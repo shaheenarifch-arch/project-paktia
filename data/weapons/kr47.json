@@ -1,0 +1,13 @@
+{
+  "id": "kr47",
+  "name": "KR-47",
+  "fictional": true,
+  "category": "rifle",
+  "fireModes": ["single", "automatic"],
+  "magazineCapacity": 30,
+  "damageProfile": "rifle_standard_01",
+  "recoilProfile": "kr47_gameplay_01",
+  "animationSet": "rifle_standard",
+  "audioSet": "kr47_audio",
+  "enabled": true
+}

@@ -1,0 +1,14 @@
+{
+  "id": "warden_tank",
+  "name": "Warden Tank",
+  "fictional": true,
+  "class": "armored_vehicle",
+  "seats": ["driver", "gunner", "commander"],
+  "systems": [
+    "component_damage",
+    "mobility_damage",
+    "repair",
+    "resupply"
+  ],
+  "enabled": true
+}

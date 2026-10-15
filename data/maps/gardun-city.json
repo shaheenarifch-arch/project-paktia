@@ -1,0 +1,75 @@
+{
+  "id": "gardun_city",
+  "name": "Gardun",
+  "fictional": true,
+  "coreSizeMeters": {
+    "width": 2500,
+    "height": 2500
+  },
+  "mode": "stronghold_assault",
+  "sectors": [
+    {
+      "id": "mountain_fort",
+      "name": "Mountain Fort",
+      "role": "high_ground"
+    },
+    {
+      "id": "west_ridge",
+      "name": "West Ridge",
+      "role": "communications"
+    },
+    {
+      "id": "old_gardun",
+      "name": "Old Gardun",
+      "role": "infantry_core"
+    },
+    {
+      "id": "east_power",
+      "name": "East Ridge and Power Station",
+      "role": "infrastructure"
+    },
+    {
+      "id": "citadel",
+      "name": "Gardun Citadel",
+      "role": "final_objective"
+    },
+    {
+      "id": "government",
+      "name": "Government Quarter",
+      "role": "mixed_arms"
+    },
+    {
+      "id": "airfield",
+      "name": "Gardun Airfield",
+      "role": "air_support"
+    },
+    {
+      "id": "riverbed",
+      "name": "Dry Riverbed",
+      "role": "alternate_route"
+    },
+    {
+      "id": "industrial",
+      "name": "Industrial Ward",
+      "role": "vehicle_support"
+    },
+    {
+      "id": "south_gate",
+      "name": "South Gate",
+      "role": "attacker_staging"
+    }
+  ],
+  "surpriseEvents": [
+    "sandstorm",
+    "communications_outage",
+    "tunnel_discovery",
+    "bridge_obstruction",
+    "nightfall"
+  ],
+  "undergroundRoutes": [
+    "mountain_fort_tunnel",
+    "old_gardun_cellars",
+    "river_drainage",
+    "citadel_operations"
+  ]
+}
