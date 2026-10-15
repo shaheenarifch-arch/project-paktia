@@ -1,0 +1,16 @@
+{
+  "id": "nomad_transport",
+  "name": "Nomad Transport",
+  "fictional": true,
+  "class": "light_transport",
+  "seats": [
+    "driver",
+    "passenger"
+  ],
+  "systems": [
+    "damage",
+    "repair",
+    "transport"
+  ],
+  "enabled": true
+}

@@ -1,0 +1,19 @@
+{
+  "id": "falcon_helicopter",
+  "name": "Falcon Helicopter",
+  "fictional": true,
+  "class": "helicopter",
+  "seats": [
+    "pilot",
+    "gunner",
+    "passenger"
+  ],
+  "systems": [
+    "flight",
+    "damage",
+    "repair",
+    "resupply",
+    "countermeasure_gameplay"
+  ],
+  "enabled": true
+}

@@ -1,0 +1,20 @@
+{
+  "currencies": [
+    {
+      "code": "CREDITS",
+      "purchasable": false,
+      "transferable": false
+    },
+    {
+      "code": "COMMAND_TOKENS",
+      "purchasable": false,
+      "transferable": false
+    },
+    {
+      "code": "PREMIUM_TOKENS",
+      "purchasable": true,
+      "transferable": false,
+      "cosmeticsOnly": true
+    }
+  ]
+}
