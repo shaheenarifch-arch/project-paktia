@@ -1,13 +1,14 @@
 # Campaign
 
-Three episodes, each handing results to the next. All factions, places and
-operations are fictional (see `README.md`, Safety boundary).
+Four episodes, each handing results to the next. Episodes 1–3 are fictional.
+Episode 4 is a declared real-world hypothetical (see `README.md`, Safety boundary).
 
 | Episode | Operation | Where | Code | Data |
 | --- | --- | --- | --- | --- |
 | 1 | Mountain Shield | Paktia Highlands: Checkpoint Echo, Ridge Station, Falcon-2 crash grid R-17 | `src/gameplay/missions/mission01/` | (hand-written state machine) |
 | 2 | Silent Corridor | Valley corridor → Dry Riverbed → South Gate | `src/gameplay/missions/episode02/` | `data/missions/episode-02-silent-corridor.json` |
 | 3 | Broken Citadel | Gardun, all five Stronghold Assault phases | `src/gameplay/missions/episode03/` | `data/missions/episode-03-broken-citadel.json` + `operation-broken-citadel.json` |
+| 4 | Open Strait | Kharg Island and the Strait of Hormuz (real-world hypothetical) | `src/gameplay/missions/episode04/` | `data/missions/episode-04-open-strait.json` + `data/maps/kharg-hormuz.json` |
 
 `src/gameplay/campaign/Campaign.ts` keeps the order, unlocks an episode when
 the previous one ended in SUCCESS or PARTIAL, never lets a worse replay
@@ -18,7 +19,7 @@ overwrite a better result, and saves/loads as plain JSON.
 `src/gameplay/missions/framework/` runs any mission described as data:
 
 - **States** with `next`, named `branches` (player choices), `requires` flags, `effects` and `checkpoint`/`terminal`.
-- **`parseMissionDefinition`** rejects a mission that isn't marked fictional, uses an unknown Gardun sector, points at a missing state, has a dead end, or has unreachable states.
+- **`parseMissionDefinition`** rejects a mission whose `fictional` flag doesn't match its declared `setting` (`fictional` by default, or `real_world_hypothetical`), uses an unknown Gardun sector, points at a missing state, has a dead end, or has unreachable states.
 - **`MissionRunner`** emits `mission:state`, `mission:blocked` (with the missing flags), `mission:checkpoint` and `mission:complete` on the `EventBus`, so UI, audio and telemetry subscribe instead of polling.
 - **Checkpoints** store the state, flags, history and the mission's own systems; `restoreCheckpoint()` puts all of them back. This is the restore path Mission 01 lacks.
 
@@ -74,6 +75,27 @@ multiplayer share one source.
 - tunnel discovery: opens the Old Gardun cellars route
 - bridge obstruction: blocks the riverbed bridge
 - nightfall: visibility
+
+## Episode 4: Operation Open Strait (real-world hypothetical)
+
+In this hypothetical scenario, Iran has closed the Strait of Hormuz to shipping. US Navy and Marine forces land on Kharg Island and take its oil terminal intact. They then clear the shipping lanes and escort tankers through, so the world sees the supply line open again. The map is a game layout on real geography, simplified for play.
+
+1. **Beach recon** (checkpoint). Raven marks the defences on both beaches. Marked defences cost reinforcements on landing.
+2. **Choose the beach:**
+   - **North:** heavier defences, and the Marines reach the oil terminal first, then the airstrip.
+   - **West:** lighter defences, and the Marines take the airstrip first, which brings helicopter support for the terminal push.
+3. **Beachhead** (checkpoint). The Marines secure it, then take the terminal and airstrip in the order the beach dictates.
+4. **Oil terminal.** It must be taken intact. Four facilities (two jetties, the tank farm and the pump station) each track integrity. The terminal and Kharg town are protected zones, so Aegis can never select anything inside them.
+5. **Lane clearance** (checkpoint). Drones reveal hazards in the inbound and outbound lanes, and clearance teams remove the revealed ones. A lane opens when every hazard is cleared.
+6. **Tanker escort** (checkpoint). Six tankers transit only through open lanes. Each one that gets through raises the supply flow.
+7. **Outcome:**
+   - **SUCCESS:** terminal integrity is at least 80%, the terminal can still export, and supply flow is at least 80%.
+   - **PARTIAL:** the strait is open but those targets weren't met.
+   - **FAILED:** the island assault ran out of reinforcements, or no tanker got through.
+
+**Reinforcements:** 30, plus 10 if Episode 3 was a full SUCCESS.
+
+**Engine calls:** `scoutBeaches`, `chooseBeach`, `secureBeachhead`, `secureAirstrip`, `secureTerminal`, `damageTerminal`, `spendReinforcements`, `revealHazards`, `clearHazard`, `startTransit`, `tankerArrived`, `damageTanker`, `finish`, then `progress()` to move on.
 
 ## Engine integration
 

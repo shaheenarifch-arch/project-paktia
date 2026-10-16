@@ -21,7 +21,14 @@ See `docs/vertical-slice.md`, `docs/gardun-map.md`, `docs/architecture.md`, `doc
 
 ## Safety boundary
 
-All factions, characters, organizations, weapons, and missions are fictional. Project Paktia does not recreate real militant organizations, real commanders, or specific attacks. Game data describes balance and simulation behavior, not real-world weapon operation.
+Gardun, the Paktia Highlands campaign (Episodes 1–3), and all characters, organizations and weapons are fictional.
+
+Episode 4 (*Operation Open Strait*) is a **real-world hypothetical**: a future scenario on real geography (Kharg Island, the Strait of Hormuz) with real nations (Iran, US Navy and Marine forces). It must declare `"setting": "real_world_hypothetical"`, and the validators check that. It still follows every other rule:
+- it doesn't reconstruct any real event
+- it doesn't name or depict real people
+- equipment stays the game's fictional kit
+
+Project Paktia does not recreate real militant organizations, real commanders, or specific attacks. Game data describes balance and simulation behavior, not real-world weapon operation.
 
 The Aegis feature is deliberately an abstract game-support workflow. It contains no real-world targeting, guidance, propulsion, or weapons engineering logic.
 
@@ -45,7 +52,7 @@ Cloudflare is used for edge-facing services, account APIs, assets, queues, and a
 
 ## Repository areas
 
-- `src/`: engine-agnostic TypeScript gameplay domain layer (drones, intelligence, Aegis support, tactical command, aircraft, telemetry), the campaign (Mission 01: Operation Mountain Shield, Episode 02: Operation Silent Corridor, Episode 03: Operation Broken Citadel) on a data-driven mission framework, and its tests
+- `src/`: engine-agnostic TypeScript gameplay domain layer (drones, intelligence, Aegis support, tactical command, aircraft, telemetry), the campaign (Mission 01: Operation Mountain Shield, Episode 02: Operation Silent Corridor, Episode 03: Operation Broken Citadel, Episode 04: Operation Open Strait) on a data-driven mission framework, and its tests
 - `ui/`: Vite tactical-command UI prototype
 - `game/`: Unreal project source and design contracts (`game/Source/ProjectPaktia/Combat/CombatAuthority.h`)
 - `services/`: economy and matchmaking contracts

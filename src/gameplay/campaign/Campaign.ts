@@ -10,7 +10,8 @@ export interface EpisodeEntry { episode: number; id: string; name: string }
 export const CAMPAIGN: readonly EpisodeEntry[] = [
   { episode: 1, id: 'mission_01_mountain_shield', name: 'Operation Mountain Shield' },
   { episode: 2, id: 'episode_02_silent_corridor', name: 'Operation Silent Corridor' },
-  { episode: 3, id: 'episode_03_broken_citadel', name: 'Operation Broken Citadel' }
+  { episode: 3, id: 'episode_03_broken_citadel', name: 'Operation Broken Citadel' },
+  { episode: 4, id: 'episode_04_open_strait', name: 'Operation Open Strait' }
 ]
 
 export interface M01Carryover { episode: 1; outcome: MissionOutcome; crewRecovered: boolean }
