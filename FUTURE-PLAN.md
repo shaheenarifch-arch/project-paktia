@@ -32,10 +32,11 @@ universal destruction, console and mobile release.
 
 ## Mission framework
 
-- DEPENDENCY: Generalize the `MountainShieldMission` transition table (`Mission01State` + `continueCrashSequence`) into a data-driven mission state machine that loads phases and transitions from `data/missions/`.
-- PLANNED: Drive *Operation Broken Citadel* phases from `operation-broken-citadel.json` and map them onto `EPaktiaMatchPhase` server-side.
+- DONE: Data-driven mission framework (`src/gameplay/missions/framework/`), used by Episodes 02 and 03 (`docs/campaign.md`).
+- PLANNED: Port Mission 01 onto the framework (its hand-written state machine is unchanged today).
+- PLANNED: Map the Episode 03 / *Operation Broken Citadel* phases onto `EPaktiaMatchPhase` server-side (the campaign already drives them from `operation-broken-citadel.json`).
 - PLANNED: Wire `DroneTutorial`, `RidgeStation`, and `Counterattack` sub-states into mission transitions; today only `RIDGE_STATION_CAPTURED`, `COUNTERATTACK`, and the crash states have side effects.
-- PLANNED: Emit mission transitions on `EventBus` so UI, audio, and telemetry subscribe instead of polling `snapshot()`.
+- PLANNED: Emit Mission 01 transitions on `EventBus` (Episodes 02 and 03 already emit `mission:*` events).
 - LATER: Branching outcomes (for example `abandonCrashRecovery()` affects later objectives or the debrief).
 
 ## Combined-arms gameplay
@@ -112,7 +113,9 @@ universal destruction, console and mobile release.
 ## Checkpoints/save systems
 
 - PLANNED: Mission 01 checkpoints at mission-state boundaries (Checkpoint Echo, Ridge Station captured, evacuation complete) built from `snapshot()` data.
-- DEPENDENCY: Serializable mission/aircraft/drone state (current `snapshot()` methods return plain objects but there is no restore path).
+- DEPENDENCY: Serializable Mission 01 aircraft/drone state; Episodes 02 and 03 already save and restore checkpoints through `MissionRunner`.
+- PLANNED: Tactical UI panels for Episode 02 (convoy integrity, relay link, route choice) and Episode 03 (phase objectives, reinforcements, surprise event).
+- PLANNED: Gray-box the Episode 02 valley corridor (Relay Kilo shoulder, ambush narrows, drainage tunnel, bridge) as a Paktia Highlands map section.
 - LATER: Persisted progression via `migrations/0001_core.sql` `players` (level, experience).
 
 ## Audio

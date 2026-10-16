@@ -17,7 +17,7 @@ Project Paktia is a fictional combined-arms game vertical slice set in the ficti
 - Cosmetic Command Token economy
 - Cloudflare API gateway, R2 assets, queues, and admin surface
 
-See `docs/vertical-slice.md`, `docs/gardun-map.md`, `docs/architecture.md`, and `docs/MatchProtocol.md`.
+See `docs/vertical-slice.md`, `docs/gardun-map.md`, `docs/architecture.md`, `docs/MatchProtocol.md` and `docs/campaign.md`.
 
 ## Safety boundary
 
@@ -45,7 +45,7 @@ Cloudflare is used for edge-facing services, account APIs, assets, queues, and a
 
 ## Repository areas
 
-- `src/`: engine-agnostic TypeScript gameplay domain layer (drones, intelligence, Aegis support, tactical command, aircraft, Mission 01: Operation Mountain Shield, telemetry) and its tests
+- `src/`: engine-agnostic TypeScript gameplay domain layer (drones, intelligence, Aegis support, tactical command, aircraft, telemetry), the campaign (Mission 01: Operation Mountain Shield, Episode 02: Operation Silent Corridor, Episode 03: Operation Broken Citadel) on a data-driven mission framework, and its tests
 - `ui/`: Vite tactical-command UI prototype
 - `game/`: Unreal project source and design contracts (`game/Source/ProjectPaktia/Combat/CombatAuthority.h`)
 - `services/`: economy and matchmaking contracts
@@ -81,6 +81,9 @@ Mission 01 includes the Falcon-2 crash recovery sequence:
 `MountainShieldMission.continueCrashSequence()` advances from
 `M01_COUNTERATTACK` through crash, search, crew recovery, and evacuation to
 `M01_FINAL_DRONE_DEFENSE`.
+
+Episodes 02 and 03 (`SilentCorridorMission`, `BrokenCitadelMission`) and the
+`Campaign` that links all three are described in `docs/campaign.md`.
 
 ## Hologram avatar overlay (optional)
 
