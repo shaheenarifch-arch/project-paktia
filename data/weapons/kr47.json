@@ -9,5 +9,6 @@
   "recoilProfile": "kr47_gameplay_01",
   "animationSet": "rifle_standard",
   "audioSet": "kr47_audio",
-  "enabled": true
+  "enabled": true,
+  "notice": "Fictional game-balance data; not real-world operation guidance."
 }
