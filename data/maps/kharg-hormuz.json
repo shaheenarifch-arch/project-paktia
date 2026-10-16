@@ -1,0 +1,18 @@
+{
+  "id": "kharg_hormuz",
+  "name": "Kharg Island and the Strait of Hormuz",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "note": "A hypothetical future scenario on real geography. Game layout, not a survey: distances and facilities are simplified for play.",
+  "sectors": [
+    { "id": "task_force_sea", "name": "Amphibious task force, offshore", "role": "attacker_staging" },
+    { "id": "kharg_north_beach", "name": "Kharg Island north beach", "role": "landing" },
+    { "id": "kharg_west_beach", "name": "Kharg Island west beach", "role": "landing" },
+    { "id": "kharg_airstrip", "name": "Kharg airstrip", "role": "air_support" },
+    { "id": "kharg_oil_terminal", "name": "Kharg oil terminal and jetties", "role": "protected_infrastructure" },
+    { "id": "kharg_town", "name": "Kharg town", "role": "protected_civilian" },
+    { "id": "hormuz_inbound_lane", "name": "Strait of Hormuz inbound lane", "role": "shipping_lane" },
+    { "id": "hormuz_outbound_lane", "name": "Strait of Hormuz outbound lane", "role": "shipping_lane" }
+  ],
+  "surpriseEvents": ["sandstorm", "communications_outage", "nightfall"]
+}

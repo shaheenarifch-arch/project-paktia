@@ -32,14 +32,20 @@ if (!weapon.fictional) {
 }
 
 // Campaign episodes: fictional, on known Gardun sectors, and internally consistent.
-const sectorIds = new Set(map.sectors.map(sector => sector.id));
 const strongholdObjectives = new Set(mission.phases.flatMap(phase => phase.objectives));
 const { readdir } = await import("node:fs/promises");
 for (const file of (await readdir("data/missions")).filter(name => /^episode-\d+.*\.json$/.test(name))) {
   const episode = JSON.parse(await readFile(`data/missions/${file}`, "utf8"));
-  if (episode.fictional !== true) throw new Error(`${file}: episodes must remain fictional`);
+  // Episodes are fictional unless they declare a real-world hypothetical setting.
+  const setting = episode.setting ?? "fictional";
+  if (setting === "fictional" && episode.fictional !== true) throw new Error(`${file}: episodes must remain fictional`);
+  if (setting === "real_world_hypothetical" && episode.fictional !== false) throw new Error(`${file}: real-world hypothetical episodes must set fictional: false`);
+  if (!["fictional", "real_world_hypothetical"].includes(setting)) throw new Error(`${file}: unknown setting ${setting}`);
+  const episodeMap = episode.map === map.id ? map : JSON.parse(await readFile(`data/maps/${episode.map.replace(/_/g, "-")}.json`, "utf8"));
+  if ((episodeMap.setting ?? "fictional") !== setting) throw new Error(`${file}: map ${episodeMap.id} setting doesn't match the episode`);
+  const episodeSectors = new Set(episodeMap.sectors.map(sector => sector.id));
   for (const sector of episode.sectors ?? []) {
-    if (!sectorIds.has(sector)) throw new Error(`${file}: unknown sector ${sector}`);
+    if (!episodeSectors.has(sector)) throw new Error(`${file}: unknown sector ${sector}`);
   }
   if (episode.states) {
     const ids = new Set(episode.states.map(state => state.id));

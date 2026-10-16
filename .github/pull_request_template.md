@@ -19,4 +19,4 @@
 - [ ] Server authority preserved
 - [ ] Token operations remain idempotent
 - [ ] No combat advantage added to premium items
-- [ ] Fictional-world boundary preserved
+- [ ] Setting boundary preserved (fictional, or a declared real-world hypothetical with no real people or real-event reconstruction)
