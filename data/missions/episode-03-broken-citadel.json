@@ -1,0 +1,42 @@
+{
+  "id": "episode_03_broken_citadel",
+  "episode": 3,
+  "name": "Operation Broken Citadel",
+  "fictional": true,
+  "map": "gardun_city",
+  "summary": "From the South Gate staging area, the task force takes Gardun in the five Stronghold Assault phases, ending at the Citadel's operations room.",
+  "stronghold": "operation_broken_citadel",
+  "phaseRules": {
+    "1": "any"
+  },
+  "baseReinforcements": 20,
+  "reinforcementsPerNomad": 5,
+  "surpriseEventPhase": 3,
+  "unlocks": {
+    "capture_airfield": "falcon_air_support",
+    "west_ridge_radio": "enemy_comms_degraded",
+    "government_relay": "enemy_comms_degraded",
+    "mountain_fort": "aegis_online",
+    "medical_station": "medical_station_protected"
+  },
+  "briefing": "Take Gardun from the south. Open the city, break enemy communications, hold Old Gardun, take the high ground, then assault the Citadel.",
+  "phaseObjectives": {
+    "1": "Open the city: take the Airfield or the Industrial Depot.",
+    "2": "Break communications: take the West Ridge radio and the Government relay.",
+    "3": "Control Old Gardun: the Market Square, the Medical Station and the Municipal Ruins.",
+    "4": "Neutralise the high ground: the Mountain Fort and the East Power Station.",
+    "5": "Assault the Citadel: Outer Gate, Inner Courtyard, Command Hall, Operations Room."
+  },
+  "protectedZones": [
+    {
+      "id": "medical_station",
+      "type": "PROTECTED_LOCATION",
+      "position": {
+        "x": 1180,
+        "y": 0,
+        "z": 1320
+      },
+      "radius": 120
+    }
+  ]
+}

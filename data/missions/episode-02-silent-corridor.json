@@ -1,0 +1,28 @@
+{
+  "id": "episode_02_silent_corridor",
+  "episode": 2,
+  "name": "Operation Silent Corridor",
+  "fictional": true,
+  "map": "gardun_city",
+  "summary": "After Mountain Shield, the task force escorts the recovered Falcon-2 crew and supplies down the valley corridor to Gardun's South Gate and sets up the staging area for the assault on the city.",
+  "sectors": ["riverbed", "south_gate", "industrial"],
+  "start": "E02_BRIEFING",
+  "failState": "E02_CONVOY_LOST",
+  "states": [
+    { "id": "E02_BRIEFING", "objective": "Briefing: move the Falcon-2 crew and supplies from Checkpoint Echo to Gardun's South Gate.", "next": "E02_CONVOY_FORMUP" },
+    { "id": "E02_CONVOY_FORMUP", "objective": "Form up the convoy: Warden-1 leads, Nomad-1 carries the Falcon-2 crew, Nomad-2 carries supplies.", "effects": ["convoy.form"], "next": "E02_RELAY_KILO" },
+    { "id": "E02_RELAY_KILO", "objective": "Fly Raven ahead and place Relay Kilo on the valley shoulder so the drone link reaches the corridor.", "effects": ["relays.prepare"], "requires": ["relay_kilo_online"], "checkpoint": true, "next": "E02_CORRIDOR_SCOUT" },
+    { "id": "E02_CORRIDOR_SCOUT", "objective": "Scout the corridor with Raven and mark what's ahead before the convoy moves.", "requires": ["corridor_scouted"], "next": "E02_CORRIDOR_ADVANCE" },
+    { "id": "E02_CORRIDOR_ADVANCE", "objective": "Advance the convoy down the main road.", "effects": ["convoy.depart"], "next": "E02_COMMS_OUTAGE" },
+    { "id": "E02_COMMS_OUTAGE", "objective": "Communications outage: the drone link is jammed. Send a squad to restore Relay Kilo.", "effects": ["event.communications_outage", "convoy.halt"], "requires": ["relay_kilo_restored"], "next": "E02_BRIDGE_OBSTRUCTED" },
+    { "id": "E02_BRIDGE_OBSTRUCTED", "objective": "The bridge ahead is blocked. Detour the whole convoy through the Dry Riverbed, or send infantry through the river drainage tunnel to clear the far bank.", "effects": ["event.bridge_obstruction", "convoy.halt"], "checkpoint": true, "branches": { "riverbed_detour": "E02_RIVERBED_DETOUR", "drainage_infiltration": "E02_DRAINAGE_INFILTRATION" } },
+    { "id": "E02_RIVERBED_DETOUR", "objective": "Take the convoy down the Dry Riverbed. Expect an ambush in the narrows: repel it and keep Nomad-1 alive.", "effects": ["convoy.detour_riverbed", "convoy.ambush"], "requires": ["ambush_repelled"], "next": "E02_SOUTH_GATE_APPROACH" },
+    { "id": "E02_DRAINAGE_INFILTRATION", "objective": "Infantry only: move through the drainage tunnel and clear the far bank while the convoy holds.", "effects": ["route.drainage"], "requires": ["far_bank_clear"], "next": "E02_BRIDGE_CLEARED" },
+    { "id": "E02_BRIDGE_CLEARED", "objective": "Warden-1 pushes the wreck off the bridge. Bring the convoy across.", "effects": ["convoy.resume"], "requires": ["bridge_cleared"], "next": "E02_SOUTH_GATE_APPROACH" },
+    { "id": "E02_SOUTH_GATE_APPROACH", "objective": "Reach South Gate and clear the staging yard.", "effects": ["convoy.resume"], "requires": ["staging_clear"], "checkpoint": true, "next": "E02_STAGING_ESTABLISHED" },
+    { "id": "E02_STAGING_ESTABLISHED", "objective": "Set up the forward staging area for the Gardun assault.", "effects": ["staging.establish"], "branches": { "full_strength": "E02_COMPLETE", "with_losses": "E02_COMPLETE_WITH_LOSSES" } },
+    { "id": "E02_COMPLETE", "objective": "Corridor secured. The whole convoy reached South Gate.", "terminal": true, "outcome": "SUCCESS" },
+    { "id": "E02_COMPLETE_WITH_LOSSES", "objective": "Corridor secured, but part of the convoy was lost. Fewer reinforcements for the assault.", "terminal": true, "outcome": "PARTIAL" },
+    { "id": "E02_CONVOY_LOST", "objective": "The Falcon-2 crew transport was lost. Restart from the last checkpoint.", "terminal": true, "outcome": "FAILED" }
+  ]
+}
