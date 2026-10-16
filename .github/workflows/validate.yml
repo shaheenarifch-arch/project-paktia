@@ -14,7 +14,14 @@ jobs:
         with:
           node-version: 20
       - run: npm install
+      - run: npm run typecheck
       - run: npm test
+      - run: npm run validate
+      - name: Build tactical UI
+        working-directory: ui
+        run: |
+          npm install
+          npm run build
       - name: Validate required architecture files
         run: |
           test -f README.md
@@ -27,4 +34,5 @@ jobs:
           ! grep -Rni \
             --exclude-dir=.git \
             --exclude-dir=node_modules \
+            --exclude=validate.yml \
             -E "BEGIN PRIVATE KEY|CLOUDFLARE_API_TOKEN=|DATABASE_URL=.+" .
