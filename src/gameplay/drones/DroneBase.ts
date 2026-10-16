@@ -36,7 +36,7 @@ export abstract class DroneBase {
   home: Vector3 = { x: 0, y: 0, z: 0 }
   battery = 1
   signal = 1
-  task?: string
+  task: string | undefined
 
   constructor(public readonly definition: DroneDefinition) {}
 
@@ -101,9 +101,10 @@ export abstract class DroneBase {
       state: this.state,
       position: { ...this.position },
       battery: this.battery,
-      signal: this.signal
+      signal: this.signal,
+      task: this.task
     }
-    return this.task ? { ...base, task: this.task } : base
+    return base
   }
 
   protected isControllable(): boolean {
