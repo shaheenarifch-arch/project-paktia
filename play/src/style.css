@@ -54,7 +54,8 @@ summary { cursor: pointer; }
 .hud { position: absolute; inset: 0; pointer-events: none; font-size: 12px; }
 .hud.modal .cross { display: none; }
 .panel { position: absolute; border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 12px 14px; backdrop-filter: blur(4px); }
-.panel-title { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .2em; color: var(--muted); margin-bottom: 8px; }
+.panel-title { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; letter-spacing: .2em; color: var(--muted); margin-bottom: 8px; max-width: 220px; }
+.panel-title span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .net.warn { color: var(--amber); }
 .brief { top: 14px; left: 14px; width: 330px; }
 .op { font-weight: 700; letter-spacing: .12em; margin: 4px 0 8px; font-size: 14px; }
@@ -107,3 +108,36 @@ summary { cursor: pointer; }
 .stats div { border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: grid; }
 .stats b { font-size: 22px; } .stats span { font-size: 11px; color: var(--muted); }
 @media (max-width: 900px) { .brief { width: 260px; } .minimap canvas { width: 150px; height: 150px; } .toasts { width: calc(100% - 40px); top: auto; bottom: 150px; } }
+
+/* ---------- campaign menu ---------- */
+.episodes { display: grid; gap: 10px; margin: 6px 0 18px; }
+.episode { border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 10px; background: rgba(255,255,255,.02); }
+.episode.muted { opacity: .8; }
+.episode h3 { margin: 0; font-size: 18px; letter-spacing: .04em; color: var(--text); text-transform: none; }
+.episode p { margin: 0; color: var(--muted); line-height: 1.5; font-size: 13px; }
+.ep-head { display: flex; justify-content: space-between; align-items: center; font-size: 10px; letter-spacing: .24em; color: var(--amber); }
+.chip { font-size: 10px; letter-spacing: .12em; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); text-transform: uppercase; }
+.chip.success { color: var(--green); border-color: rgba(120,255,171,.45); }
+.chip.partial { color: var(--amber); border-color: rgba(255,209,102,.45); }
+.chip.failed { color: var(--red); border-color: rgba(255,94,99,.45); }
+.note { font-size: 12px; color: var(--text); }
+.toggle { display: flex; gap: 6px; flex-wrap: wrap; }
+.toggle button { border: 1px solid var(--line); background: none; border-radius: 6px; padding: 7px 12px; font-size: 12px; color: var(--muted); }
+.toggle button.on { border-color: var(--green); color: var(--text); background: rgba(120,255,171,.08); }
+.episode .convoys, .episode .seedrow { margin: 0; }
+.play { justify-self: start; }
+.menu-foot { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.menu-foot details { margin: 0; flex: 1; min-width: 0; }
+.reset { border: 1px solid var(--line); background: none; border-radius: 6px; padding: 6px 12px; font-size: 12px; color: var(--muted); }
+
+/* ---------- in-game additions ---------- */
+.val { font-size: 14px; } .val.low { color: var(--red); }
+.extra { display: grid; gap: 8px; }
+.extra .row .lbl { min-width: 128px; }
+.hint { display: none; position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); padding: 8px 14px; border-radius: 6px; background: var(--panel); border: 1px solid rgba(143,211,255,.45); color: var(--blue); max-width: min(520px, calc(100% - 640px)); min-width: 260px; text-align: center; line-height: 1.4; }
+.choices { display: grid; gap: 8px; margin-top: 14px; }
+.choice { text-align: left; border: 1px solid var(--line); background: rgba(255,255,255,.03); border-radius: 8px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: baseline; }
+.choice:hover, .choice:focus-visible { border-color: var(--amber); outline: none; }
+.choice kbd { grid-row: span 2; align-self: center; }
+.choice span { color: var(--muted); font-size: 12px; line-height: 1.45; }
+@media (max-width: 900px) { .hint { bottom: 170px; max-width: calc(100% - 40px); } }
