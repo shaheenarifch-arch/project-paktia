@@ -9,7 +9,8 @@
     "test": "npm run build && node --test dist/tests/*.test.js",
     "validate:data": "node scripts/validate-data.mjs",
     "validate:contracts": "node scripts/validate-contracts.mjs",
-    "validate": "npm run validate:data && npm run validate:contracts"
+    "validate": "npm run validate:data && npm run validate:contracts",
+    "sim:test": "cmake -S sim -B build/sim && cmake --build build/sim && ctest --test-dir build/sim --output-on-failure"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251001.0",
