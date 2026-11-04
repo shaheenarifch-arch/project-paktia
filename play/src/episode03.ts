@@ -406,7 +406,7 @@ export class BrokenCitadelGame extends Battle {
     const phase = m.phase
     const anyOne = phase !== undefined && EPISODE_03.phaseRules[String(phase)] === 'any'
     return {
-      eyebrow: 'PROJECT PAKTIA // EPISODE 03', title: 'OPERATION BROKEN CITADEL',
+      eyebrow: 'OPERATION MIDNIGHT HAVOC // EPISODE 03', title: 'OPERATION BROKEN CITADEL',
       phase: phase ? `PHASE ${phase}/5 · ${PHASE_NAMES[phase]?.toUpperCase() ?? ''}` : '',
       objective: m.runner.objective + (anyOne ? ' (either one)' : ''),
       items: (STRONGHOLD.phases.find(x => x.order === phase)?.objectives ?? []).map(id => ({

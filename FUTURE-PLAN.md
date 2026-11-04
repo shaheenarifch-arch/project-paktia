@@ -1,4 +1,4 @@
-# Project Paktia Future Plan
+# Operation Midnight Havoc Future Plan
 
 This file lists future work only. Current, working systems are described in
 `README.md` and `docs/`. Every item is grounded in what exists in the repo
@@ -18,7 +18,7 @@ universal destruction, console and mobile release.
 
 - `src/`: TypeScript domain layer: drones (Raven, Warden, Talon), intelligence contacts, Aegis support workflow with protected zones, tactical map and command manager, Falcon-2 aircraft crash/recovery, Mission 01 *Operation Mountain Shield* state machine, after-action telemetry. Tests: `src/tests/`.
 - `data/`: Gardun map (10 sectors), *Operation Broken Citadel* (5 Stronghold Assault phases), KR-47, Warden tank, Nomad transport, Falcon helicopter, currencies.
-- `game/`: Unreal 5.5 skeleton: replicated `APaktiaCharacter` (health, Enhanced Input), replicated `APaktiaGameState` (match phase, scores), game mode, `Combat/CombatAuthority.h` interface contract.
+- `game/`: Unreal 5.5 skeleton: replicated `AHavocCharacter` (health, Enhanced Input), replicated `AHavocGameState` (match phase, scores), game mode, `Combat/CombatAuthority.h` interface contract.
 - `workers/`: Cloudflare gateway (`/health`, `/api/v1/game/config`) and match-result queue consumer (stub ack). `services/`: economy and matchmaking contracts. `migrations/`: players, matches, token ledger, entitlements.
 - `ui/`: Vite tactical-command UI prototype; optional three.js hologram avatar (not mounted).
 
@@ -26,7 +26,7 @@ universal destruction, console and mobile release.
 
 - PLANNED: Gray-box all 10 `gardun-city.json` sectors in Unreal following the `docs/gardun-map.md` flow and route requirements (main, flank, interior, elevated, conditional).
 - PLANNED: Implement the four `undergroundRoutes` (Mountain Fort tunnel, Old Gardun cellars, river drainage, Citadel operations) with the rule that heavy vehicles stay out of tunnels and the dense inner city.
-- DEPENDENCY: Shared sector/objective ID registry between `data/`, the Unreal map, and `APaktiaGameState` phases, so validators can cross-check them.
+- DEPENDENCY: Shared sector/objective ID registry between `data/`, the Unreal map, and `AHavocGameState` phases, so validators can cross-check them.
 - LATER: Mission 01 terrain (Checkpoint Echo, Ridge Station, Falcon-2 crash grid R-17) as a separate Paktia Highlands map.
 - OPTIONAL: Extra Gardun districts beyond the 2.5 km x 2.5 km core.
 
@@ -34,7 +34,7 @@ universal destruction, console and mobile release.
 
 - DONE: Data-driven mission framework (`src/gameplay/missions/framework/`), used by Episodes 02 and 03 (`docs/campaign.md`).
 - PLANNED: Port Mission 01 onto the framework (its hand-written state machine is unchanged today).
-- PLANNED: Map the Episode 03 / *Operation Broken Citadel* phases onto `EPaktiaMatchPhase` server-side (the campaign already drives them from `operation-broken-citadel.json`).
+- PLANNED: Map the Episode 03 / *Operation Broken Citadel* phases onto `EHavocMatchPhase` server-side (the campaign already drives them from `operation-broken-citadel.json`).
 - PLANNED: Wire `DroneTutorial`, `RidgeStation`, and `Counterattack` sub-states into mission transitions; today only `RIDGE_STATION_CAPTURED`, `COUNTERATTACK`, and the crash states have side effects.
 - PLANNED: Emit Mission 01 transitions on `EventBus` (Episodes 02 and 03 already emit `mission:*` events).
 - LATER: Branching outcomes (for example `abandonCrashRecovery()` affects later objectives or the debrief).
@@ -47,7 +47,7 @@ universal destruction, console and mobile release.
 
 ## Infantry systems
 
-- PLANNED: Two infantry classes per faction (vertical-slice scope) on top of `APaktiaCharacter`.
+- PLANNED: Two infantry classes per faction (vertical-slice scope) on top of `AHavocCharacter`.
 - PLANNED: Server-authoritative fire intents via `ICombatAuthority::ValidateFireIntent` / `ApplyValidatedFireIntent`.
 - DEPENDENCY: Stamina, stance, and interaction input actions in Enhanced Input (only Move, Look, and Jump exist).
 - LATER: Revive/medic flow (Mission 01 crew `CRITICAL`/`INJURED` conditions are a design precedent).
@@ -106,7 +106,7 @@ universal destruction, console and mobile release.
 
 ## Objectives and mission sequencing
 
-- PLANNED: Objective entities for each Broken Citadel objective ID (`capture_airfield` ... `operations_room`) with capture state replicated in `APaktiaGameState`.
+- PLANNED: Objective entities for each Broken Citadel objective ID (`capture_airfield` ... `operations_room`) with capture state replicated in `AHavocGameState`.
 - PLANNED: Server-controlled surprise events (`sandstorm`, `communications_outage`, `tunnel_discovery`, `bridge_obstruction`, `nightfall`): one per match, per vertical-slice scope.
 - DEPENDENCY: Mission framework generalization (see above).
 
@@ -140,7 +140,7 @@ universal destruction, console and mobile release.
 
 ## Multiplayer/network architecture
 
-- PLANNED: Dedicated authoritative server (`ProjectPaktiaServer.Target.cs` exists), following `docs/MatchProtocol.md` (client input with sequence/frame, server snapshots with `rulesVersion`).
+- PLANNED: Dedicated authoritative server (`MidnightHavocServer.Target.cs` exists), following `docs/MatchProtocol.md` (client input with sequence/frame, server snapshots with `rulesVersion`).
 - PLANNED: Implement `GameServerAllocator` (`services/matchmaking/contracts.ts`) against a real hosting provider (not chosen; `MATCH_SERVER_PROVIDER` is blank in `.env.example`).
 - PLANNED: Complete the match-result queue consumer in `workers/jobs/src/index.ts` (it currently only acks): load the signed result, check idempotency, update progression/economy, and write audit records.
 - DEPENDENCY: Wrangler configuration for the jobs worker (`wrangler.jsonc` only defines the gateway and the queue producer) and a D1/persistent store binding for `migrations/`.
@@ -149,7 +149,7 @@ universal destruction, console and mobile release.
 ## Unreal migration/integration planning
 
 - DEPENDENCY: Decide how the TypeScript `src/` domain logic reaches Unreal: port it to C++ modules, or keep it as the reference spec plus tests. Engine adapters are not implemented today.
-- PLANNED: Implement `ProjectPaktia::ICombatAuthority` (`game/Source/ProjectPaktia/Combat/CombatAuthority.h`) as a server-only component; it currently uses plain C++ types (`long long`, `int`, `float`) and is not a UObject/UInterface, so convert it to UE types (`int64`, `int32`) when integrated.
+- PLANNED: Implement `MidnightHavoc::ICombatAuthority` (`game/Source/MidnightHavoc/Combat/CombatAuthority.h`) as a server-only component; it currently uses plain C++ types (`long long`, `int`, `float`) and is not a UObject/UInterface, so convert it to UE types (`int64`, `int32`) when integrated.
 - PLANNED: Compile and verify the Unreal module with UE 5.5 (not verified in this repo's CI; no Unreal toolchain in CI).
 - LATER: Unreal content folder (`Content/`) with LFS tracking per `.gitattributes`.
 

@@ -1,0 +1,26 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.5",
+  "Category": "Games",
+  "Description": "Operation Midnight Havoc fictional combined-arms vertical slice.",
+  "Modules": [
+    {
+      "Name": "MidnightHavoc",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "EnhancedInput",
+      "Enabled": true
+    },
+    {
+      "Name": "ModelingToolsEditorMode",
+      "Enabled": true,
+      "TargetAllowList": [
+        "Editor"
+      ]
+    }
+  ]
+}

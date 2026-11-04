@@ -33,7 +33,7 @@ function menu(): void {
   app.innerHTML = `
     <div class="menu">
       <div class="menu-card">
-        <div class="eyebrow">PROJECT PAKTIA // CAMPAIGN // PLAYABLE PROTOTYPE</div>
+        <div class="eyebrow">OPERATION MIDNIGHT HAVOC // CAMPAIGN // PLAYABLE PROTOTYPE</div>
         <h1>GARDUN<br>CAMPAIGN</h1>
         <p class="lede">Each episode hands its result to the next. Progress is saved in this browser.</p>
         <div class="episodes">
