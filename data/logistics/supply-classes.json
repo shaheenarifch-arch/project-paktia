@@ -1,0 +1,79 @@
+{
+  "supplyClasses": [
+    {
+      "id": "fuel",
+      "name": "Fuel",
+      "unit": "kilolitre",
+      "items": [
+        "refined_fuel"
+      ],
+      "consumptionKeys": [
+        "fuel_capacity",
+        "fuel_burn"
+      ],
+      "note": "fuel_burn is kilolitres per game-day of operation; fuel_capacity is the tank size in kilolitres."
+    },
+    {
+      "id": "ammunition",
+      "name": "Ammunition",
+      "unit": "crate",
+      "items": [
+        "ammo_small_arms",
+        "ammo_tank_shell",
+        "ammo_artillery",
+        "ammo_rocket",
+        "ammo_missile_at",
+        "ammo_missile_aa",
+        "ammo_missile_ship",
+        "ammo_air_ordnance",
+        "ammo_naval_gun"
+      ],
+      "consumptionKeys": [
+        "ammo_loadout"
+      ],
+      "note": "ammo_loadout maps an ammunition id to crates carried per unit."
+    },
+    {
+      "id": "spares",
+      "name": "Spares",
+      "unit": "crate",
+      "items": [
+        "spare_parts"
+      ],
+      "consumptionKeys": [
+        "maintenance_hours"
+      ],
+      "note": "maintenance_hours is repair-hours per game-day of operation; each repair hour consumes spare parts."
+    },
+    {
+      "id": "food_water",
+      "name": "Food and water",
+      "unit": "crate",
+      "items": [
+        "rations",
+        "water"
+      ],
+      "consumptionKeys": [
+        "crew"
+      ],
+      "perCrewPerDay": {
+        "rations": 0.2,
+        "water": 0.5
+      }
+    },
+    {
+      "id": "medical",
+      "name": "Medical",
+      "unit": "crate",
+      "items": [
+        "medical_supplies"
+      ],
+      "consumptionKeys": [
+        "crew"
+      ],
+      "perCrewPerDay": {
+        "medical_supplies": 0.02
+      }
+    }
+  ]
+}

@@ -1,0 +1,554 @@
+{
+  "faction": "houthi",
+  "units": [
+    {
+      "id": "houthi_fighter_squad",
+      "name": "Fighter squad",
+      "faction": "houthi",
+      "branch": "infantry",
+      "role": "line_infantry",
+      "echelon": "squad",
+      "crew": 9,
+      "cost_points": 6,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 9
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 7,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_tribal_militia",
+      "name": "Tribal militia squad",
+      "faction": "houthi",
+      "branch": "infantry",
+      "role": "territorial_militia",
+      "echelon": "squad",
+      "crew": 10,
+      "cost_points": 4,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 10
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 7,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_atgm_team",
+      "name": "Anti-armor missile team",
+      "faction": "houthi",
+      "branch": "infantry",
+      "role": "anti_armor",
+      "echelon": "squad",
+      "crew": 4,
+      "cost_points": 12,
+      "build_time_days": 3,
+      "components": {
+        "small_arms_kit": 4,
+        "missile_launcher": 1,
+        "optics_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 2,
+        "antiArmor": 7,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 1,
+        "ammo_missile_at": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 7,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_mortar_team",
+      "name": "Mortar team",
+      "faction": "houthi",
+      "branch": "artillery",
+      "role": "fire_support",
+      "echelon": "squad",
+      "crew": 4,
+      "cost_points": 8,
+      "build_time_days": 3,
+      "components": {
+        "small_arms_kit": 4,
+        "gun_system": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 6,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_artillery": 3
+      },
+      "maintenance_hours": 1,
+      "stealth": 7,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_technical",
+      "name": "Armed technical",
+      "faction": "houthi",
+      "branch": "armor",
+      "role": "irregular_mobile_fire",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 10,
+      "build_time_days": 4,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "gun_system": 1
+      },
+      "mobility": 7,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 5,
+        "antiArmor": 3,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.3,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 2,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_old_tank",
+      "name": "Older main battle tank",
+      "faction": "houthi",
+      "branch": "armor",
+      "role": "heavy_armor",
+      "echelon": "platoon",
+      "crew": 3,
+      "cost_points": 50,
+      "build_time_days": 12,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 1,
+        "turret": 1,
+        "gun_system": 1,
+        "optics_set": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 5,
+        "side": 4,
+        "top": 3
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 7,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 1.2,
+      "fuel_burn": 0.8,
+      "ammo_loadout": {
+        "ammo_tank_shell": 2,
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 8,
+      "stealth": 3,
+      "tech_requirements": [
+        "armor_doctrine"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_rocket_launcher",
+      "name": "Rocket launcher truck",
+      "faction": "houthi",
+      "branch": "artillery",
+      "role": "fire_support",
+      "echelon": "battery",
+      "crew": 3,
+      "cost_points": 30,
+      "build_time_days": 8,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "rocket_launcher": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 7,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.6,
+      "fuel_burn": 0.4,
+      "ammo_loadout": {
+        "ammo_rocket": 6
+      },
+      "maintenance_hours": 4,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_mobile_sam",
+      "name": "Mobile air defense launcher",
+      "faction": "houthi",
+      "branch": "air_defense",
+      "role": "point_air_defense",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 35,
+      "build_time_days": 9,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "missile_launcher": 1,
+        "optics_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 5
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 3,
+        "radar": 3
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0.5,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_missile_aa": 2
+      },
+      "maintenance_hours": 4,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_attack_drone",
+      "name": "Attack drone",
+      "faction": "houthi",
+      "branch": "air",
+      "role": "loitering_strike",
+      "echelon": "flight",
+      "crew": 0,
+      "cost_points": 16,
+      "build_time_days": 5,
+      "components": {
+        "drone_airframe": 1,
+        "electronics_suite": 1
+      },
+      "mobility": 6,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 4,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.2,
+      "fuel_burn": 0.2,
+      "ammo_loadout": {
+        "ammo_air_ordnance": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 7,
+      "tech_requirements": [
+        "unmanned_systems"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_coastal_missile_battery",
+      "name": "Coastal missile battery",
+      "faction": "houthi",
+      "branch": "artillery",
+      "role": "coastal_defense",
+      "echelon": "battery",
+      "crew": 5,
+      "cost_points": 60,
+      "build_time_days": 14,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "missile_launcher": 1,
+        "radar_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 5
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 2
+      },
+      "fuel_capacity": 0.6,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_missile_ship": 2
+      },
+      "maintenance_hours": 4,
+      "stealth": 5,
+      "tech_requirements": [
+        "coastal_defense"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_armed_skiff",
+      "name": "Armed skiff group",
+      "faction": "houthi",
+      "branch": "naval",
+      "role": "littoral_swarm",
+      "echelon": "flotilla",
+      "crew": 12,
+      "cost_points": 25,
+      "build_time_days": 6,
+      "components": {
+        "small_craft_hull": 3,
+        "engine": 3,
+        "gun_system": 1
+      },
+      "mobility": 8,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 6,
+      "fuel_burn": 5,
+      "ammo_loadout": {
+        "ammo_small_arms": 2,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 3,
+      "stealth": 5,
+      "tech_requirements": [
+        "littoral_swarm"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "houthi_supply_truck",
+      "name": "Supply truck",
+      "faction": "houthi",
+      "branch": "logistics",
+      "role": "supply_transport",
+      "echelon": "section",
+      "crew": 2,
+      "cost_points": 8,
+      "build_time_days": 3,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 1,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.4,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 4,
+      "tech_requirements": [],
+      "era": "modern"
+    }
+  ]
+}

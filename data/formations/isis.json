@@ -1,0 +1,15 @@
+{
+  "formations": [
+    {
+      "id": "isis_cell_network",
+      "faction": "isis",
+      "name": "Cell network",
+      "units": {
+        "isis_insurgent_cell": 6,
+        "isis_technical": 2,
+        "isis_mortar_team": 1,
+        "isis_supply_truck": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "coalition",
+  "name": "US-led Coalition",
+  "setting": "real_world_hypothetical",
+  "fictional": false,
+  "playable": true,
+  "doctrine": "Combined-arms power projection built on air, sea and logistics superiority.",
+  "strengths": [
+    "Air and naval superiority",
+    "Advanced sensors and networking",
+    "Deep logistics chain"
+  ],
+  "weaknesses": [
+    "Long, exposed supply lines",
+    "High unit cost",
+    "Sensitive to casualties"
+  ],
+  "aiProfile": "ai_coalition_combined_arms"
+}

@@ -1,0 +1,791 @@
+{
+  "faction": "coalition",
+  "units": [
+    {
+      "id": "coalition_infantry_squad",
+      "name": "Infantry squad",
+      "faction": "coalition",
+      "branch": "infantry",
+      "role": "line_infantry",
+      "echelon": "squad",
+      "crew": 9,
+      "cost_points": 10,
+      "build_time_days": 3,
+      "components": {
+        "small_arms_kit": 9,
+        "comms_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 6,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_marine_rifle_squad",
+      "name": "Marine rifle squad",
+      "faction": "coalition",
+      "branch": "infantry",
+      "role": "amphibious_infantry",
+      "echelon": "squad",
+      "crew": 13,
+      "cost_points": 14,
+      "build_time_days": 4,
+      "components": {
+        "small_arms_kit": 13,
+        "comms_set": 1,
+        "optics_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 5,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 2
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 3,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 1,
+      "stealth": 6,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_main_battle_tank",
+      "name": "Main battle tank",
+      "faction": "coalition",
+      "branch": "armor",
+      "role": "heavy_armor",
+      "echelon": "platoon",
+      "crew": 4,
+      "cost_points": 120,
+      "build_time_days": 20,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 2,
+        "turret": 1,
+        "gun_system": 1,
+        "optics_set": 2,
+        "electronics_suite": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 10,
+        "side": 8,
+        "top": 5
+      },
+      "firepower": {
+        "antiInfantry": 5,
+        "antiArmor": 10,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 7,
+        "thermal": 7,
+        "radar": 2
+      },
+      "ew": {
+        "jam": 4,
+        "resist": 6
+      },
+      "fuel_capacity": 1.9,
+      "fuel_burn": 0.8,
+      "ammo_loadout": {
+        "ammo_tank_shell": 4,
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 6,
+      "stealth": 3,
+      "tech_requirements": [
+        "armor_doctrine"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_ifv",
+      "name": "Infantry fighting vehicle",
+      "faction": "coalition",
+      "branch": "armor",
+      "role": "mechanized_transport",
+      "echelon": "platoon",
+      "crew": 3,
+      "cost_points": 70,
+      "build_time_days": 14,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 1,
+        "turret": 1,
+        "gun_system": 1,
+        "optics_set": 1,
+        "comms_set": 1
+      },
+      "mobility": 6,
+      "armor": {
+        "front": 6,
+        "side": 5,
+        "top": 3
+      },
+      "firepower": {
+        "antiInfantry": 7,
+        "antiArmor": 6,
+        "antiAir": 3
+      },
+      "sensors": {
+        "optics": 6,
+        "thermal": 5,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 3,
+        "resist": 4
+      },
+      "fuel_capacity": 0.8,
+      "fuel_burn": 0.5,
+      "ammo_loadout": {
+        "ammo_tank_shell": 2,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 4,
+      "stealth": 4,
+      "tech_requirements": [
+        "mechanized_doctrine"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_amphibious_assault_vehicle",
+      "name": "Amphibious assault vehicle",
+      "faction": "coalition",
+      "branch": "armor",
+      "role": "amphibious_transport",
+      "echelon": "platoon",
+      "crew": 3,
+      "cost_points": 60,
+      "build_time_days": 12,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 1,
+        "gun_system": 1,
+        "comms_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 4,
+        "side": 3,
+        "top": 2
+      },
+      "firepower": {
+        "antiInfantry": 5,
+        "antiArmor": 3,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 3,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 0.7,
+      "fuel_burn": 0.5,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 4,
+      "stealth": 3,
+      "tech_requirements": [
+        "amphibious_ops"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_light_recon_vehicle",
+      "name": "Light reconnaissance vehicle",
+      "faction": "coalition",
+      "branch": "armor",
+      "role": "reconnaissance",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 40,
+      "build_time_days": 8,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "optics_set": 2,
+        "comms_set": 1,
+        "gun_system": 1
+      },
+      "mobility": 8,
+      "armor": {
+        "front": 3,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 5,
+        "antiArmor": 4,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 8,
+        "thermal": 7,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 3,
+        "resist": 3
+      },
+      "fuel_capacity": 0.4,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 2,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 3,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_self_propelled_howitzer",
+      "name": "Self-propelled howitzer",
+      "faction": "coalition",
+      "branch": "artillery",
+      "role": "fire_support",
+      "echelon": "battery",
+      "crew": 5,
+      "cost_points": 90,
+      "build_time_days": 16,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 1,
+        "gun_system": 1,
+        "comms_set": 1,
+        "electronics_suite": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 3,
+        "side": 3,
+        "top": 2
+      },
+      "firepower": {
+        "antiInfantry": 8,
+        "antiArmor": 4,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 1,
+      "fuel_burn": 0.6,
+      "ammo_loadout": {
+        "ammo_artillery": 6
+      },
+      "maintenance_hours": 5,
+      "stealth": 3,
+      "tech_requirements": [
+        "fire_control_network"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_air_defense_battery",
+      "name": "Air defense battery",
+      "faction": "coalition",
+      "branch": "air_defense",
+      "role": "area_air_defense",
+      "echelon": "battery",
+      "crew": 6,
+      "cost_points": 110,
+      "build_time_days": 18,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "missile_launcher": 2,
+        "radar_set": 1,
+        "comms_set": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 9
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 9
+      },
+      "ew": {
+        "jam": 5,
+        "resist": 6
+      },
+      "fuel_capacity": 0.8,
+      "fuel_burn": 0.5,
+      "ammo_loadout": {
+        "ammo_missile_aa": 6
+      },
+      "maintenance_hours": 5,
+      "stealth": 3,
+      "tech_requirements": [
+        "integrated_air_defense"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_attack_helicopter",
+      "name": "Attack helicopter",
+      "faction": "coalition",
+      "branch": "air",
+      "role": "attack_aviation",
+      "echelon": "flight",
+      "crew": 2,
+      "cost_points": 100,
+      "build_time_days": 22,
+      "components": {
+        "airframe": 1,
+        "rotor_set": 1,
+        "engine": 2,
+        "missile_launcher": 1,
+        "gun_system": 1,
+        "optics_set": 1,
+        "electronics_suite": 1
+      },
+      "mobility": 9,
+      "armor": {
+        "front": 3,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 7,
+        "antiArmor": 9,
+        "antiAir": 3
+      },
+      "sensors": {
+        "optics": 8,
+        "thermal": 8,
+        "radar": 4
+      },
+      "ew": {
+        "jam": 6,
+        "resist": 6
+      },
+      "fuel_capacity": 1.2,
+      "fuel_burn": 1.4,
+      "ammo_loadout": {
+        "ammo_missile_at": 3,
+        "ammo_air_ordnance": 2,
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 9,
+      "stealth": 4,
+      "tech_requirements": [
+        "rotary_wing"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_tiltrotor_transport",
+      "name": "Tiltrotor transport",
+      "faction": "coalition",
+      "branch": "air",
+      "role": "assault_transport",
+      "echelon": "flight",
+      "crew": 4,
+      "cost_points": 95,
+      "build_time_days": 22,
+      "components": {
+        "airframe": 1,
+        "rotor_set": 1,
+        "engine": 2,
+        "electronics_suite": 1,
+        "comms_set": 1
+      },
+      "mobility": 9,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 2,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 3,
+        "radar": 3
+      },
+      "ew": {
+        "jam": 4,
+        "resist": 5
+      },
+      "fuel_capacity": 2.5,
+      "fuel_burn": 1.5,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 8,
+      "stealth": 4,
+      "tech_requirements": [
+        "rotary_wing"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_strike_fighter",
+      "name": "Strike fighter",
+      "faction": "coalition",
+      "branch": "air",
+      "role": "air_superiority_strike",
+      "echelon": "flight",
+      "crew": 1,
+      "cost_points": 150,
+      "build_time_days": 30,
+      "components": {
+        "airframe": 1,
+        "jet_engine": 1,
+        "radar_set": 1,
+        "electronics_suite": 1,
+        "missile_launcher": 1
+      },
+      "mobility": 10,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 8,
+        "antiAir": 8
+      },
+      "sensors": {
+        "optics": 8,
+        "thermal": 8,
+        "radar": 9
+      },
+      "ew": {
+        "jam": 8,
+        "resist": 7
+      },
+      "fuel_capacity": 4,
+      "fuel_burn": 3,
+      "ammo_loadout": {
+        "ammo_air_ordnance": 3,
+        "ammo_missile_aa": 2
+      },
+      "maintenance_hours": 12,
+      "stealth": 6,
+      "tech_requirements": [
+        "fixed_wing",
+        "stealth_coatings"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_recon_uav",
+      "name": "Reconnaissance UAV",
+      "faction": "coalition",
+      "branch": "air",
+      "role": "aerial_reconnaissance",
+      "echelon": "flight",
+      "crew": 0,
+      "cost_points": 35,
+      "build_time_days": 10,
+      "components": {
+        "drone_airframe": 1,
+        "electronics_suite": 1,
+        "optics_set": 1
+      },
+      "mobility": 7,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 9,
+        "thermal": 9,
+        "radar": 5
+      },
+      "ew": {
+        "jam": 3,
+        "resist": 3
+      },
+      "fuel_capacity": 0.3,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {},
+      "maintenance_hours": 3,
+      "stealth": 5,
+      "tech_requirements": [
+        "unmanned_systems"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_destroyer",
+      "name": "Guided-missile destroyer",
+      "faction": "coalition",
+      "branch": "naval",
+      "role": "surface_combatant",
+      "echelon": "ship",
+      "crew": 300,
+      "cost_points": 320,
+      "build_time_days": 60,
+      "components": {
+        "ship_hull": 1,
+        "engine": 2,
+        "radar_set": 2,
+        "electronics_suite": 2,
+        "missile_launcher": 3,
+        "gun_system": 1,
+        "comms_set": 2
+      },
+      "mobility": 6,
+      "armor": {
+        "front": 5,
+        "side": 5,
+        "top": 3
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 5,
+        "antiAir": 10
+      },
+      "sensors": {
+        "optics": 7,
+        "thermal": 8,
+        "radar": 10
+      },
+      "ew": {
+        "jam": 8,
+        "resist": 8
+      },
+      "fuel_capacity": 900,
+      "fuel_burn": 70,
+      "ammo_loadout": {
+        "ammo_missile_aa": 20,
+        "ammo_missile_ship": 8,
+        "ammo_naval_gun": 10
+      },
+      "maintenance_hours": 30,
+      "stealth": 3,
+      "tech_requirements": [
+        "integrated_air_defense",
+        "naval_combat_systems"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_amphibious_assault_ship",
+      "name": "Amphibious assault ship",
+      "faction": "coalition",
+      "branch": "naval",
+      "role": "amphibious_command",
+      "echelon": "ship",
+      "crew": 1000,
+      "cost_points": 450,
+      "build_time_days": 75,
+      "components": {
+        "ship_hull": 1,
+        "engine": 2,
+        "radar_set": 1,
+        "electronics_suite": 2,
+        "comms_set": 3,
+        "gun_system": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 4,
+        "side": 4,
+        "top": 3
+      },
+      "firepower": {
+        "antiInfantry": 2,
+        "antiArmor": 1,
+        "antiAir": 5
+      },
+      "sensors": {
+        "optics": 5,
+        "thermal": 6,
+        "radar": 8
+      },
+      "ew": {
+        "jam": 6,
+        "resist": 7
+      },
+      "fuel_capacity": 1200,
+      "fuel_burn": 90,
+      "ammo_loadout": {
+        "ammo_missile_aa": 6,
+        "ammo_naval_gun": 4,
+        "ammo_air_ordnance": 10
+      },
+      "maintenance_hours": 40,
+      "stealth": 2,
+      "tech_requirements": [
+        "amphibious_ops",
+        "naval_combat_systems"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_landing_craft",
+      "name": "Landing craft",
+      "faction": "coalition",
+      "branch": "naval",
+      "role": "ship_to_shore",
+      "echelon": "section",
+      "crew": 5,
+      "cost_points": 30,
+      "build_time_days": 8,
+      "components": {
+        "small_craft_hull": 1,
+        "engine": 2
+      },
+      "mobility": 6,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 2,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 6,
+      "fuel_burn": 4,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 3,
+      "stealth": 2,
+      "tech_requirements": [
+        "amphibious_ops"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "coalition_logistics_truck",
+      "name": "Logistics truck",
+      "faction": "coalition",
+      "branch": "logistics",
+      "role": "supply_transport",
+      "echelon": "section",
+      "crew": 2,
+      "cost_points": 18,
+      "build_time_days": 5,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "comms_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.5,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 3,
+      "tech_requirements": [],
+      "era": "modern"
+    }
+  ]
+}

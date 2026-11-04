@@ -1,0 +1,34 @@
+{
+  "formations": [
+    {
+      "id": "iran_irgc_brigade",
+      "faction": "iran",
+      "name": "IRGC brigade",
+      "units": {
+        "iran_irgc_infantry_squad": 9,
+        "iran_basij_militia_squad": 3,
+        "iran_main_battle_tank": 3,
+        "iran_ifv": 6,
+        "iran_light_recon_vehicle": 2,
+        "iran_rocket_artillery": 2,
+        "iran_air_defense_battery": 1,
+        "iran_attack_drone": 2,
+        "iran_ew_truck": 1,
+        "iran_logistics_truck": 5
+      }
+    },
+    {
+      "id": "iran_coastal_defense_group",
+      "faction": "iran",
+      "name": "Coastal defense group",
+      "units": {
+        "iran_coastal_missile_battery": 2,
+        "iran_fast_attack_boat_group": 3,
+        "iran_air_defense_battery": 1,
+        "iran_fighter": 2,
+        "iran_attack_drone": 2,
+        "iran_logistics_truck": 2
+      }
+    }
+  ]
+}
