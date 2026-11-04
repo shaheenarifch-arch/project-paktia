@@ -5,10 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Drones/HavocDroneDetectable.h"
 #include "HavocLaneHazard.generated.h"
 
 UCLASS(Blueprintable)
-class MIDNIGHTHAVOC_API AHavocLaneHazard : public AActor
+class MIDNIGHTHAVOC_API AHavocLaneHazard : public AActor, public IHavocDroneDetectable
 {
     GENERATED_BODY()
 
@@ -47,6 +48,12 @@ public:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Havoc|Lane")
     void OnCleared();
+
+    // IHavocDroneDetectable: a drone sensor pass reveals this hazard.
+    virtual FName GetDetectableId() const override { return HazardId; }
+    virtual bool IsDetectableVisible() const override { return !bCleared; }
+    virtual FString GetDetectableClassification() const override { return TEXT("lane_hazard"); }
+    virtual void OnDetectedByDrone(FName DroneId) override { Reveal(); }
 
 protected:
     virtual void BeginPlay() override;
