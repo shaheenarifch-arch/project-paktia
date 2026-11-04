@@ -16,7 +16,9 @@ public class ProjectPaktia : ModuleRules
                 "EnhancedInput",
                 "NetCore",
                 "UMG",
-                "AIModule"
+                "AIModule",
+                "Json",
+                "JsonUtilities"
             }
         );
 
