@@ -21,7 +21,7 @@ constexpr std::size_t kNoIndex = strat::kNone;
 bool Contains(const std::vector<std::size_t>& v, std::size_t x) { return std::find(v.begin(), v.end(), x) != v.end(); }
 
 // Gulf oil production of the coalition's exporters with every route open, and
-// the same for Iran, from data/world/gardun-gulf.json (game units per day).
+// the same for Iran, from data/world/gulf-theatre.json (game units per day).
 Fixed64 Units(std::int32_t n) { return Fixed64::FromInt(n); }
 
 std::size_t Zone(const strat::WorldMap& m, const char* id) {

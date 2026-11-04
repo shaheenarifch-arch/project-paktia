@@ -50,7 +50,7 @@ Rules from the design doc: a brigade below 60% readiness can't be ordered to att
 
 | Piece | What it does |
 | --- | --- |
-| `WorldMap.h` | Static map from `data/world/gardun-gulf.json`: 16 provinces (owner, terrain, infrastructure 0-10, oil in game units/day, population band, `isPort`, `hasAirbase`), 12 sea zones (Hormuz, Bab el-Mandeb and Suez flagged `chokepoint`; Arabian Sea and the eastern Mediterranean are `worldMarket` zones), 5 strategic routes, and which factions are enemies. |
+| `WorldMap.h` | Static map from `data/world/gulf-theatre.json`: 16 provinces (owner, terrain, infrastructure 0-10, oil in game units/day, population band, `isPort`, `hasAirbase`), 12 sea zones (Hormuz, Bab el-Mandeb and Suez flagged `chokepoint`; Arabian Sea and the eastern Mediterranean are `worldMarket` zones), 5 strategic routes, and which factions are enemies. |
 | `Strategic.h` | State per province (owner, control 0..1, infrastructure damage), per zone (`blockadedBy`, `threat` 0..1) and per route (open, interdiction), plus faction treasuries. `StepDay(World*)` runs once per game-day. |
 | `OpsLink.h` | `LinkInterdiction` sets an `ops::Theater` route's interdiction from the threat on a sea zone. |
 

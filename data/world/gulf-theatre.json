@@ -1,6 +1,6 @@
 {
-  "id": "gardun_gulf",
-  "name": "Gardun Gulf theatre: world map and chokepoints",
+  "id": "gulf_theatre",
+  "name": "Gulf theatre: world map and chokepoints",
   "fictional": false,
   "setting": "real_world_hypothetical",
   "note": "A hypothetical future scenario on real geography. Game layout, not a survey: provinces, distances, output and infrastructure are simplified for play. Oil output is in game units per day. Owners are the coalition (the Gulf partners, Iraq south, Djibouti and Egypt are simplified into it), Iran and the Houthis.",

@@ -1,4 +1,6 @@
 // Operational layer v1 tests (run in both test executables).
+#include <limits>
+
 #include "TestHarness.h"
 #include "havoc/Fixed.h"
 #include "havoc/World.h"

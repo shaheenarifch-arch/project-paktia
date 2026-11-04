@@ -7,7 +7,7 @@ import { root, readJson, milli, str, byId } from './_util.mjs'
 export const output = 'World'
 
 export default function generate() {
-  const doc = readJson('data', 'world', 'gardun-gulf.json')
+  const doc = readJson('data', 'world', 'gulf-theatre.json')
   const factions = readdirSync(join(root, 'data', 'factions'))
     .filter(f => f.endsWith('.json'))
     .map(f => readJson('data', 'factions', f).id)
