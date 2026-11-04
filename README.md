@@ -21,7 +21,14 @@ See `docs/vertical-slice.md`, `docs/gardun-map.md`, `docs/architecture.md`, `doc
 
 ## Safety boundary
 
-All factions, characters, organizations, weapons, and missions are fictional. Project Paktia does not recreate real militant organizations, real commanders, or specific attacks. Game data describes balance and simulation behavior, not real-world weapon operation.
+Gardun, the Paktia Highlands campaign (Episodes 1–3), and all characters, organizations and weapons are fictional.
+
+Episode 4 (*Operation Open Strait*) is a **real-world hypothetical**: a future scenario on real geography (Kharg Island, the Strait of Hormuz) with real nations (Iran, US Navy and Marine forces). It must declare `"setting": "real_world_hypothetical"`, and the validators check that. It still follows every other rule:
+- it doesn't reconstruct any real event
+- it doesn't name or depict real people
+- equipment stays the game's fictional kit
+
+Project Paktia does not recreate real militant organizations, real commanders, or specific attacks. Game data describes balance and simulation behavior, not real-world weapon operation.
 
 The Aegis feature is deliberately an abstract game-support workflow. It contains no real-world targeting, guidance, propulsion, or weapons engineering logic.
 
