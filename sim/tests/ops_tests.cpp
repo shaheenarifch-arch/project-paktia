@@ -1,7 +1,12 @@
-// Operational layer v1 tests. Included by main.cpp so they share its runner
-// (and run again in havoc_sim_tests_portable).
+// Operational layer v1 tests (run in both test executables).
+#include "TestHarness.h"
+#include "havoc/Fixed.h"
+#include "havoc/World.h"
+#include "havoc/StateHash.h"
 #include "havoc/ops/Data.h"
 #include "havoc/ops/Operational.h"
+
+using namespace havoc;
 
 namespace opstest {
 

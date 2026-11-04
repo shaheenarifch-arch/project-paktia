@@ -1,0 +1,515 @@
+{
+  "id": "gardun_gulf",
+  "name": "Gardun Gulf theatre: world map and chokepoints",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "note": "A hypothetical future scenario on real geography. Game layout, not a survey: provinces, distances, output and infrastructure are simplified for play. Oil output is in game units per day. Owners are the coalition (the Gulf partners, Iraq south, Djibouti and Egypt are simplified into it), Iran and the Houthis.",
+  "provinces": [
+    {
+      "id": "kuwait",
+      "name": "Kuwait",
+      "owner": "coalition",
+      "terrain": "desert",
+      "infrastructure": 7,
+      "oil": 30,
+      "population": "medium",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "gulf_north",
+        "iraq_south",
+        "saudi_east"
+      ]
+    },
+    {
+      "id": "iraq_south",
+      "name": "Iraq south (Basra)",
+      "owner": "coalition",
+      "terrain": "marsh",
+      "infrastructure": 4,
+      "oil": 40,
+      "population": "high",
+      "isPort": true,
+      "hasAirbase": false,
+      "adjacent": [
+        "gulf_north",
+        "iran_khuzestan",
+        "kuwait"
+      ]
+    },
+    {
+      "id": "iran_khuzestan",
+      "name": "Iran: Khuzestan",
+      "owner": "iran",
+      "terrain": "plains",
+      "infrastructure": 5,
+      "oil": 35,
+      "population": "high",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "gulf_north",
+        "iran_bushehr",
+        "iraq_south"
+      ]
+    },
+    {
+      "id": "iran_bushehr",
+      "name": "Iran: Bushehr",
+      "owner": "iran",
+      "terrain": "coastal",
+      "infrastructure": 5,
+      "oil": 10,
+      "population": "medium",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "gulf_central",
+        "iran_bandar_abbas",
+        "iran_khuzestan"
+      ]
+    },
+    {
+      "id": "iran_kharg",
+      "name": "Iran: Kharg Island",
+      "owner": "iran",
+      "terrain": "island",
+      "infrastructure": 6,
+      "oil": 45,
+      "population": "low",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "gulf_north"
+      ]
+    },
+    {
+      "id": "iran_bandar_abbas",
+      "name": "Iran: Bandar Abbas",
+      "owner": "iran",
+      "terrain": "coastal",
+      "infrastructure": 6,
+      "oil": 5,
+      "population": "high",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "hormuz",
+        "iran_bushehr",
+        "iran_qeshm"
+      ]
+    },
+    {
+      "id": "iran_qeshm",
+      "name": "Iran: Qeshm",
+      "owner": "iran",
+      "terrain": "island",
+      "infrastructure": 3,
+      "oil": 0,
+      "population": "low",
+      "isPort": true,
+      "hasAirbase": false,
+      "adjacent": [
+        "hormuz",
+        "iran_bandar_abbas"
+      ]
+    },
+    {
+      "id": "saudi_east",
+      "name": "Saudi east coast",
+      "owner": "coalition",
+      "terrain": "desert",
+      "infrastructure": 8,
+      "oil": 90,
+      "population": "high",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "bahrain",
+        "gulf_central",
+        "kuwait",
+        "qatar",
+        "uae"
+      ]
+    },
+    {
+      "id": "bahrain",
+      "name": "Bahrain",
+      "owner": "coalition",
+      "terrain": "island",
+      "infrastructure": 8,
+      "oil": 5,
+      "population": "medium",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "gulf_central",
+        "saudi_east"
+      ]
+    },
+    {
+      "id": "qatar",
+      "name": "Qatar",
+      "owner": "coalition",
+      "terrain": "desert",
+      "infrastructure": 8,
+      "oil": 25,
+      "population": "medium",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "gulf_central",
+        "gulf_south",
+        "saudi_east"
+      ]
+    },
+    {
+      "id": "uae",
+      "name": "UAE",
+      "owner": "coalition",
+      "terrain": "desert",
+      "infrastructure": 9,
+      "oil": 40,
+      "population": "high",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "gulf_of_oman",
+        "gulf_south",
+        "oman_musandam",
+        "saudi_east"
+      ]
+    },
+    {
+      "id": "oman_musandam",
+      "name": "Oman: Musandam",
+      "owner": "coalition",
+      "terrain": "mountain",
+      "infrastructure": 3,
+      "oil": 2,
+      "population": "low",
+      "isPort": true,
+      "hasAirbase": false,
+      "adjacent": [
+        "gulf_of_oman",
+        "hormuz",
+        "uae"
+      ]
+    },
+    {
+      "id": "yemen_hudaydah",
+      "name": "Yemen: Hudaydah",
+      "owner": "houthi",
+      "terrain": "coastal",
+      "infrastructure": 2,
+      "oil": 0,
+      "population": "medium",
+      "isPort": true,
+      "hasAirbase": false,
+      "adjacent": [
+        "red_sea_south",
+        "yemen_highlands"
+      ]
+    },
+    {
+      "id": "yemen_highlands",
+      "name": "Yemen: highlands",
+      "owner": "houthi",
+      "terrain": "mountain",
+      "infrastructure": 1,
+      "oil": 6,
+      "population": "high",
+      "isPort": false,
+      "hasAirbase": false,
+      "adjacent": [
+        "yemen_hudaydah"
+      ]
+    },
+    {
+      "id": "djibouti",
+      "name": "Djibouti",
+      "owner": "coalition",
+      "terrain": "desert",
+      "infrastructure": 4,
+      "oil": 0,
+      "population": "low",
+      "isPort": true,
+      "hasAirbase": true,
+      "adjacent": [
+        "bab_el_mandeb",
+        "gulf_of_aden"
+      ]
+    },
+    {
+      "id": "egypt_suez",
+      "name": "Egypt: Suez",
+      "owner": "coalition",
+      "terrain": "desert",
+      "infrastructure": 6,
+      "oil": 8,
+      "population": "high",
+      "isPort": true,
+      "hasAirbase": false,
+      "adjacent": [
+        "mediterranean_east",
+        "red_sea_north",
+        "suez"
+      ]
+    }
+  ],
+  "seaZones": [
+    {
+      "id": "gulf_north",
+      "name": "Northern Gulf",
+      "chokepoint": false,
+      "worldMarket": false,
+      "adjacent": [
+        "gulf_central",
+        "iran_kharg",
+        "iran_khuzestan",
+        "iraq_south",
+        "kuwait"
+      ]
+    },
+    {
+      "id": "gulf_central",
+      "name": "Central Gulf",
+      "chokepoint": false,
+      "worldMarket": false,
+      "adjacent": [
+        "bahrain",
+        "gulf_north",
+        "gulf_south",
+        "iran_bushehr",
+        "qatar",
+        "saudi_east"
+      ]
+    },
+    {
+      "id": "gulf_south",
+      "name": "Southern Gulf",
+      "chokepoint": false,
+      "worldMarket": false,
+      "adjacent": [
+        "gulf_central",
+        "hormuz",
+        "qatar",
+        "uae"
+      ]
+    },
+    {
+      "id": "hormuz",
+      "name": "Strait of Hormuz",
+      "chokepoint": true,
+      "worldMarket": false,
+      "adjacent": [
+        "gulf_of_oman",
+        "gulf_south",
+        "iran_bandar_abbas",
+        "iran_qeshm",
+        "oman_musandam"
+      ]
+    },
+    {
+      "id": "gulf_of_oman",
+      "name": "Gulf of Oman",
+      "chokepoint": false,
+      "worldMarket": false,
+      "adjacent": [
+        "arabian_sea",
+        "hormuz",
+        "oman_musandam",
+        "uae"
+      ]
+    },
+    {
+      "id": "arabian_sea",
+      "name": "Arabian Sea (Indian Ocean market)",
+      "chokepoint": false,
+      "worldMarket": true,
+      "adjacent": [
+        "gulf_of_aden",
+        "gulf_of_oman"
+      ]
+    },
+    {
+      "id": "gulf_of_aden",
+      "name": "Gulf of Aden",
+      "chokepoint": false,
+      "worldMarket": false,
+      "adjacent": [
+        "arabian_sea",
+        "bab_el_mandeb",
+        "djibouti"
+      ]
+    },
+    {
+      "id": "bab_el_mandeb",
+      "name": "Bab el-Mandeb",
+      "chokepoint": true,
+      "worldMarket": false,
+      "adjacent": [
+        "djibouti",
+        "gulf_of_aden",
+        "red_sea_south"
+      ]
+    },
+    {
+      "id": "red_sea_south",
+      "name": "Southern Red Sea",
+      "chokepoint": false,
+      "worldMarket": false,
+      "adjacent": [
+        "bab_el_mandeb",
+        "red_sea_north",
+        "yemen_hudaydah"
+      ]
+    },
+    {
+      "id": "red_sea_north",
+      "name": "Northern Red Sea",
+      "chokepoint": false,
+      "worldMarket": false,
+      "adjacent": [
+        "egypt_suez",
+        "red_sea_south",
+        "suez"
+      ]
+    },
+    {
+      "id": "suez",
+      "name": "Suez Canal",
+      "chokepoint": true,
+      "worldMarket": false,
+      "adjacent": [
+        "egypt_suez",
+        "mediterranean_east",
+        "red_sea_north"
+      ]
+    },
+    {
+      "id": "mediterranean_east",
+      "name": "Eastern Mediterranean (Mediterranean market)",
+      "chokepoint": false,
+      "worldMarket": true,
+      "adjacent": [
+        "egypt_suez",
+        "suez"
+      ]
+    }
+  ],
+  "enemies": [
+    [
+      "coalition",
+      "houthi"
+    ],
+    [
+      "coalition",
+      "iran"
+    ],
+    [
+      "coalition",
+      "isis"
+    ],
+    [
+      "houthi",
+      "isis"
+    ],
+    [
+      "iran",
+      "isis"
+    ]
+  ],
+  "routes": [
+    {
+      "id": "gulf_oil_east",
+      "name": "Gulf oil to Indian Ocean",
+      "mode": "sea",
+      "owner": "coalition",
+      "legs": [
+        "gulf_north",
+        "gulf_central",
+        "gulf_south",
+        "hormuz",
+        "gulf_of_oman",
+        "arabian_sea"
+      ],
+      "exporters": [
+        "kuwait",
+        "iraq_south",
+        "saudi_east",
+        "bahrain",
+        "qatar",
+        "uae",
+        "oman_musandam"
+      ]
+    },
+    {
+      "id": "iran_oil_east",
+      "name": "Iranian oil to Indian Ocean",
+      "mode": "sea",
+      "owner": "iran",
+      "legs": [
+        "gulf_north",
+        "gulf_central",
+        "gulf_south",
+        "hormuz",
+        "gulf_of_oman",
+        "arabian_sea"
+      ],
+      "exporters": [
+        "iran_khuzestan",
+        "iran_bushehr",
+        "iran_kharg",
+        "iran_bandar_abbas"
+      ]
+    },
+    {
+      "id": "yemen_oil_export",
+      "name": "Yemeni oil via the Red Sea and Bab el-Mandeb",
+      "mode": "mixed",
+      "owner": "houthi",
+      "legs": [
+        "yemen_highlands",
+        "yemen_hudaydah",
+        "red_sea_south",
+        "bab_el_mandeb",
+        "gulf_of_aden",
+        "arabian_sea"
+      ],
+      "exporters": []
+    },
+    {
+      "id": "red_sea_shipping",
+      "name": "Red Sea shipping",
+      "mode": "sea",
+      "owner": "coalition",
+      "legs": [
+        "arabian_sea",
+        "gulf_of_aden",
+        "bab_el_mandeb",
+        "red_sea_south",
+        "red_sea_north",
+        "suez",
+        "mediterranean_east"
+      ],
+      "exporters": [
+        "egypt_suez",
+        "djibouti"
+      ]
+    },
+    {
+      "id": "gulf_land_corridor",
+      "name": "Gulf land corridor",
+      "mode": "land",
+      "owner": "coalition",
+      "legs": [
+        "iraq_south",
+        "kuwait",
+        "saudi_east",
+        "bahrain"
+      ],
+      "exporters": []
+    }
+  ]
+}

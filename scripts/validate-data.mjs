@@ -226,6 +226,85 @@ for (const [file, doc] of filesIn("formations")) {
   });
 }
 
+// --- world map (data/world) ---
+const TERRAINS = new Set(["desert", "marsh", "plains", "coastal", "island", "mountain", "urban"]);
+const POP_BANDS = new Set(["low", "medium", "high", "very_high"]);
+const ROUTE_MODES = new Set(["sea", "land", "mixed"]);
+for (const [file, doc] of filesIn("world")) {
+  if (!isObject(doc)) { fail(file, "(root)", "must be an object"); continue; }
+  if (!isStr(doc.id)) fail(file, "id", "must be a non-empty string");
+  for (const key of ["provinces", "seaZones", "routes", "enemies"]) {
+    if (!Array.isArray(doc[key]) || doc[key].length === 0) fail(file, key, "must be a non-empty array");
+  }
+  const list = (key) => (Array.isArray(doc[key]) ? doc[key] : []);
+  const entries = (key) => list(key).map((item, i) => ({ file, at: `${key}[${i}]`, item })).filter(({ at, item }) => isObject(item) || (fail(file, at, "must be an object"), false));
+  const provinces = indexById(entries("provinces"), "province");
+  const zones = indexById(entries("seaZones"), "sea zone");
+  const routes = indexById(entries("routes"), "route");
+  for (const id of provinces.keys()) if (zones.has(id)) fail(file, "provinces", `id '${id}' is used by both a province and a sea zone`);
+  const nodes = new Map([...provinces, ...zones]); // provinces and zones share one id space for adjacency
+
+  for (const [id, { at, item }] of provinces) {
+    if (!isStr(item.name)) fail(file, `${at}.name`, "must be a non-empty string");
+    if (!factions.has(item.owner)) fail(file, `${at}.owner`, `unknown faction '${item.owner}'`);
+    if (!TERRAINS.has(item.terrain)) fail(file, `${at}.terrain`, `must be one of ${[...TERRAINS].join(", ")}`);
+    if (!isInt(item.infrastructure) || item.infrastructure < 0 || item.infrastructure > 10) fail(file, `${at}.infrastructure`, "must be an integer 0-10");
+    if (!isNum(item.oil) || item.oil < 0) fail(file, `${at}.oil`, "must be a number >= 0 (game units per day)");
+    if (!POP_BANDS.has(item.population)) fail(file, `${at}.population`, `must be one of ${[...POP_BANDS].join(", ")}`);
+    for (const f of ["isPort", "hasAirbase"]) if (typeof item[f] !== "boolean") fail(file, `${at}.${f}`, "must be true or false");
+    if (item.oil > 0 && !item.isPort && ![...list("routes")].some((r) => isObject(r) && Array.isArray(r.legs) && r.legs.includes(id))) {
+      fail(file, `${at}.oil`, "an inland oil province must be a leg of a route so its oil can reach a market");
+    }
+  }
+  for (const [, { at, item }] of zones) {
+    if (!isStr(item.name)) fail(file, `${at}.name`, "must be a non-empty string");
+    for (const f of ["chokepoint", "worldMarket"]) if (typeof item[f] !== "boolean") fail(file, `${at}.${f}`, "must be true or false");
+  }
+  for (const required of ["hormuz", "bab_el_mandeb", "suez"]) {
+    if (zones.has(required) && zones.get(required).item.chokepoint !== true) fail(file, "seaZones", `'${required}' must be flagged chokepoint: true`);
+    if (!zones.has(required)) fail(file, "seaZones", `missing required chokepoint '${required}'`);
+  }
+  if (![...zones.values()].some(({ item }) => item.worldMarket === true)) fail(file, "seaZones", "at least one zone must be a worldMarket");
+
+  // adjacency: every referenced id exists, and is symmetric
+  for (const [id, { at, item }] of nodes) {
+    if (!Array.isArray(item.adjacent) || !item.adjacent.every(isStr)) { fail(file, `${at}.adjacent`, "must be an array of ids"); continue; }
+    if (new Set(item.adjacent).size !== item.adjacent.length) fail(file, `${at}.adjacent`, "contains duplicates");
+    for (const other of item.adjacent) {
+      if (other === id) fail(file, `${at}.adjacent`, `'${id}' is adjacent to itself`);
+      else if (!nodes.has(other)) fail(file, `${at}.adjacent`, `unknown id '${other}'`);
+      else if (!nodes.get(other).item.adjacent?.includes?.(id)) fail(file, `${at}.adjacent`, `'${id}' lists '${other}' but '${other}' does not list '${id}' (adjacency must be symmetric)`);
+    }
+  }
+  const adjacent = (a, b) => nodes.get(a)?.item.adjacent?.includes?.(b) === true;
+
+  for (const pair of list("enemies")) {
+    if (!Array.isArray(pair) || pair.length !== 2 || !pair.every((f) => factions.has(f)) || pair[0] === pair[1]) fail(file, "enemies", `each entry must be a pair of two different known factions, got ${JSON.stringify(pair)}`);
+  }
+
+  // routes: owner known, legs exist and are consecutive neighbours, exporters sit on the route
+  for (const [, { at, item }] of routes) {
+    if (!isStr(item.name)) fail(file, `${at}.name`, "must be a non-empty string");
+    if (!factions.has(item.owner)) fail(file, `${at}.owner`, `unknown faction '${item.owner}'`);
+    if (!ROUTE_MODES.has(item.mode)) fail(file, `${at}.mode`, `must be one of ${[...ROUTE_MODES].join(", ")}`);
+    if (!Array.isArray(item.legs) || item.legs.length < 2 || !item.legs.every(isStr)) { fail(file, `${at}.legs`, "must be an array of at least two ids"); continue; }
+    item.legs.forEach((leg, i) => {
+      if (!nodes.has(leg)) return fail(file, `${at}.legs[${i}]`, `unknown id '${leg}'`);
+      if (i > 0 && nodes.has(item.legs[i - 1]) && !adjacent(item.legs[i - 1], leg)) fail(file, `${at}.legs[${i}]`, `'${item.legs[i - 1]}' and '${leg}' are not adjacent`);
+    });
+    const hasZone = item.legs.some((l) => zones.has(l));
+    const hasProvince = item.legs.some((l) => provinces.has(l));
+    if (item.mode === "land" && hasZone) fail(file, `${at}.mode`, "a land route must not contain sea zones");
+    if (item.mode === "sea" && hasProvince && item.legs.some((l) => provinces.has(l))) fail(file, `${at}.mode`, "a sea route must list only sea zones (use exporters for ports)");
+    if (item.mode === "mixed" && !(hasZone && hasProvince)) fail(file, `${at}.mode`, "a mixed route needs both provinces and sea zones");
+    if (!Array.isArray(item.exporters) || !item.exporters.every(isStr)) { fail(file, `${at}.exporters`, "must be an array of province ids"); continue; }
+    for (const ex of item.exporters) {
+      if (!provinces.has(ex)) fail(file, `${at}.exporters`, `unknown province '${ex}'`);
+      else if (!item.legs.includes(ex) && !item.legs.some((l) => adjacent(ex, l))) fail(file, `${at}.exporters`, `province '${ex}' is not on or next to the route`);
+    }
+  }
+}
+
 if (errors.length > 0) {
   console.error(`\n${errors.length} data validation error(s):`);
   for (const e of errors) console.error(`  - ${e}`);

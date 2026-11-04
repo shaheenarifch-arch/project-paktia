@@ -1,10 +1,9 @@
-// Self-contained mini test runner (no external framework).
+// Core tests (fixed-point, RNG, clock, replay) and the test runner entry point.
+// Module tests live in tests/<module>_tests.cpp; the runner is in TestHarness.h.
 #include <cstdio>
 #include <limits>
-#include <functional>
-#include <string>
-#include <vector>
 
+#include "TestHarness.h"
 #include "havoc/Clock.h"
 #include "havoc/Fixed.h"
 #include "havoc/Random.h"
@@ -13,20 +12,6 @@
 #include "havoc/World.h"
 
 namespace {
-
-struct TestCase { const char* name; std::function<void()> fn; };
-std::vector<TestCase>& Tests() { static std::vector<TestCase> t; return t; }
-int g_failures = 0;
-
-struct Reg { Reg(const char* n, std::function<void()> f) { Tests().push_back({n, std::move(f)}); } };
-
-#define TEST(name) \
-  static void name(); \
-  static Reg reg_##name(#name, name); \
-  static void name()
-
-#define CHECK(cond) \
-  do { if (!(cond)) { std::printf("    CHECK failed %s:%d: %s\n", __FILE__, __LINE__, #cond); ++g_failures; } } while (0)
 
 using namespace havoc;
 
@@ -162,14 +147,12 @@ TEST(replay_matches) {
 
 }  // namespace
 
-#include "ops_tests.inc"
-
 int main() {
-  for (const TestCase& t : Tests()) {
-    int before = g_failures;
+  for (const havoc_test::TestCase& t : havoc_test::Tests()) {
+    int before = havoc_test::g_failures;
     t.fn();
-    std::printf("[%s] %s\n", g_failures == before ? " OK " : "FAIL", t.name);
+    std::printf("[%s] %s\n", havoc_test::g_failures == before ? " OK " : "FAIL", t.name);
   }
-  std::printf("%zu tests, %d failed checks\n", Tests().size(), g_failures);
-  return g_failures == 0 ? 0 : 1;
+  std::printf("%zu tests, %d failed checks\n", havoc_test::Tests().size(), havoc_test::g_failures);
+  return havoc_test::g_failures == 0 ? 0 : 1;
 }

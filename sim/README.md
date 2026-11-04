@@ -44,12 +44,42 @@ GCC and Clang use the built-in `__int128` for fixed-point multiply and divide. M
 
 Rules from the design doc: a brigade below 60% readiness can't be ordered to attack; refit only happens on a depot; a brigade out of fuel stops moving and digs in. Commands (`kCmdSetPosture`, `kCmdMoveTo`) and events (`kEvShortage`, `kEvPostureForced`, ...) go through the World, so replays and hashes cover them.
 
+## Strategic layer (v1)
+
+`include/havoc/strat/` holds the world map and the daily strategic step, linked to the World's strategic tick (`Strategic::Attach`). Coupling is one-way: strat knows ops (`OpsLink.h`), ops knows nothing about strat.
+
+| Piece | What it does |
+| --- | --- |
+| `WorldMap.h` | Static map from `data/world/gardun-gulf.json`: 16 provinces (owner, terrain, infrastructure 0-10, oil in game units/day, population band, `isPort`, `hasAirbase`), 12 sea zones (Hormuz, Bab el-Mandeb and Suez flagged `chokepoint`; Arabian Sea and the eastern Mediterranean are `worldMarket` zones), 5 strategic routes, and which factions are enemies. |
+| `Strategic.h` | State per province (owner, control 0..1, infrastructure damage), per zone (`blockadedBy`, `threat` 0..1) and per route (open, interdiction), plus faction treasuries. `StepDay(World*)` runs once per game-day. |
+| `OpsLink.h` | `LinkInterdiction` sets an `ops::Theater` route's interdiction from the threat on a sea zone. |
+
+Daily rules, in order:
+
+1. Zone threat rises 1/4 per day while blockaded and falls 1/8 per day after the blockade is lifted.
+2. A route is open for a faction only if none of its sea zones is blockaded by an enemy of that faction. Its interdiction is 1 when closed, otherwise the highest residual threat on its zones. Opening or closing emits an event.
+3. A captured province starts at low control and recovers 1/20 per day.
+4. Oil income per faction = sum of its provinces' oil x (1 - infrastructure damage) x control, counting only provinces whose oil has an open route to a world market (province legs and `exporters` of a route that reaches a `worldMarket` zone). The treasury grows by the income.
+
+Events (200-299): `kEvBlockadeStarted`, `kEvBlockadeLifted`, `kEvRouteClosed`, `kEvRouteOpened`, `kEvProvinceCaptured`. Commands: `kCmdBlockade` and `kCmdLiftBlockade` (`entity` = faction index, `a` = zone index; faction indices are positions in `WorldMap::Factions()`, sorted by id). Several layers can handle commands because `World::AddCommandHandler` appends handlers (`SetCommandHandler` still replaces them all). `Strategic::Hash()` covers all strategic state.
+
+### Layout: adding a module
+
+- Library sources: any `src/**/*.cpp` is picked up (CMake `GLOB_RECURSE ... CONFIGURE_DEPENDS`).
+- Tests: `tests/TestHarness.h` has `TEST` and `CHECK`; each module has its own `tests/<module>_tests.cpp` (all `tests/*.cpp` link into both test executables). `main.cpp` has `main()` and the core tests only.
+- Generated data: `scripts/gen-sim-data.mjs` runs every `scripts/sim-data/*.mjs` in sorted order (files starting with `_` are helpers). A section exports `output` and a default function returning the lines of `generated/<output>.inc`.
+
+| Section | Reads | Writes |
+| --- | --- | --- |
+| `scripts/sim-data/ops.mjs` | `data/units`, `data/formations`, `data/logistics` | `generated/HavocData.inc` |
+| `scripts/sim-data/world.mjs` | `data/world`, `data/factions` | `generated/World.inc` |
+
 ### Game data in the sim
 
-The sim does not parse JSON. `scripts/gen-sim-data.mjs` turns `data/units`, `data/formations` and `data/logistics` into `generated/HavocData.inc` (integer thousandths, no floats). After changing those data files run:
+The sim does not parse JSON. `scripts/gen-sim-data.mjs` turns the data folders above into `generated/*.inc` (integer thousandths, no floats). After changing those data files run:
 
 ```
 npm run sim:gen
 ```
 
-`npm run sim:test` (and CI) fails if the generated file is out of date.
+`npm run sim:test` (and CI) fails if any generated file is out of date.
