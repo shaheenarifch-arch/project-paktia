@@ -27,3 +27,7 @@ Or `npm run sim:test` from the repo root. Warnings are errors (`-Wall -Wextra -W
 - CMake documentation: https://cmake.org/cmake/help/latest/
 - CMake tutorial: https://cmake.org/cmake/help/latest/guide/tutorial/index.html
 - CTest: https://cmake.org/cmake/help/latest/manual/ctest.1.html
+
+## Compilers
+
+GCC and Clang use the built-in `__int128` for fixed-point multiply and divide. MSVC (Unreal on Windows) has no `__int128`, so `Fixed.h` falls back to a portable 128-bit path that gives bit-identical results. The `havoc_sim_tests_portable` test runs every test on that path (via `HAVOC_FORCE_PORTABLE_I128`), and `fixed_math_golden` checks both paths against one checksum.

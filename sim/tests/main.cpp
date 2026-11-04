@@ -58,6 +58,29 @@ TEST(fixed_rounding) {
   CHECK(Fixed64::FromRatio(-1, 3).raw == -t.raw);
 }
 
+// Golden checksum over mixed-sign multiply/divide/ratio results. The same test
+// runs in havoc_sim_tests_portable (no __int128), so both code paths must agree
+// bit for bit with this constant.
+TEST(fixed_math_golden) {
+  Pcg32 rng(20261104);
+  std::uint64_t h = 1469598103934665603ull;
+  auto mix = [&h](std::int64_t v) { h ^= static_cast<std::uint64_t>(v); h *= 1099511628211ull; };
+  auto next64 = [&rng]() {
+    const std::uint64_t hi = rng.NextU32(), lo = rng.NextU32();
+    return static_cast<std::int64_t>((hi << 32) | lo);
+  };
+  for (int i = 0; i < 200000; ++i) {
+    std::int64_t a = next64(), b = next64();
+    if (i % 3 == 0) b >>= 20;  // include small magnitudes
+    if (i % 5 == 0) a >>= 33;
+    mix((Fixed64::FromRaw(a) * Fixed64::FromRaw(b)).raw);
+    if (b != 0) mix((Fixed64::FromRaw(a) / Fixed64::FromRaw(b)).raw);
+    if (b != 0) mix(Fixed64::FromRatio(a >> 31, b).raw);
+  }
+  std::printf("    golden=%llu\n", static_cast<unsigned long long>(h));
+  CHECK(h == 8738330279699673661ull);
+}
+
 TEST(rng_same_seed_same_sequence) {
   Pcg32 a(12345), b(12345), c(54321);
   bool differs = false;
