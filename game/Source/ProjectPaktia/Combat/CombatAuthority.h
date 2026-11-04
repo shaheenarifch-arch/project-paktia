@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 // Design contract for the Unreal implementation.
 // The dedicated server owns damage, health, ammunition, weapon state,
 // objective state, vehicle state, aircraft state, rewards, and match result.
@@ -8,8 +10,8 @@ namespace ProjectPaktia
 {
     struct FFireIntent
     {
-        long long InputSequence;
-        int WeaponSlot;
+        int64 InputSequence;
+        int32 WeaponSlot;
         float AimYaw;
         float AimPitch;
     };
