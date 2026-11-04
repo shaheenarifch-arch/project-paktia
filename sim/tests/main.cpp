@@ -1,5 +1,6 @@
 // Self-contained mini test runner (no external framework).
 #include <cstdio>
+#include <limits>
 #include <functional>
 #include <string>
 #include <vector>
@@ -160,6 +161,8 @@ TEST(replay_matches) {
 }
 
 }  // namespace
+
+#include "ops_tests.inc"
 
 int main() {
   for (const TestCase& t : Tests()) {

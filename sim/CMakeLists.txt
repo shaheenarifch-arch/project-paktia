@@ -9,7 +9,9 @@ add_library(havoc_sim STATIC
   src/Clock.cpp
   src/World.cpp
   src/StateHash.cpp
-  src/Replay.cpp)
+  src/Replay.cpp
+  src/ops/Data.cpp
+  src/ops/Operational.cpp)
 target_include_directories(havoc_sim PUBLIC include)
 
 add_executable(havoc_sim_tests tests/main.cpp)

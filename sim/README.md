@@ -31,3 +31,25 @@ Or `npm run sim:test` from the repo root. Warnings are errors (`-Wall -Wextra -W
 ## Compilers
 
 GCC and Clang use the built-in `__int128` for fixed-point multiply and divide. MSVC (Unreal on Windows) has no `__int128`, so `Fixed.h` falls back to a portable 128-bit path that gives bit-identical results. The `havoc_sim_tests_portable` test runs every test on that path (via `HAVOC_FORCE_PORTABLE_I128`), and `fixed_math_golden` checks both paths against one checksum.
+
+## Operational layer (v1)
+
+`include/havoc/ops/` holds the first gameplay layer on the core: one theater of brigades, depots and supply routes, stepped once per game-hour on the World's operational tick (`Theater::Attach`).
+
+| Piece | What it does |
+| --- | --- |
+| `Data.h` | Unit and formation definitions compiled in from `data/` (see below). |
+| `Operational.h` | `Theater` with nodes, routes and brigades; supply by class (fuel, ammunition, spares, food/water, medical); consumption by posture; resupply from depots along capacity-limited, interdictable routes; fatigue, morale, equipment wear, refit and readiness. |
+| `Tuning` | Every balance number in one struct, so it can move to `data/` later. |
+
+Rules from the design doc: a brigade below 60% readiness can't be ordered to attack; refit only happens on a depot; a brigade out of fuel stops moving and digs in. Commands (`kCmdSetPosture`, `kCmdMoveTo`) and events (`kEvShortage`, `kEvPostureForced`, ...) go through the World, so replays and hashes cover them.
+
+### Game data in the sim
+
+The sim does not parse JSON. `scripts/gen-sim-data.mjs` turns `data/units`, `data/formations` and `data/logistics` into `generated/HavocData.inc` (integer thousandths, no floats). After changing those data files run:
+
+```
+npm run sim:gen
+```
+
+`npm run sim:test` (and CI) fails if the generated file is out of date.
