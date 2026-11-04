@@ -1,0 +1,20 @@
+{
+  "id": "iran",
+  "name": "Iran",
+  "setting": "real_world_hypothetical",
+  "fictional": false,
+  "playable": true,
+  "doctrine": "Layered defense using coastal missiles, littoral swarms, drones and electronic warfare.",
+  "strengths": [
+    "Coastal anti-ship missiles",
+    "Littoral swarm tactics",
+    "Strong electronic warfare",
+    "Defensive depth at home"
+  ],
+  "weaknesses": [
+    "Limited air power",
+    "Dated armor and aircraft",
+    "Sanctions-limited industry"
+  ],
+  "aiProfile": "ai_iran_layered_defense"
+}

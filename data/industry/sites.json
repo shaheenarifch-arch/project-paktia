@@ -1,0 +1,152 @@
+{
+  "sites": [
+    {
+      "id": "oil_field",
+      "name": "Oil field",
+      "inputsPerDay": {},
+      "outputsPerDay": {
+        "crude_oil": 500
+      }
+    },
+    {
+      "id": "mine",
+      "name": "Mine",
+      "inputsPerDay": {
+        "refined_fuel": 20
+      },
+      "outputsPerDay": {
+        "iron_ore": 120,
+        "coal": 80,
+        "rare_earths": 6
+      }
+    },
+    {
+      "id": "refinery",
+      "name": "Refinery",
+      "inputsPerDay": {
+        "crude_oil": 200
+      },
+      "outputsPerDay": {
+        "refined_fuel": 150,
+        "chemicals": 30
+      }
+    },
+    {
+      "id": "steel_mill",
+      "name": "Steel mill",
+      "inputsPerDay": {
+        "iron_ore": 100,
+        "coal": 40,
+        "refined_fuel": 5
+      },
+      "outputsPerDay": {
+        "steel": 80
+      }
+    },
+    {
+      "id": "electronics_plant",
+      "name": "Electronics plant",
+      "inputsPerDay": {
+        "rare_earths": 4,
+        "steel": 5
+      },
+      "outputsPerDay": {
+        "electronic_parts": 40
+      }
+    },
+    {
+      "id": "munitions_plant",
+      "name": "Munitions plant",
+      "inputsPerDay": {
+        "steel": 20,
+        "chemicals": 20,
+        "electronic_parts": 4
+      },
+      "outputsPerDay": {
+        "ammo_small_arms": 60,
+        "ammo_tank_shell": 20,
+        "ammo_artillery": 20,
+        "ammo_rocket": 15,
+        "ammo_missile_at": 6,
+        "ammo_missile_aa": 6,
+        "ammo_missile_ship": 2,
+        "ammo_air_ordnance": 6,
+        "ammo_naval_gun": 8
+      }
+    },
+    {
+      "id": "vehicle_plant",
+      "name": "Vehicle plant",
+      "inputsPerDay": {
+        "steel": 40,
+        "electronic_parts": 10,
+        "rare_earths": 2
+      },
+      "outputsPerDay": {
+        "vehicle_chassis": 4,
+        "engine": 4,
+        "armor_plating": 3,
+        "turret": 2,
+        "gun_system": 3,
+        "rocket_launcher": 1,
+        "missile_launcher": 1,
+        "small_arms_kit": 20,
+        "optics_set": 3,
+        "comms_set": 4
+      }
+    },
+    {
+      "id": "aircraft_plant",
+      "name": "Aircraft plant",
+      "inputsPerDay": {
+        "steel": 30,
+        "electronic_parts": 15,
+        "rare_earths": 6
+      },
+      "outputsPerDay": {
+        "airframe": 1,
+        "rotor_set": 1,
+        "jet_engine": 1,
+        "drone_airframe": 3,
+        "electronics_suite": 2,
+        "radar_set": 1
+      }
+    },
+    {
+      "id": "shipyard",
+      "name": "Shipyard",
+      "inputsPerDay": {
+        "steel": 80,
+        "electronic_parts": 10
+      },
+      "outputsPerDay": {
+        "ship_hull": 0.2,
+        "small_craft_hull": 2
+      }
+    },
+    {
+      "id": "repair_depot",
+      "name": "Repair depot",
+      "inputsPerDay": {
+        "steel": 3,
+        "electronic_parts": 2
+      },
+      "outputsPerDay": {
+        "spare_parts": 10,
+        "repair_hours": 100
+      }
+    },
+    {
+      "id": "supply_depot",
+      "name": "Supply depot",
+      "inputsPerDay": {
+        "refined_fuel": 5
+      },
+      "outputsPerDay": {
+        "rations": 50,
+        "water": 60,
+        "medical_supplies": 10
+      }
+    }
+  ]
+}

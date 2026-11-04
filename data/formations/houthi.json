@@ -1,0 +1,33 @@
+{
+  "formations": [
+    {
+      "id": "houthi_highland_group",
+      "faction": "houthi",
+      "name": "Highland group",
+      "units": {
+        "houthi_fighter_squad": 8,
+        "houthi_tribal_militia": 4,
+        "houthi_atgm_team": 3,
+        "houthi_mortar_team": 2,
+        "houthi_technical": 4,
+        "houthi_old_tank": 2,
+        "houthi_rocket_launcher": 2,
+        "houthi_mobile_sam": 1,
+        "houthi_attack_drone": 2,
+        "houthi_supply_truck": 3
+      }
+    },
+    {
+      "id": "houthi_coastal_group",
+      "faction": "houthi",
+      "name": "Coastal group",
+      "units": {
+        "houthi_coastal_missile_battery": 1,
+        "houthi_armed_skiff": 2,
+        "houthi_fighter_squad": 3,
+        "houthi_attack_drone": 1,
+        "houthi_supply_truck": 1
+      }
+    }
+  ]
+}

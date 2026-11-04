@@ -1,0 +1,49 @@
+{
+  "formations": [
+    {
+      "id": "coalition_marine_expeditionary_unit",
+      "faction": "coalition",
+      "name": "Marine Expeditionary Unit",
+      "units": {
+        "coalition_marine_rifle_squad": 12,
+        "coalition_amphibious_assault_vehicle": 6,
+        "coalition_main_battle_tank": 2,
+        "coalition_light_recon_vehicle": 2,
+        "coalition_self_propelled_howitzer": 1,
+        "coalition_air_defense_battery": 1,
+        "coalition_attack_helicopter": 2,
+        "coalition_tiltrotor_transport": 4,
+        "coalition_strike_fighter": 2,
+        "coalition_recon_uav": 2,
+        "coalition_landing_craft": 3,
+        "coalition_logistics_truck": 4
+      }
+    },
+    {
+      "id": "coalition_armored_brigade",
+      "faction": "coalition",
+      "name": "Armored brigade",
+      "units": {
+        "coalition_infantry_squad": 9,
+        "coalition_main_battle_tank": 6,
+        "coalition_ifv": 9,
+        "coalition_light_recon_vehicle": 3,
+        "coalition_self_propelled_howitzer": 3,
+        "coalition_air_defense_battery": 1,
+        "coalition_recon_uav": 2,
+        "coalition_logistics_truck": 6
+      }
+    },
+    {
+      "id": "coalition_naval_task_group",
+      "faction": "coalition",
+      "name": "Naval task group",
+      "units": {
+        "coalition_destroyer": 2,
+        "coalition_amphibious_assault_ship": 1,
+        "coalition_landing_craft": 2,
+        "coalition_recon_uav": 1
+      }
+    }
+  ]
+}

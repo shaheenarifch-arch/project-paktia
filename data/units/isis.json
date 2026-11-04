@@ -1,0 +1,181 @@
+{
+  "faction": "isis",
+  "units": [
+    {
+      "id": "isis_insurgent_cell",
+      "name": "Insurgent cell",
+      "faction": "isis",
+      "branch": "infantry",
+      "role": "irregular_infantry",
+      "echelon": "squad",
+      "crew": 6,
+      "cost_points": 5,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 6
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 8,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "isis_technical",
+      "name": "Armed technical",
+      "faction": "isis",
+      "branch": "armor",
+      "role": "irregular_mobile_fire",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 8,
+      "build_time_days": 3,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "gun_system": 1
+      },
+      "mobility": 7,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 2,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.3,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 2,
+      "stealth": 6,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "isis_mortar_team",
+      "name": "Mortar team",
+      "faction": "isis",
+      "branch": "artillery",
+      "role": "fire_support",
+      "echelon": "squad",
+      "crew": 4,
+      "cost_points": 6,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 4,
+        "gun_system": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 5,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_artillery": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 8,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "isis_supply_truck",
+      "name": "Supply truck",
+      "faction": "isis",
+      "branch": "logistics",
+      "role": "supply_transport",
+      "echelon": "section",
+      "crew": 2,
+      "cost_points": 5,
+      "build_time_days": 2,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 1,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.4,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 6,
+      "tech_requirements": [],
+      "era": "modern"
+    }
+  ]
+}

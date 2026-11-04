@@ -1,0 +1,623 @@
+{
+  "faction": "iran",
+  "units": [
+    {
+      "id": "iran_irgc_infantry_squad",
+      "name": "IRGC infantry squad",
+      "faction": "iran",
+      "branch": "infantry",
+      "role": "line_infantry",
+      "echelon": "squad",
+      "crew": 9,
+      "cost_points": 9,
+      "build_time_days": 3,
+      "components": {
+        "small_arms_kit": 9,
+        "comms_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 1,
+      "stealth": 6,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_basij_militia_squad",
+      "name": "Militia squad",
+      "faction": "iran",
+      "branch": "infantry",
+      "role": "territorial_militia",
+      "echelon": "squad",
+      "crew": 10,
+      "cost_points": 5,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 10
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_main_battle_tank",
+      "name": "Main battle tank",
+      "faction": "iran",
+      "branch": "armor",
+      "role": "heavy_armor",
+      "echelon": "platoon",
+      "crew": 4,
+      "cost_points": 85,
+      "build_time_days": 18,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 2,
+        "turret": 1,
+        "gun_system": 1,
+        "optics_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 7,
+        "side": 6,
+        "top": 4
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 8,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 5,
+        "thermal": 3,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 1.6,
+      "fuel_burn": 0.8,
+      "ammo_loadout": {
+        "ammo_tank_shell": 3,
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 7,
+      "stealth": 3,
+      "tech_requirements": [
+        "armor_doctrine"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_ifv",
+      "name": "Infantry fighting vehicle",
+      "faction": "iran",
+      "branch": "armor",
+      "role": "mechanized_transport",
+      "echelon": "platoon",
+      "crew": 3,
+      "cost_points": 50,
+      "build_time_days": 12,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 1,
+        "turret": 1,
+        "gun_system": 1,
+        "comms_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 5,
+        "side": 4,
+        "top": 3
+      },
+      "firepower": {
+        "antiInfantry": 6,
+        "antiArmor": 5,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 3,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 0.7,
+      "fuel_burn": 0.5,
+      "ammo_loadout": {
+        "ammo_tank_shell": 2,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 5,
+      "stealth": 3,
+      "tech_requirements": [
+        "mechanized_doctrine"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_light_recon_vehicle",
+      "name": "Light reconnaissance vehicle",
+      "faction": "iran",
+      "branch": "armor",
+      "role": "reconnaissance",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 28,
+      "build_time_days": 7,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "optics_set": 1,
+        "comms_set": 1,
+        "gun_system": 1
+      },
+      "mobility": 7,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 5,
+        "thermal": 3,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 2
+      },
+      "fuel_capacity": 0.4,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 3,
+      "stealth": 4,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_rocket_artillery",
+      "name": "Rocket artillery launcher",
+      "faction": "iran",
+      "branch": "artillery",
+      "role": "fire_support",
+      "echelon": "battery",
+      "crew": 4,
+      "cost_points": 65,
+      "build_time_days": 14,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "rocket_launcher": 1,
+        "comms_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 8,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 2
+      },
+      "fuel_capacity": 0.8,
+      "fuel_burn": 0.5,
+      "ammo_loadout": {
+        "ammo_rocket": 8
+      },
+      "maintenance_hours": 4,
+      "stealth": 3,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_air_defense_battery",
+      "name": "Air defense battery",
+      "faction": "iran",
+      "branch": "air_defense",
+      "role": "area_air_defense",
+      "echelon": "battery",
+      "crew": 5,
+      "cost_points": 80,
+      "build_time_days": 16,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "missile_launcher": 2,
+        "radar_set": 1,
+        "comms_set": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 7
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 7
+      },
+      "ew": {
+        "jam": 4,
+        "resist": 5
+      },
+      "fuel_capacity": 0.7,
+      "fuel_burn": 0.5,
+      "ammo_loadout": {
+        "ammo_missile_aa": 4
+      },
+      "maintenance_hours": 5,
+      "stealth": 3,
+      "tech_requirements": [
+        "integrated_air_defense"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_coastal_missile_battery",
+      "name": "Coastal anti-ship missile battery",
+      "faction": "iran",
+      "branch": "artillery",
+      "role": "coastal_defense",
+      "echelon": "battery",
+      "crew": 6,
+      "cost_points": 95,
+      "build_time_days": 20,
+      "components": {
+        "vehicle_chassis": 2,
+        "engine": 2,
+        "missile_launcher": 2,
+        "radar_set": 1,
+        "comms_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 2,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 2,
+        "radar": 7
+      },
+      "ew": {
+        "jam": 3,
+        "resist": 3
+      },
+      "fuel_capacity": 0.8,
+      "fuel_burn": 0.4,
+      "ammo_loadout": {
+        "ammo_missile_ship": 4
+      },
+      "maintenance_hours": 5,
+      "stealth": 4,
+      "tech_requirements": [
+        "coastal_defense"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_fast_attack_boat_group",
+      "name": "Fast attack boat group",
+      "faction": "iran",
+      "branch": "naval",
+      "role": "littoral_swarm",
+      "echelon": "flotilla",
+      "crew": 24,
+      "cost_points": 70,
+      "build_time_days": 14,
+      "components": {
+        "small_craft_hull": 4,
+        "engine": 4,
+        "missile_launcher": 2,
+        "comms_set": 2
+      },
+      "mobility": 8,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 6,
+        "antiAir": 2
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 3
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 2
+      },
+      "fuel_capacity": 10,
+      "fuel_burn": 6,
+      "ammo_loadout": {
+        "ammo_missile_ship": 2,
+        "ammo_naval_gun": 2,
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 6,
+      "stealth": 4,
+      "tech_requirements": [
+        "littoral_swarm"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_fighter",
+      "name": "Fighter aircraft",
+      "faction": "iran",
+      "branch": "air",
+      "role": "air_superiority_strike",
+      "echelon": "flight",
+      "crew": 1,
+      "cost_points": 90,
+      "build_time_days": 24,
+      "components": {
+        "airframe": 1,
+        "jet_engine": 1,
+        "radar_set": 1,
+        "electronics_suite": 1,
+        "missile_launcher": 1
+      },
+      "mobility": 9,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 6,
+        "antiAir": 6
+      },
+      "sensors": {
+        "optics": 5,
+        "thermal": 5,
+        "radar": 6
+      },
+      "ew": {
+        "jam": 3,
+        "resist": 3
+      },
+      "fuel_capacity": 3,
+      "fuel_burn": 2.5,
+      "ammo_loadout": {
+        "ammo_air_ordnance": 2,
+        "ammo_missile_aa": 2
+      },
+      "maintenance_hours": 12,
+      "stealth": 3,
+      "tech_requirements": [
+        "fixed_wing"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_attack_drone",
+      "name": "Attack drone",
+      "faction": "iran",
+      "branch": "air",
+      "role": "loitering_strike",
+      "echelon": "flight",
+      "crew": 0,
+      "cost_points": 20,
+      "build_time_days": 6,
+      "components": {
+        "drone_airframe": 1,
+        "electronics_suite": 1
+      },
+      "mobility": 6,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 5,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0.2,
+      "fuel_burn": 0.2,
+      "ammo_loadout": {
+        "ammo_air_ordnance": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 6,
+      "tech_requirements": [
+        "unmanned_systems"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_ew_truck",
+      "name": "Electronic warfare truck",
+      "faction": "iran",
+      "branch": "logistics",
+      "role": "electronic_warfare",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 45,
+      "build_time_days": 10,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "electronics_suite": 2,
+        "comms_set": 2
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 5
+      },
+      "ew": {
+        "jam": 8,
+        "resist": 6
+      },
+      "fuel_capacity": 0.5,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {},
+      "maintenance_hours": 4,
+      "stealth": 4,
+      "tech_requirements": [
+        "electronic_warfare"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_logistics_truck",
+      "name": "Logistics truck",
+      "faction": "iran",
+      "branch": "logistics",
+      "role": "supply_transport",
+      "echelon": "section",
+      "crew": 2,
+      "cost_points": 14,
+      "build_time_days": 5,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "comms_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.5,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 3,
+      "tech_requirements": [],
+      "era": "modern"
+    }
+  ]
+}

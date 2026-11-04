@@ -28,6 +28,13 @@ Episode 4 (*Operation Open Strait*) is a **real-world hypothetical**: a future s
 - it doesn't name or depict real people
 - equipment stays the game's fictional kit
 
+The strategy-layer data (`data/factions/`, `units/`, `formations/`, `logistics/`, `industry/`) uses the same declared `"setting": "real_world_hypothetical"` with `"fictional": false`. Its content boundary:
+- real factions (a US-led coalition, Iran, Houthi forces, ISIS) appear only as game adversaries or participants, not as real events
+- no real people, commanders or specific attacks
+- no real-world weapon, attack, targeting or building instructions; ratings are 1–10 game-balance values, never real performance figures, and unit names are generic classes
+- ISIS is AI-only and never `playable`; the validator enforces this
+- nuclear weapons appear only as a strategic deterrence event, never as a usable unit or system
+
 Operation Midnight Havoc does not recreate real militant organizations, real commanders, or specific attacks. Game data describes balance and simulation behavior, not real-world weapon operation.
 
 The Aegis feature is deliberately an abstract game-support workflow. It contains no real-world targeting, guidance, propulsion, or weapons engineering logic.

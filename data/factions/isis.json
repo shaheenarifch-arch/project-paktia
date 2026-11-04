@@ -1,0 +1,18 @@
+{
+  "id": "isis",
+  "name": "ISIS",
+  "setting": "real_world_hypothetical",
+  "fictional": false,
+  "playable": false,
+  "doctrine": "AI-only insurgent cell network that harasses and raids; never player-controlled.",
+  "strengths": [
+    "Dispersion and concealment",
+    "Hard to find and fix"
+  ],
+  "weaknesses": [
+    "No heavy equipment",
+    "Tiny logistics base",
+    "Poor sensors"
+  ],
+  "aiProfile": "ai_insurgent_cells"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "houthi",
+  "name": "Houthi forces",
+  "setting": "real_world_hypothetical",
+  "fictional": false,
+  "playable": true,
+  "backedBy": "iran",
+  "doctrine": "Irregular highland defense backed by Iranian drones and coastal missiles.",
+  "strengths": [
+    "Rugged terrain knowledge",
+    "Cheap drones and rockets",
+    "Low-signature dispersed units"
+  ],
+  "weaknesses": [
+    "Minimal armor and air defense",
+    "Fragile supply",
+    "Little industrial base"
+  ],
+  "aiProfile": "ai_houthi_highland_irregular"
+}
