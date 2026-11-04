@@ -1,0 +1,114 @@
+{
+  "resources": [
+    {
+      "id": "crude_oil",
+      "name": "Crude oil",
+      "unit": "kilolitre"
+    },
+    {
+      "id": "iron_ore",
+      "name": "Iron ore",
+      "unit": "tonne"
+    },
+    {
+      "id": "coal",
+      "name": "Coal",
+      "unit": "tonne"
+    },
+    {
+      "id": "rare_earths",
+      "name": "Rare earths",
+      "unit": "tonne"
+    },
+    {
+      "id": "steel",
+      "name": "Steel",
+      "unit": "tonne"
+    },
+    {
+      "id": "refined_fuel",
+      "name": "Refined fuel",
+      "unit": "kilolitre"
+    },
+    {
+      "id": "chemicals",
+      "name": "Industrial chemicals",
+      "unit": "tonne"
+    },
+    {
+      "id": "electronic_parts",
+      "name": "Electronic parts",
+      "unit": "crate"
+    },
+    {
+      "id": "spare_parts",
+      "name": "Spare parts",
+      "unit": "crate"
+    },
+    {
+      "id": "repair_hours",
+      "name": "Repair hours",
+      "unit": "hour"
+    },
+    {
+      "id": "rations",
+      "name": "Rations",
+      "unit": "crate"
+    },
+    {
+      "id": "water",
+      "name": "Potable water",
+      "unit": "kilolitre"
+    },
+    {
+      "id": "medical_supplies",
+      "name": "Medical supplies",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_small_arms",
+      "name": "Small-arms ammunition",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_tank_shell",
+      "name": "Tank shells",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_artillery",
+      "name": "Artillery rounds",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_rocket",
+      "name": "Rockets",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_missile_at",
+      "name": "Anti-armor missiles",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_missile_aa",
+      "name": "Anti-air missiles",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_missile_ship",
+      "name": "Anti-ship missiles",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_air_ordnance",
+      "name": "Air-launched ordnance",
+      "unit": "crate"
+    },
+    {
+      "id": "ammo_naval_gun",
+      "name": "Naval gun rounds",
+      "unit": "crate"
+    }
+  ]
+}

@@ -1,0 +1,163 @@
+{
+  "components": [
+    {
+      "id": "small_arms_kit",
+      "name": "Small-arms kit",
+      "inputs": {
+        "steel": 1,
+        "chemicals": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "vehicle_chassis",
+      "name": "Vehicle chassis",
+      "inputs": {
+        "steel": 6
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "engine",
+      "name": "Engine",
+      "inputs": {
+        "steel": 3,
+        "electronic_parts": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "armor_plating",
+      "name": "Armor plating",
+      "inputs": {
+        "steel": 8,
+        "rare_earths": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "turret",
+      "name": "Turret",
+      "inputs": {
+        "steel": 5,
+        "electronic_parts": 2
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "gun_system",
+      "name": "Gun system",
+      "inputs": {
+        "steel": 4,
+        "chemicals": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "rocket_launcher",
+      "name": "Rocket launcher",
+      "inputs": {
+        "steel": 3,
+        "electronic_parts": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "missile_launcher",
+      "name": "Missile launcher",
+      "inputs": {
+        "steel": 2,
+        "electronic_parts": 3
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "optics_set",
+      "name": "Optics set",
+      "inputs": {
+        "electronic_parts": 2,
+        "rare_earths": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "electronics_suite",
+      "name": "Electronics suite",
+      "inputs": {
+        "electronic_parts": 4,
+        "rare_earths": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "radar_set",
+      "name": "Radar set",
+      "inputs": {
+        "electronic_parts": 6,
+        "rare_earths": 2
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "comms_set",
+      "name": "Comms set",
+      "inputs": {
+        "electronic_parts": 2
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "airframe",
+      "name": "Airframe",
+      "inputs": {
+        "steel": 6,
+        "rare_earths": 2
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "rotor_set",
+      "name": "Rotor set",
+      "inputs": {
+        "steel": 3,
+        "rare_earths": 1
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "jet_engine",
+      "name": "Jet engine",
+      "inputs": {
+        "steel": 5,
+        "rare_earths": 3,
+        "electronic_parts": 2
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "drone_airframe",
+      "name": "Drone airframe",
+      "inputs": {
+        "steel": 1,
+        "electronic_parts": 2
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "ship_hull",
+      "name": "Ship hull",
+      "inputs": {
+        "steel": 40
+      },
+      "build_hours": 12
+    },
+    {
+      "id": "small_craft_hull",
+      "name": "Small craft hull",
+      "inputs": {
+        "steel": 8
+      },
+      "build_hours": 12
+    }
+  ]
+}
