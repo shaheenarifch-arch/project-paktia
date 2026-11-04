@@ -14,7 +14,9 @@ public class ProjectPaktia : ModuleRules
                 "Engine",
                 "InputCore",
                 "EnhancedInput",
-                "NetCore"
+                "NetCore",
+                "UMG",
+                "AIModule"
             }
         );
 
