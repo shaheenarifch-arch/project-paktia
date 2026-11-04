@@ -22,11 +22,19 @@ export interface MissionStateDefinition {
   outcome?: MissionOutcome
 }
 
+/**
+ * fictional: invented places and factions (Gardun, Episodes 1-3).
+ * real_world_hypothetical: real places and nations in an invented future
+ * scenario. Never a reconstruction of a real event, never real named people.
+ */
+export type MissionSetting = 'fictional' | 'real_world_hypothetical'
+
 export interface MissionDefinition {
   id: string
   episode: number
   name: string
-  fictional: true
+  fictional: boolean
+  setting?: MissionSetting
   map: string
   sectors: readonly string[]
   start: string
@@ -41,7 +49,10 @@ export function parseMissionDefinition(raw: unknown, knownSectors?: readonly str
   const problems: string[] = []
   const def = raw as Partial<MissionDefinition>
   if (!def || typeof def !== 'object') throw new Error('Mission definition must be an object')
-  if (def.fictional !== true) problems.push('mission must be marked fictional')
+  const setting = def.setting ?? 'fictional'
+  if (setting === 'fictional' && def.fictional !== true) problems.push('mission must be marked fictional')
+  if (setting === 'real_world_hypothetical' && def.fictional !== false) problems.push('a real-world hypothetical mission must set fictional: false')
+  if (!['fictional', 'real_world_hypothetical'].includes(setting)) problems.push(`unknown setting ${String(setting)}`)
   for (const key of ['id', 'name', 'map', 'start'] as const) if (typeof def[key] !== 'string' || !def[key]) problems.push(`missing ${key}`)
   if (typeof def.episode !== 'number') problems.push('missing episode number')
   if (!Array.isArray(def.states) || !def.states.length) problems.push('mission needs states')
