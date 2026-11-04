@@ -1,6 +1,6 @@
-# Project Paktia
+# Operation Midnight Havoc
 
-Project Paktia is a fictional combined-arms game vertical slice set in the fictional city of Gardun in the Paktia Highlands.
+Operation Midnight Havoc is a fictional combined-arms game vertical slice set in the fictional city of Gardun in the Paktia Highlands.
 
 ## Vertical-slice target
 
@@ -28,7 +28,7 @@ Episode 4 (*Operation Open Strait*) is a **real-world hypothetical**: a future s
 - it doesn't name or depict real people
 - equipment stays the game's fictional kit
 
-Project Paktia does not recreate real militant organizations, real commanders, or specific attacks. Game data describes balance and simulation behavior, not real-world weapon operation.
+Operation Midnight Havoc does not recreate real militant organizations, real commanders, or specific attacks. Game data describes balance and simulation behavior, not real-world weapon operation.
 
 The Aegis feature is deliberately an abstract game-support workflow. It contains no real-world targeting, guidance, propulsion, or weapons engineering logic.
 
@@ -54,7 +54,7 @@ Cloudflare is used for edge-facing services, account APIs, assets, queues, and a
 
 - `src/`: engine-agnostic TypeScript gameplay domain layer (drones, intelligence, Aegis support, tactical command, aircraft, telemetry), the campaign (Mission 01: Operation Mountain Shield, Episode 02: Operation Silent Corridor, Episode 03: Operation Broken Citadel) on a data-driven mission framework, and its tests
 - `ui/`: Vite tactical-command UI prototype
-- `game/`: Unreal project source and design contracts (`game/Source/ProjectPaktia/Combat/CombatAuthority.h`)
+- `game/`: Unreal project source and design contracts (`game/Source/MidnightHavoc/Combat/CombatAuthority.h`)
 - `services/`: economy and matchmaking contracts
 - `workers/`: Cloudflare gateway and jobs Workers (`wrangler.jsonc`)
 - `data/`: versioned game definitions

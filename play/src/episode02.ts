@@ -539,7 +539,7 @@ export class SilentCorridorGame extends Battle {
       ...(d.flying ? [{ x: d.x, z: d.z, color: '#8fd3ff', size: 3 }] : [])
     ]
     return {
-      eyebrow: 'PROJECT PAKTIA // EPISODE 02', title: 'OPERATION SILENT CORRIDOR', phase: this.stepLabel(), objective: m.runner.objective, items,
+      eyebrow: 'OPERATION MIDNIGHT HAVOC // EPISODE 02', title: 'OPERATION SILENT CORRIDOR', phase: this.stepLabel(), objective: m.runner.objective, items,
       vitals: [
         veh('warden-1', 'WARDEN-1'),
         veh('nomad-1', crew ? 'NOMAD-1 · CREW' : 'NOMAD-1 · SUPPLIES'),

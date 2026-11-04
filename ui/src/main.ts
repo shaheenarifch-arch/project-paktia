@@ -5,7 +5,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
   <header>
     <div>
-      <div class="eyebrow">PROJECT PAKTIA // TACTICAL COMMAND</div>
+      <div class="eyebrow">OPERATION MIDNIGHT HAVOC // TACTICAL COMMAND</div>
       <h1>OPERATION MOUNTAIN SHIELD</h1>
     </div>
     <div class="mission">
