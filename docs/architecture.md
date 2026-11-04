@@ -1,4 +1,4 @@
-# Project Paktia Architecture
+# Operation Midnight Havoc Architecture
 
 ## Control plane
 

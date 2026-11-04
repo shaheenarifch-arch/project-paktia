@@ -1,4 +1,4 @@
-name: Validate Project Paktia
+name: Validate Operation Midnight Havoc
 
 on:
   pull_request:

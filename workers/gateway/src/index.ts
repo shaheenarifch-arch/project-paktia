@@ -29,7 +29,7 @@ export default {
 
     if (request.method === "GET" && url.pathname === "/api/v1/game/config") {
       return json({
-        game: "Project Paktia",
+        game: "Operation Midnight Havoc",
         map: "gardun_city",
         mode: "stronghold_assault",
         version: env.PUBLIC_GAME_VERSION
