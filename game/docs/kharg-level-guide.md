@@ -6,6 +6,21 @@ This is a hypothetical scenario on real geography (`real_world_hypothetical`). T
 
 Official docs home: <https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-5-documentation>
 
+## Fastest way: run the script (manual steps below are the fallback)
+
+`Content/Python/build_kharg_level.py` builds `Content/Maps/Kharg/L_KhargHormuz` in one run: World Partition level, Water Body Ocean and Water Zone, sun/sky/fog with Lumen, all 8 sector volumes, 4 terminal parts, 7 lane hazards, 2 tanker splines, player starts on the north and west beaches, and the level director. Positions live in the script's `LAYOUT` table, checked against the sector ids in `data/maps/kharg-hormuz.json` (the script stops if they disagree).
+
+1. Open the project once so the **Python Editor Script Plugin** (already enabled in `MidnightHavoc.uproject`) loads, and build the C++ classes. Docs: <https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python>
+2. **Heightmap.** The PNG is not committed. On any machine with Python 3 run:
+   `python -m pip install rasterio numpy pillow` then `python game/Content/Python/make_kharg_heightmap.py --download`
+   It writes `Content/Maps/Kharg/Source/kharg_heightmap_r16.png` from Copernicus DEM GLO-30 (source and licence are in `Content/Maps/Kharg/SOURCES.txt`). Prefer your own DEM (for example SRTM)? Use `--dem file.tif`, or drop any 2017 x 2017 16-bit PNG at that path (sea level = 32768). Format notes: <https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-technical-guide-in-unreal-engine>
+3. **Art.** The script reads soft asset paths from `Content/Fab/fab_manifest.json` (the Fab manifest, plan item 3). If an asset is not imported yet, the script logs a warning naming the Fab pack and skips it (no grey boxes). Import the pack from `Window > Fab` and re-run. Docs: <https://dev.epicgames.com/documentation/en-us/fab/using-fab-in-unreal-engine>
+4. **Run it.** In the editor: `Tools > Execute Python Script...` and pick the file, or in the Output Log type `py "<project>/Content/Python/build_kharg_level.py"`. Headless on Windows: `game/scripts/run-build-kharg-level.ps1` (optional; set `-EngineDir` if UE is not in the default folder). Command line help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/command-line-arguments-in-unreal-engine>
+5. **Re-running is safe.** Everything the script spawns is tagged `HavocKhargBuilder` and is deleted and rebuilt on each run. Actors you placed by hand are kept.
+6. Read the Output Log for `[KhargBuilder]` lines. Warnings tell you what to finish by hand. Then go to Step 9 and press Play.
+
+Known limit: Unreal's Python API cannot create a Landscape in every 5.5 build (not verified on this repo's CI, which cannot run Unreal). If the log says "Landscape not created by script", do Step 3 by hand using the heightmap from step 2 above (Scale XY about 992, Z 100). The rest of the level is still built. Steps 1 to 8 below describe what the script does and are the manual fallback.
+
 ## Before you start
 
 - Install UE 5.5 from the Epic Games Launcher: <https://dev.epicgames.com/documentation/en-us/unreal-engine/installing-unreal-engine>

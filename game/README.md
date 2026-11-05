@@ -89,6 +89,13 @@ Episode 04 (`episode_04_open_strait`) starts as a `UHavocOpenStraitMission`
 functions (`RevealHazards`, `ClearHazard`, `DamageTerminal`, `DamageTanker`, `SpendReinforcements`, ...).
 Branch order in `GetChoices()` relies on `TMap` keeping JSON insertion order.
 
+## Building the Kharg level
+
+Run `Content/Python/build_kharg_level.py` (editor: `Tools > Execute Python Script...`, or headless with
+`scripts/run-build-kharg-level.ps1`) to build `Content/Maps/Kharg/L_KhargHormuz`. Make the heightmap first with
+`Content/Python/make_kharg_heightmap.py`. Full steps and the manual fallback: `docs/kharg-level-guide.md`.
+Python scripting help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python>
+
 ## Running tests
 
 The tests in `Source/MidnightHavoc/Tests/` are Unreal Automation Tests
