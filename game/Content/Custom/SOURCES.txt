@@ -1,0 +1,19 @@
+Havoc custom models: texture sources and licences
+=================================================
+All textures are real photo-scanned PBR materials (diffuse, GL normal, roughness, 1k JPG),
+downloaded by tools/blender/havoc_common.py from the Poly Haven API. No drawn, flat-colour or
+placeholder art. Poly Haven licence: CC0 1.0 (public domain), https://polyhaven.com/license
+Megascans surfaces from Shaheen's Fab library are permitted too but none are used yet; add a
+row here (id, Fab link, licence) before using one.
+
+Role     Poly Haven asset                                        Licence  Used by
+-------  ------------------------------------------------------  -------  ------------------------------
+paint    green_metal_rust  https://polyhaven.com/a/green_metal_rust   CC0      body panels, hulls
+rust     rusty_metal_02    https://polyhaven.com/a/rusty_metal_02     CC0      barrels, tubes, pipes, bundle
+plate    metal_plate       https://polyhaven.com/a/metal_plate        CC0      shields, cradles, wheels hubs
+rubber   asphalt_02        https://polyhaven.com/a/asphalt_02         CC0      tyres and tracks
+sand     sand_01           https://polyhaven.com/a/sand_01            CC0      IED dirt mound
+rock     rock_boulder_dry  https://polyhaven.com/a/rock_boulder_dry   CC0      IED rock
+
+Texture files are copied into each model folder (and cached in Content/Custom/_textures/) when the
+Blender scripts run. Credits: see each Poly Haven page for the scanning artists.
