@@ -52,12 +52,39 @@ redistribution of the raw assets). Read each listing's licence box.
 | Weapons | [Weapon FX (muzzle flash, tracers, impacts)](https://www.fab.com/search?q=weapon%20fx%20muzzle%20niagara%20free) | Firing feedback | `FX.Muzzle` | `Content/ThirdParty/WeaponFX` |
 | Aircraft | [Helicopter](https://www.fab.com/search?q=helicopter%20free) | Falcon helicopter | `Aircraft.Falcon` | `Content/ThirdParty/Helicopter` |
 | Vessels | [Small boats](https://www.fab.com/search?q=small%20boat%20free) | Strait traffic | `Vessel.SmallBoat` | `Content/ThirdParty/Boats` |
-| Vessels | [Oil tanker ship](https://www.fab.com/search?q=oil%20tanker%20ship%20free) | Tanker escort | `Vessel.Tanker` | `Content/ThirdParty/Boats` |
+| Vessels | Oil tanker ship: custom Blender model, see [custom-models.md](custom-models.md) | Tanker escort | `Vessel.Tanker` | `Content/Custom/OilTanker` |
 | FX | [Explosions](https://www.fab.com/search?q=explosion%20niagara%20free) | Terminal and hazard hits | `FX.Explosion.Large` | `Content/ThirdParty/VFX` |
 | FX | [Smoke and fire](https://www.fab.com/search?q=smoke%20fire%20niagara%20free) | Damage states, crash | `FX.Smoke` | `Content/ThirdParty/VFX` |
 | FX | [Water splash / ocean FX](https://www.fab.com/search?q=water%20splash%20niagara%20free) | Boats, impacts (the Water plugin already provides the sea) | `FX.Water.Splash` | `Content/ThirdParty/VFX` |
 | Audio | [Ambient sea / wind / industrial](https://www.fab.com/search?q=ambient%20sound%20sea%20wind%20free&listing_types=audio) | Level atmosphere | `Audio.Ambient.Coast` | `Content/ThirdParty/Audio/Ambient` |
 | Audio | [Weapon and explosion sounds](https://www.fab.com/search?q=weapon%20sound%20effects%20free&listing_types=audio) | Gunfire and blasts | `Audio.Weapon.Rifle`, `Audio.Explosion` | `Content/ThirdParty/Audio/Weapons` |
+
+## Packs added 2026-11-04
+
+Search links (like the table above) so they never go stale; pick the listing with the exact name.
+Licence column: **Personal** = free Personal licence (named in the request); the others were not
+specified, so check the licence box on the listing and update the cell.
+
+| Group | Pack to find | Role key | Licence | Target folder |
+| --- | --- | --- | --- | --- |
+| Drone | [Free Military Drone: Full Pack](https://www.fab.com/search?q=Free%20Military%20Drone%20Full%20Pack) (alt: [Military Drone, VGDC](https://www.fab.com/search?q=Military%20Drone%20VGDC)) | `Drone.Raven` | check listing | `Content/ThirdParty/Drones/MilitaryDroneFull` |
+| Drone | [Drone UAV wing desert camo](https://www.fab.com/search?q=Drone%20UAV%20wing%20desert%20camo) | `Drone.Warden` | check listing | `Content/ThirdParty/Drones/UAVWingDesert` |
+| Drone | [Kamikaze Drones - PolyPack Starter](https://www.fab.com/search?q=Kamikaze%20Drones%20PolyPack%20Starter) | `Drone.Talon` | check listing | `Content/ThirdParty/Drones/KamikazeDronesStarter` |
+| Weapon | [Cruise Missile PBR (UE5 Sample)](https://www.fab.com/search?q=Cruise%20Missile%20PBR%20UE5%20Sample) | `Weapon.Missile` | check listing | `Content/ThirdParty/Weapons/CruiseMissile` |
+| Weapon | [PBR Game Ready RPG Launcher](https://www.fab.com/search?q=PBR%20Game%20Ready%20RPG%20Launcher) | `Weapon.Launcher` | check listing | `Content/ThirdParty/Weapons/RPGLauncher` |
+| Vehicle | [Tank Challenger](https://www.fab.com/search?q=Tank%20Challenger) | `Vehicle.Tank.Coalition` | check listing | `Content/ThirdParty/Vehicles/TankChallenger` |
+| Weapon | [MK2 Frag Grenade (rigged)](https://www.fab.com/search?q=MK2%20Frag%20Grenade%20rigged) | `Weapon.Grenade` | check listing | `Content/ThirdParty/Weapons/MK2Grenade` |
+| Weapon | [Pistol 9mm Custom](https://www.fab.com/search?q=Pistol%209mm%20Custom) | `Weapon.Pistol` | Personal | `Content/ThirdParty/Weapons/Pistol9mm` |
+| Weapon | [Weapon Pack 03 (Animated Revolver Handgun)](https://www.fab.com/search?q=Weapon%20Pack%2003%20Animated%20Revolver%20Handgun) | `Weapon.Revolver` | check listing | `Content/ThirdParty/Weapons/WeaponPack03` |
+
+Other packs on the free **Personal** licence: Rock Environment Pack, Soviet Assault Rifle,
+Perfect Fire VFX, Procedural Wind (and Pistol 9mm Custom above). Personal licence means personal,
+non-commercial use; check Fab's licence terms before shipping a commercial build.
+
+## Custom models
+
+Built from Blender scripts, not downloaded: `Vehicle.MRL.Enemy`, `Vehicle.Artillery`,
+`Vehicle.Tank.Enemy`, `Props.IED`, `Vessel.Tanker`. See [custom-models.md](custom-models.md).
 
 ## Rules
 
