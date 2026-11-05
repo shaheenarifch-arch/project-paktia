@@ -6,6 +6,10 @@ public class MidnightHavoc : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
+        // Resolve "Folder/File.h" style includes (e.g. "Aircraft/HavocAircraftTypes.h")
+        // from the module root, since headers are not split into Public/ and Private/.
+        PublicIncludePaths.Add(ModuleDirectory);
+
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
