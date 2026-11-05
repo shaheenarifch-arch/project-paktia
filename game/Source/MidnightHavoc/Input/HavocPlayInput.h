@@ -6,7 +6,7 @@
 // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/enhanced-input-in-unreal-engine
 //
 // Contexts: Meta (always on: pause, beach choice, drone/Falcon calls, interact, return),
-//           Foot (Marine), Drone (Raven), Falcon.
+//           Foot (Marine), Drone (Raven), Falcon, Vehicle (boat, ground vehicle, helicopter, recon drone).
 // Keys are listed in game/README.md "How to play".
 
 #include "CoreMinimal.h"
@@ -30,6 +30,7 @@ public:
     UPROPERTY() TObjectPtr<UInputMappingContext> FootContext;
     UPROPERTY() TObjectPtr<UInputMappingContext> DroneContext;
     UPROPERTY() TObjectPtr<UInputMappingContext> FalconContext;
+    UPROPERTY() TObjectPtr<UInputMappingContext> VehicleContext;
 
     // ---- Meta actions (bound on the player controller) ----
     UPROPERTY() TObjectPtr<UInputAction> PauseAction;
@@ -39,6 +40,8 @@ public:
     UPROPERTY() TObjectPtr<UInputAction> DeployRavenAction;
     UPROPERTY() TObjectPtr<UInputAction> CallFalconAction;
     UPROPERTY() TObjectPtr<UInputAction> ReturnAction;
+    /** F: get into the nearest vehicle, or out of the one being driven. */
+    UPROPERTY() TObjectPtr<UInputAction> VehicleAction;
 
     // ---- On foot ----
     UPROPERTY() TObjectPtr<UInputAction> MoveAction;
@@ -52,6 +55,10 @@ public:
 
     // ---- Raven (also uses MoveAction / LookAction) ----
     UPROPERTY() TObjectPtr<UInputAction> RiseAction;
+
+    // ---- Vehicles (also use LookAction and RiseAction) ----
+    UPROPERTY() TObjectPtr<UInputAction> ThrottleAction;
+    UPROPERTY() TObjectPtr<UInputAction> SteerAction;
 
     // ---- Falcon (assigned to AHavocFalconHelicopter's properties) ----
     UPROPERTY() TObjectPtr<UInputAction> CollectiveAction;

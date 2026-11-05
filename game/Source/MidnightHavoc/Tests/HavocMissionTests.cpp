@@ -22,7 +22,7 @@
 #include "Missions/Episode04/HavocShippingLanes.h"
 #include "Missions/Episode04/HavocTankerEscort.h"
 
-#define HAVOC_TEST_FLAGS (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+#define HAVOC_TEST_FLAGS (EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 namespace HavocMissionTests
 {

@@ -365,9 +365,9 @@ void AHavocDrone::ScanForDetectables()
         Json->SetStringField(TEXT("classification"), Hit.Classification);
         PublishEvent(TEXT("drone:detected"), HavocMissionJson::ToString(Json));
 
-        if (AActor* Owner = Owners.FindRef(Hit.Id).Get())
+        if (AActor* HitOwner = Owners.FindRef(Hit.Id).Get())
         {
-            if (IHavocDroneDetectable* Detectable = Cast<IHavocDroneDetectable>(Owner))
+            if (IHavocDroneDetectable* Detectable = Cast<IHavocDroneDetectable>(HitOwner))
             {
                 Detectable->OnDetectedByDrone(DroneName);
             }

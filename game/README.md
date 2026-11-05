@@ -26,11 +26,11 @@ Folders are under `Source/MidnightHavoc/`.
 | `Core/` | `UHavocEventSubsystem` | `src/core/EventBus.ts` |
 | `Missions/` | `UHavocMissionSubsystem`, `UHavocMissionRunner`, `IHavocMissionSystems` | `src/gameplay/missions/framework/MissionRunner.ts` |
 | `Missions/Episode04/` | `UHavocOpenStraitMission`, `UHavocOilTerminal`, `UHavocShippingLanes`, `UHavocTankerEscort` | `src/gameplay/missions/episode04/` (OpenStrait, OilTerminal, ShippingLanes, TankerEscort) |
-| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.AI.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
+| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
 | `Drones/` | `AHavocDrone` (Raven, Warden, Talon subclasses), `IHavocDroneDetectable` | `src/gameplay/drones/` (DroneBase, DroneFlightController, DroneBattery, DroneSignalManager, DroneSensor, DroneCamera) |
 | `Aircraft/` | `AHavocFalconHelicopter`, `UHavocCrashSequence` | `src/gameplay/aircraft/` (HelicopterController, HelicopterDamageState, CrewState, HelicopterCrashController) |
-| `Vehicles/` | `AHavocVehicleBase` | `data/vehicles/` (Warden, Nomad) |
+| `Vehicles/` | `AHavocVehicleBase`, `AHavocBoatVehicle`, `AHavocGroundVehicle`, `AHavocHelicopterVehicle`, `AHavocDroneVehicle` (see `docs/vehicles.md`) | `data/vehicles/` (stats, seats) |
 | `TacticalUI/` | `UHavocTacticalHUD` (see `docs/hud-guide.md`) | `src/gameplay/command/TacticalMap.ts` |
 | `World/` | `AHavocLevelDirector`, `AHavocSectorVolume`, `AHavocTerminalPart`, `AHavocLaneHazard`, `AHavocTankerSpline` (see `docs/kharg-level-guide.md`) | `data/maps/kharg-hormuz.json`, Episode 04 rules |
 | `AI/` | `AHavocAIController` (perception, patrol / cover / engage / search / fallback), `AHavocEnemyCharacter` (Iran, Houthi, ISIS opposing and coalition allied units; AI-only), `UHavocSquadSubsystem` + `HavocSquadLogic.h` (squad patrol / engage / fallback), `UHavocEnvQueryTest_Cover` (EQS cover); see `docs/ai.md` | `data/units/` (game-balance ratings only), `data/ai/squad-behaviour.json` (squad tuning and phase deployments) |
@@ -126,6 +126,7 @@ shows the outcome, terminal integrity, tankers through/lost and supply flow.
 | G | Call Falcon support (tanker escort, after the airstrip is secured) |
 | Space, W / A / S / D, Q / E | Falcon: collective, cyclic tilt, yaw |
 | Tab | Return to the Marine from the Raven or the Falcon |
+| F | Get into the nearest vehicle (on foot, within ~4.5 m) or out of the one you drive; see `docs/vehicles.md` |
 | Esc or P | Pause menu |
 
 **The mission, step by step** (the rules and states come from `data/missions/episode-04-open-strait.json`):

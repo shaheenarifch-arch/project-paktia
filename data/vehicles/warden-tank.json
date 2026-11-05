@@ -10,5 +10,6 @@
     "repair",
     "resupply"
   ],
+  "stats": { "maxSpeed": 14, "acceleration": 5, "turnRate": 45 },
   "enabled": true
 }

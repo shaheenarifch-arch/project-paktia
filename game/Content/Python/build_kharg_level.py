@@ -60,9 +60,12 @@ PLAYER_STARTS = {  # north and west beaches
     "west_beach_1": (-225000, -30000, 300, 0), "west_beach_2": (-225000, 30000, 300, 0),
 }
 DIRECTOR_POS = (0, -330000, 300)
-# One NavMeshBoundsVolume over the island so AI squads can path (docs/ai.md). centre x, y, z and half extents, cm.
-# It spans both beaches, the airstrip, the oil terminal and the town; the Gulf and the lanes stay off the mesh.
-NAV_BOUNDS = (-60000, -90000, 0, 300000, 350000, 60000)
+VEHICLES = {  # class name -> (x, y, z, yaw); one of each playable vehicle (item 7), docs/vehicles.md. Boat sits on the sea (z = water level).
+    "HavocBoatVehicle": (0, -440000, 0, 90),
+    "HavocGroundVehicle": (90000, -360000, 300, 90),
+    "HavocHelicopterVehicle": (-90000, -360000, 300, 90),
+    "HavocDroneVehicle": (0, -320000, 300, 90),
+}
 
 # Fab manifest slots used here (item 3 may add more). Each slot: {"path": "/Game/Fab/...", "pack": "<Fab pack name>"}.
 SLOTS = {
@@ -288,6 +291,9 @@ def build_navmesh(eas):
     # A new volume's brush is a 200 cm cube (half extent 100).
     spawn(eas, cls, "NavMeshBounds_Kharg", (x, y, z), scale=(hx / 100.0, hy / 100.0, hz / 100.0))
     log("Placed NavMeshBounds_Kharg; press P in the viewport to check the green NavMesh covers the island")
+
+    for cls_name, (x, y, z, yaw) in VEHICLES.items():
+        spawn(eas, havoc(cls_name), cls_name, (x, y, z), (0, 0, yaw))
 
 
 def main():

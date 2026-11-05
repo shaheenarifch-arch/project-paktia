@@ -994,6 +994,24 @@ void AHavocEpisode04Flow::TickRecon()
     }
 }
 
+void AHavocEpisode04Flow::ChooseBeach(bool bNorth)
+{
+    if (Phase != EHavocFlowPhase::Playing || bRespawnPending)
+    {
+        return;
+    }
+    if (LastState != TEXT("E04_CHOOSE_BEACH"))
+    {
+        ShowToast(TEXT("Pick a landing beach after the Raven has scouted both beaches."), 3.f);
+        return;
+    }
+    if (UHavocOpenStraitMission* Mission = GetMission())
+    {
+        // The mission runner moves to *_LANDING; Tick sees the new state and OnEnterState lands the Marines.
+        Mission->ChooseBeach(bNorth ? TEXT("north_beach") : TEXT("west_beach"));
+    }
+}
+
 void AHavocEpisode04Flow::HandleInteract()
 {
     if (Phase != EHavocFlowPhase::Playing || bRespawnPending)

@@ -1,0 +1,10 @@
+{
+  "id": "tern_patrol_boat",
+  "name": "Tern Patrol Boat",
+  "fictional": true,
+  "class": "patrol_boat",
+  "seats": ["helm", "passenger"],
+  "systems": ["damage", "repair"],
+  "stats": { "maxSpeed": 20, "acceleration": 6, "turnRate": 40 },
+  "enabled": true
+}

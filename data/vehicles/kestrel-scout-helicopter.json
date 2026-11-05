@@ -1,0 +1,10 @@
+{
+  "id": "kestrel_scout_helicopter",
+  "name": "Kestrel Scout Helicopter",
+  "fictional": true,
+  "class": "helicopter",
+  "seats": ["pilot", "passenger"],
+  "systems": ["flight", "damage", "repair"],
+  "stats": { "maxSpeed": 45, "acceleration": 10, "turnRate": 70, "climbRate": 8 },
+  "enabled": true
+}
