@@ -6,7 +6,7 @@
 
 namespace
 {
-    UHavocOpenStraitMission* FindMission(const UWorld* World)
+    UHavocOpenStraitMission* FindHazardMission(const UWorld* World)
     {
         UHavocMissionSubsystem* Missions = World ? World->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
         return Missions ? Missions->GetOpenStrait() : nullptr;
@@ -41,7 +41,7 @@ bool AHavocLaneHazard::Reveal()
     {
         return false;
     }
-    UHavocOpenStraitMission* Mission = FindMission(GetWorld());
+    UHavocOpenStraitMission* Mission = FindHazardMission(GetWorld());
     if (!Mission)
     {
         UE_LOG(LogHavocWorld, Warning, TEXT("Lane hazard '%s': no Episode 04 mission active"), *HazardId.ToString());
@@ -64,7 +64,7 @@ bool AHavocLaneHazard::Clear()
     {
         return false;
     }
-    UHavocOpenStraitMission* Mission = FindMission(GetWorld());
+    UHavocOpenStraitMission* Mission = FindHazardMission(GetWorld());
     if (!Mission || !Mission->ClearHazard(LaneId))
     {
         return false;
