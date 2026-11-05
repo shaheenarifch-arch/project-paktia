@@ -40,6 +40,20 @@ jobs:
           -unattended -nullrhi -nosplash -log
           -ReportExportPath="%GITHUB_WORKSPACE%\out\test-report"
 
+      - name: Show test results and editor log (on failure)
+        if: failure()
+        shell: pwsh
+        run: |
+          # Prints why the headless tests failed straight into the run log (no artifact download needed).
+          # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/automation-test-framework-in-unreal-engine
+          $log = Join-Path $env:GITHUB_WORKSPACE 'game\Saved\Logs\MidnightHavoc.log'
+          if (Test-Path $log) {
+            Write-Host '--- failed tests and errors ---'
+            Select-String -Path $log -Pattern 'Result=\{(Fail|Error)\}|Error:|Fatal|Assertion failed|Unhandled' | Select-Object -Last 80 | ForEach-Object { $_.Line }
+            Write-Host '--- last 60 log lines ---'
+            Get-Content $log -Tail 60
+          } else { Write-Host "No editor log at $log" }
+
       - name: Zip the packaged build
         if: success()
         shell: pwsh
