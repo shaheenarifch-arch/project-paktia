@@ -125,13 +125,13 @@ void AHavocVehicleBase::LoadVisual()
 
 // ---------------------------------------------------------------- enter / exit
 
-bool AHavocVehicleBase::CanEnter(const AController* Controller) const
+bool AHavocVehicleBase::CanEnter(const AController* InController) const
 {
-    if (!Controller || Driver)
+    if (!InController || Driver)
     {
         return false;
     }
-    const APawn* Pawn = Controller->GetPawn();
+    const APawn* Pawn = InController->GetPawn();
     if (!Pawn || Pawn == this)
     {
         return false;
@@ -139,14 +139,14 @@ bool AHavocVehicleBase::CanEnter(const AController* Controller) const
     return FVector::DistSquared(Pawn->GetActorLocation(), GetActorLocation()) <= FMath::Square(EnterRange);
 }
 
-bool AHavocVehicleBase::Enter(AController* Controller)
+bool AHavocVehicleBase::Enter(AController* InController)
 {
-    if (!HasAuthority() || !CanEnter(Controller))
+    if (!HasAuthority() || !CanEnter(InController))
     {
         return false;
     }
-    APawn* Previous = Controller->GetPawn();
-    Driver = Controller;
+    APawn* Previous = InController->GetPawn();
+    Driver = InController;
     PreviousPawn = Previous;
     Throttle = Steer = Lift = 0.0;
 
@@ -154,7 +154,7 @@ bool AHavocVehicleBase::Enter(AController* Controller)
     Previous->SetActorHiddenInGame(true);
     Previous->SetActorEnableCollision(false);
 
-    Controller->Possess(this);
+    InController->Possess(this);
     return true;
 }
 
@@ -201,9 +201,9 @@ void AHavocVehicleBase::UnPossessed()
     }
 }
 
-AHavocVehicleBase* AHavocVehicleBase::FindEnterable(const AController* Controller)
+AHavocVehicleBase* AHavocVehicleBase::FindEnterable(const AController* InController)
 {
-    const APawn* Pawn = Controller ? Controller->GetPawn() : nullptr;
+    const APawn* Pawn = InController ? InController->GetPawn() : nullptr;
     if (!Pawn || !Pawn->GetWorld())
     {
         return nullptr;
@@ -212,7 +212,7 @@ AHavocVehicleBase* AHavocVehicleBase::FindEnterable(const AController* Controlle
     double BestDist = TNumericLimits<double>::Max();
     for (TActorIterator<AHavocVehicleBase> It(Pawn->GetWorld()); It; ++It)
     {
-        if (!It->CanEnter(Controller))
+        if (!It->CanEnter(InController))
         {
             continue;
         }
