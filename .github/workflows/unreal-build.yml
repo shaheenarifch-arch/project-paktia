@@ -65,3 +65,77 @@ jobs:
             game/Saved/Logs/**
             ${{ env.APPDATA }}/Unreal Engine/AutomationTool/Logs/**
           if-no-files-found: warn
+
+  smoke-test:
+    needs: build
+    runs-on: [self-hosted, windows, unreal]
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      actions: read
+      issues: write
+      pull-requests: write
+    env:
+      SMOKE_SECONDS: '180'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      - name: Download packaged build
+        uses: actions/download-artifact@v4
+        with:
+          name: MidnightHavoc-Win64
+          path: smoke-in
+
+      - name: Unzip build
+        shell: pwsh
+        run: Expand-Archive -Path smoke-in\MidnightHavoc-Win64.zip -DestinationPath smoke-build -Force
+
+      - name: Smoke run (3 min) and parse results
+        shell: pwsh
+        run: >
+          ./game/scripts/smoke-run.ps1
+          -BuildDir "$env:GITHUB_WORKSPACE\smoke-build"
+          -OutDir "$env:GITHUB_WORKSPACE\smoke-out"
+          -Seconds ([int]$env:SMOKE_SECONDS)
+
+      - name: Job summary
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path smoke-out\summary.md) { Get-Content smoke-out\summary.md -Raw | Add-Content $env:GITHUB_STEP_SUMMARY }
+          else { 'Smoke test produced no summary (script failed before writing).' | Add-Content $env:GITHUB_STEP_SUMMARY }
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test
+          path: smoke-out/**
+          if-no-files-found: warn
+
+      - name: Post summary comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            let body = fs.existsSync('smoke-out/summary.md')
+              ? fs.readFileSync('smoke-out/summary.md', 'utf8')
+              : '### Smoke test: \u274C FAIL\n- The smoke script did not produce a summary; see the run log.';
+            body += `\n[Run, logs and artifacts](${runUrl}) \u00b7 commit \`${context.sha.slice(0, 7)}\``;
+            // Find the triggering PR for this branch, else the issue number in the branch name (bhaddru/37-...).
+            const branch = context.ref.replace('refs/heads/', '');
+            let number = null;
+            const prs = await github.rest.pulls.list({
+              ...context.repo, state: 'open', head: `${context.repo.owner}:${branch}`,
+            });
+            if (prs.data.length) number = prs.data[0].number;
+            else {
+              const m = branch.match(/^bhaddru\/(\d+)/);
+              if (m) number = Number(m[1]);
+            }
+            if (!number) { core.notice('No PR or issue to comment on for ' + branch); return; }
+            await github.rest.issues.createComment({ ...context.repo, issue_number: number, body });
