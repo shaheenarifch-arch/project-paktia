@@ -26,7 +26,7 @@
 #include "UI/HavocHudModel.h"
 #include "Player/HavocPlaySettings.h"
 
-#define HAVOC_PLAY_TEST_FLAGS (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+#define HAVOC_PLAY_TEST_FLAGS (EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 namespace HavocPlayableTests
 {

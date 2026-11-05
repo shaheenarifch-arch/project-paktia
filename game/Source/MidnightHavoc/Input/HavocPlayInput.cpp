@@ -69,6 +69,7 @@ void UHavocPlayInput::Initialize(FSubsystemCollectionBase& Collection)
     DeployRavenAction = MakeAction(TEXT("IA_DeployRaven"), 0);
     CallFalconAction = MakeAction(TEXT("IA_CallFalcon"), 0);
     ReturnAction = MakeAction(TEXT("IA_Return"), 0);
+    VehicleAction = MakeAction(TEXT("IA_Vehicle"), 0);
 
     MoveAction = MakeAction(TEXT("IA_Move"), 2);
     LookAction = MakeAction(TEXT("IA_Look"), 2);
@@ -80,6 +81,8 @@ void UHavocPlayInput::Initialize(FSubsystemCollectionBase& Collection)
     ReloadAction = MakeAction(TEXT("IA_Reload"), 0);
 
     RiseAction = MakeAction(TEXT("IA_Rise"), 1);
+    ThrottleAction = MakeAction(TEXT("IA_Throttle"), 1);
+    SteerAction = MakeAction(TEXT("IA_Steer"), 1);
 
     CollectiveAction = MakeAction(TEXT("IA_Collective"), 1);
     CyclicAction = MakeAction(TEXT("IA_Cyclic"), 2);
@@ -136,6 +139,7 @@ void UHavocPlayInput::BuildContexts()
     MetaContext->MapKey(DeployRavenAction, EKeys::T);
     MetaContext->MapKey(CallFalconAction, EKeys::G);
     MetaContext->MapKey(ReturnAction, EKeys::Tab);
+    MetaContext->MapKey(VehicleAction, EKeys::F);
 
     FootContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Foot"));
     MapWasd(FootContext, MoveAction, EKeys::W, EKeys::S, EKeys::A, EKeys::D);
@@ -160,6 +164,16 @@ void UHavocPlayInput::BuildContexts()
     FalconContext->MapKey(YawAction, EKeys::E);
     // Q is not used by Meta, so it is free for yaw left on the Falcon.
     FalconContext->MapKey(YawAction, EKeys::Q).Modifiers.Add(Negate(FalconContext, true, true, true));
+
+    // Vehicles: W/S throttle, D/A steer (or yaw), Space/Ctrl up and down (flyers), mouse orbits the camera.
+    VehicleContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Vehicle"));
+    VehicleContext->MapKey(ThrottleAction, EKeys::W);
+    VehicleContext->MapKey(ThrottleAction, EKeys::S).Modifiers.Add(Negate(VehicleContext, true, true, true));
+    VehicleContext->MapKey(SteerAction, EKeys::D);
+    VehicleContext->MapKey(SteerAction, EKeys::A).Modifiers.Add(Negate(VehicleContext, true, true, true));
+    VehicleContext->MapKey(RiseAction, EKeys::SpaceBar);
+    VehicleContext->MapKey(RiseAction, EKeys::LeftControl).Modifiers.Add(Negate(VehicleContext, true, true, true));
+    MapMouseLook(VehicleContext, LookAction);
 }
 
 void UHavocPlayInput::ApplyContexts(APlayerController* Controller, UInputMappingContext* PawnContext, int32 PawnPriority) const

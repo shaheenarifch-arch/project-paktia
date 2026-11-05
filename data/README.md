@@ -17,6 +17,10 @@ All ratings are **game-balance values** on a 1–10 scale (armor 0–10). They a
 | `industry/components.json` | Buildable components with `inputs` (resource ids → amount). Units list the components they are made of. |
 | `industry/sites.json` | Site types (oil field, refinery, steel mill, electronics plant, munitions plant, vehicle plant, aircraft plant, shipyard, repair depot, plus mine and supply depot) with `inputsPerDay` / `outputsPerDay` per game-day. |
 
+## Vehicle stats
+
+`vehicles/*.json` files may carry `stats`: `{ maxSpeed (m/s), acceleration (m/s^2), turnRate (deg/s), climbRate (m/s, flyers) }`. Abstract game-balance values read by the playable vehicle pawns (`game/docs/vehicles.md`), never real performance figures.
+
 ## Unit schema
 
 `id`, `name`, `faction`, `branch`, `role`, `echelon`, `crew` (integer ≥ 0), `cost_points`, `build_time_days`,

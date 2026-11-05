@@ -7,7 +7,7 @@
 
 namespace
 {
-    UHavocOpenStraitMission* FindMission(const UWorld* World)
+    UHavocOpenStraitMission* FindTankerMission(const UWorld* World)
     {
         UHavocMissionSubsystem* Missions = World ? World->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
         return Missions ? Missions->GetOpenStrait() : nullptr;
@@ -24,7 +24,7 @@ AHavocTankerSpline::AHavocTankerSpline()
 TArray<FString> AHavocTankerSpline::GetTransitingTankerIds() const
 {
     TArray<FString> Ids;
-    const UHavocOpenStraitMission* Mission = FindMission(GetWorld());
+    const UHavocOpenStraitMission* Mission = FindTankerMission(GetWorld());
     const UHavocTankerEscort* Escort = Mission ? Mission->GetEscort() : nullptr;
     if (!Escort)
     {
@@ -57,13 +57,13 @@ float AHavocTankerSpline::GetRouteLength() const
 
 bool AHavocTankerSpline::BeginTransit(const FString& TankerId)
 {
-    UHavocOpenStraitMission* Mission = FindMission(GetWorld());
+    UHavocOpenStraitMission* Mission = FindTankerMission(GetWorld());
     return Mission && Mission->StartTransit(TankerId, LaneId);
 }
 
 void AHavocTankerSpline::CompleteTransit(const FString& TankerId)
 {
-    if (UHavocOpenStraitMission* Mission = FindMission(GetWorld()))
+    if (UHavocOpenStraitMission* Mission = FindTankerMission(GetWorld()))
     {
         Mission->TankerArrived(TankerId);
     }
