@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          lfs: false   # LFS skip is fine for compile/cook of code + data
+          lfs: true    # the Kharg level (.umap/.uasset) is stored in Git LFS and must be present to cook
 
       - name: Build, cook, stage, pak and archive (Win64 Development)
         shell: cmd
