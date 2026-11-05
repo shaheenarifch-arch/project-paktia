@@ -21,6 +21,8 @@ public class MidnightHavoc : ModuleRules
                 "NetCore",
                 "UMG",
                 "AIModule",
+                "StateTreeModule",
+                "GameplayStateTreeModule",
                 "NavigationSystem",
                 "GameplayTasks",
                 "Niagara",

@@ -2,6 +2,7 @@
 
 #include "AI/HavocAIController.h"
 #include "AI/HavocEnemyCharacter.h"
+#include "AI/HavocSquadSubsystem.h"
 #include "Aircraft/HavocFalconHelicopter.h"
 #include "Assets/HavocAssetSubsystem.h"
 #include "Audio/HavocAudioSubsystem.h"
@@ -631,6 +632,7 @@ void AHavocEpisode04Flow::SpawnGarrison(FName SectorId, int32 Count, FName Tag, 
     const TArray<FString> Factions = FactionsOverride ? *FactionsOverride : FactionsFor(SectorId);
     const FBox Box = Volume->GetComponentsBoundingBox(true);
     const FVector MarineLoc = GetMarine() ? GetMarine()->GetActorLocation() : FVector::ZeroVector;
+    TArray<AHavocEnemyCharacter*> Spawned;
 
     for (int32 i = 0; i < Count; ++i)
     {
@@ -687,6 +689,7 @@ void AHavocEpisode04Flow::SpawnGarrison(FName SectorId, int32 Count, FName Tag, 
         Enemy->ApplyUnitDef(Unit, Tag.IsNone() ? SectorId : Tag);
         UGameplayStatics::FinishSpawningActor(Enemy, Where);
         Enemies.Add(Enemy);
+        Spawned.Add(Enemy);
 
         if (!Tag.IsNone())
         {
@@ -696,6 +699,13 @@ void AHavocEpisode04Flow::SpawnGarrison(FName SectorId, int32 Count, FName Tag, 
                 AI->NotifyShotBy(GetMarine());
             }
         }
+    }
+
+    // The garrison is one squad: it shares threats and runs the patrol / engage / fallback cycle.
+    // Raiders always press the attack (Assault); garrisons can fall back when weak.
+    if (UHavocSquadSubsystem* Squads = World->GetSubsystem<UHavocSquadSubsystem>())
+    {
+        Squads->RegisterSquad(EHavocTeam::Opposing, Tag.IsNone() ? SectorId : Tag, Tag.IsNone() ? EHavocSquadPosture::Patrol : EHavocSquadPosture::Assault, Spawned);
     }
 }
 
