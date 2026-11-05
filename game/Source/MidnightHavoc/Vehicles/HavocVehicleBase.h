@@ -100,7 +100,7 @@ public:
     AController* GetDriver() const { return Driver; }
 
     UFUNCTION(BlueprintPure, Category = "Havoc|Vehicle")
-    bool CanEnter(const AController* Controller) const;
+    bool CanEnter(const AController* InController) const;
 
     UFUNCTION(BlueprintPure, Category = "Havoc|Vehicle")
     double GetForwardSpeedCm() const { return Speed; }
@@ -108,7 +108,7 @@ public:
     // ---- Enter / exit (server only) ----
     /** Possesses the vehicle. False if occupied, out of range, or the controller has no pawn to return to. */
     UFUNCTION(BlueprintCallable, Category = "Havoc|Vehicle")
-    bool Enter(AController* Controller);
+    bool Enter(AController* InController);
 
     /** Returns the driver to the pawn they came from. False if nobody is inside. */
     UFUNCTION(BlueprintCallable, Category = "Havoc|Vehicle")
@@ -118,7 +118,7 @@ public:
     void ApplyDefinition(const FHavocVehicleDef& Def);
 
     /** Nearest enterable vehicle in range of the controller's pawn, or null. */
-    static AHavocVehicleBase* FindEnterable(const AController* Controller);
+    static AHavocVehicleBase* FindEnterable(const AController* InController);
 
     /** Sets input in [-1, 1]: throttle (W/S), steer (D/A), lift (Space/Ctrl). Authority only; clients use ServerSetInput. */
     void SetInput(double InThrottle, double InSteer, double InLift);
