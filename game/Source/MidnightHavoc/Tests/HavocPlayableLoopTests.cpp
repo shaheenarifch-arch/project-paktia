@@ -23,6 +23,8 @@
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 #include "Missions/Episode04/HavocShippingLanes.h"
 #include "Missions/Episode04/HavocTankerEscort.h"
+#include "UI/HavocHudModel.h"
+#include "Player/HavocPlaySettings.h"
 
 #define HAVOC_PLAY_TEST_FLAGS (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
@@ -240,6 +242,74 @@ bool FHavocPlayEnemyDataTest::RunTest(const FString& Parameters)
 
     // The weapon the Marine fires exists in data/weapons.
     TestTrue(TEXT("data/weapons/kr47.json exists"), FPaths::FileExists(HavocPlayableTests::DataPath(TEXT("weapons/kr47.json"))));
+    return true;
+}
+
+// HUD smoke test: the tactical HUD's view-model follows a full north-beach run (tracker step, reinforcements,
+// terminal integrity, lane progress, tankers) and every state has an objective line.
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocHudRunTest, "MidnightHavoc.Playable.HudFollowsEpisodeRun", HAVOC_PLAY_TEST_FLAGS)
+bool FHavocHudRunTest::RunTest(const FString& Parameters)
+{
+    TStrongObjectPtr<UHavocOpenStraitMission> Mission = HavocPlayableTests::MakeMission(*this);
+    if (!Mission.IsValid()) { return false; }
+    UHavocOpenStraitMission& M = *Mission;
+
+    FHavocHudSnapshot S = HavocHudModel::Build(&M);
+    TestTrue(TEXT("objective shown at start"), !S.Objective.IsEmpty());
+    TestTrue(TEXT("no lane line before lane clearance"), S.LaneLine().IsEmpty());
+    TestEqual(TEXT("empty model for no mission"), HavocHudModel::Build(nullptr).LaneCount, 0);
+
+    HavocPlayableTests::PlayToHold(*this, M, true);
+    S = HavocHudModel::Build(&M);
+    TestEqual(TEXT("reinforcements on HUD"), S.Reinforcements, M.GetReinforcements());
+    TestEqual(TEXT("terminal integrity on HUD"), S.TerminalIntegrity, 1.0);
+    TestTrue(TEXT("Falcon support shown after the airstrip"), S.bAirSupport);
+    TestTrue(TEXT("tracker marks the lane step current"), S.TrackerText().Contains(TEXT("[>] Clear both shipping lanes")));
+    TestTrue(TEXT("tracker marks earlier steps done"), S.TrackerText().Contains(TEXT("[x] Hold the oil terminal")));
+    TestTrue(TEXT("lane line appears with seeded hazards"), S.LaneLine().Contains(TEXT("0 of 7 hazards cleared")));
+
+    // Reveal and clear one hazard: the lane line moves.
+    M.RevealHazards(FName(TEXT("inbound")), 1);
+    S = HavocHudModel::Build(&M);
+    TestEqual(TEXT("one hazard found"), S.LaneRevealed, 1);
+    TestTrue(TEXT("lane line shows the find"), S.LaneLine().Contains(TEXT("(1 found)")));
+    M.ClearHazard(FName(TEXT("inbound")));
+    S = HavocHudModel::Build(&M);
+    TestEqual(TEXT("one hazard cleared"), S.LaneCleared, 1);
+
+    // Finish the lanes and the escort.
+    while (M.RevealHazards(FName(TEXT("inbound")), 1) > 0) { M.ClearHazard(FName(TEXT("inbound"))); }
+    while (M.RevealHazards(FName(TEXT("outbound")), 1) > 0) { M.ClearHazard(FName(TEXT("outbound"))); }
+    M.Progress();
+    S = HavocHudModel::Build(&M);
+    TestEqual(TEXT("all lanes open"), S.LanesOpen, S.LaneCount);
+    TestTrue(TEXT("tracker on the escort step"), S.TrackerText().Contains(TEXT("[>] Escort the tankers")));
+    TestTrue(TEXT("escort line shown"), S.StatusBlock().Contains(TEXT("Tankers through: 0  lost: 0")));
+
+    const TArray<FHavocTanker> Tankers = M.GetEscort()->GetTankers();
+    for (int32 i = 0; i < Tankers.Num(); ++i)
+    {
+        M.StartTransit(Tankers[i].Id, FName(i % 2 == 0 ? TEXT("inbound") : TEXT("outbound")));
+        M.TankerArrived(Tankers[i].Id);
+    }
+    M.Finish();
+    S = HavocHudModel::Build(&M);
+    TestEqual(TEXT("tankers through on HUD"), S.TankersThrough, 6);
+    TestTrue(TEXT("tracker on the debrief"), S.TrackerText().Contains(TEXT("[>] Debrief")));
+    TestFalse(TEXT("no pending steps at the end"), S.TrackerText().Contains(TEXT("[ ]")));
+    return true;
+}
+
+// Settings: help text for every setting, quality names and clamping.
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocSettingsHelpTest, "MidnightHavoc.Playable.SettingsHaveHelp", HAVOC_PLAY_TEST_FLAGS)
+bool FHavocSettingsHelpTest::RunTest(const FString& Parameters)
+{
+    for (const TCHAR* Id : { TEXT("quality"), TEXT("flashes"), TEXT("subtitles"), TEXT("sensitivity"), TEXT("volume"), TEXT("bind"), TEXT("reset") })
+    {
+        TestTrue(FString::Printf(TEXT("help text for %s"), Id), !UHavocPlaySettings::HelpFor(Id).IsEmpty());
+    }
+    TestEqual(TEXT("quality 0"), FString(UHavocPlaySettings::QualityName(0)), FString(TEXT("Low")));
+    TestEqual(TEXT("quality clamps high"), FString(UHavocPlaySettings::QualityName(9)), FString(TEXT("Epic")));
     return true;
 }
 

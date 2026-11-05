@@ -5,7 +5,9 @@
 #include "InputAction.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
+#include "Player/HavocPlaySettings.h"
 
 namespace
 {
@@ -57,6 +59,7 @@ UInputAction* UHavocPlayInput::MakeAction(const TCHAR* Name, int32 ValueType)
 
 void UHavocPlayInput::Initialize(FSubsystemCollectionBase& Collection)
 {
+    Collection.InitializeDependency<UHavocPlaySettings>();
     Super::Initialize(Collection);
 
     PauseAction = MakeAction(TEXT("IA_Pause"), 0);
@@ -83,6 +86,42 @@ void UHavocPlayInput::Initialize(FSubsystemCollectionBase& Collection)
     YawAction = MakeAction(TEXT("IA_FalconYaw"), 1);
 
     BuildContexts();
+    if (const UGameInstance* GI = GetGameInstance())
+    {
+        if (const UHavocPlaySettings* Settings = GI->GetSubsystem<UHavocPlaySettings>())
+        {
+            ApplyBindings(*Settings);
+        }
+    }
+}
+
+void UHavocPlayInput::ApplyBindings(const UHavocPlaySettings& Settings)
+{
+    auto Remap = [](UInputMappingContext* Context, const UInputAction* Action, const FKey& Key)
+    {
+        if (Context && Action && Key.IsValid())
+        {
+            Context->UnmapAllKeysFromAction(Action);
+            Context->MapKey(Action, Key);
+        }
+    };
+    Remap(MetaContext, InteractAction, Settings.InteractKey);
+    Remap(MetaContext, DeployRavenAction, Settings.RavenKey);
+    Remap(MetaContext, CallFalconAction, Settings.FalconKey);
+    Remap(MetaContext, ReturnAction, Settings.ReturnKey);
+    Remap(FootContext, ReloadAction, Settings.ReloadKey);
+
+    // Live players pick the new keys up on the next rebuild.
+    if (const UGameInstance* GI = GetGameInstance())
+    {
+        for (ULocalPlayer* LocalPlayer : GI->GetLocalPlayers())
+        {
+            if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer ? LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>() : nullptr)
+            {
+                Subsystem->RequestRebuildControlMappings();
+            }
+        }
+    }
 }
 
 void UHavocPlayInput::BuildContexts()
@@ -90,6 +129,7 @@ void UHavocPlayInput::BuildContexts()
     MetaContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Meta"));
     MetaContext->MapKey(PauseAction, EKeys::Escape);
     MetaContext->MapKey(PauseAction, EKeys::P);
+    MetaContext->MapKey(PauseAction, EKeys::Gamepad_Special_Right); // Start / Menu
     MetaContext->MapKey(ChooseNorthAction, EKeys::One);
     MetaContext->MapKey(ChooseWestAction, EKeys::Two);
     MetaContext->MapKey(InteractAction, EKeys::E);
