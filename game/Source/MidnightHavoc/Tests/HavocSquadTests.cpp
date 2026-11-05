@@ -19,7 +19,7 @@
 #include "AI/HavocSquadLogic.h"
 #include "Missions/HavocMissionJson.h"
 
-#define HAVOC_AI_TEST_FLAGS (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+#define HAVOC_AI_TEST_FLAGS (EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 namespace HavocSquadTests
 {

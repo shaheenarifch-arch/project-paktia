@@ -24,7 +24,7 @@
 #include "Vehicles/HavocSurfaceVehicles.h"
 #include "Vehicles/HavocVehicleBase.h"
 
-#define HAVOC_VEHICLE_TEST_FLAGS (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+#define HAVOC_VEHICLE_TEST_FLAGS (EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 namespace HavocVehicleTests
 {
