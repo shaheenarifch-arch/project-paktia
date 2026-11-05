@@ -97,6 +97,22 @@ In this hypothetical scenario, Iran has closed the Strait of Hormuz to shipping.
 
 **Engine calls:** `scoutBeaches`, `chooseBeach`, `secureBeachhead`, `secureAirstrip`, `secureTerminal`, `damageTerminal`, `spendReinforcements`, `revealHazards`, `clearHazard`, `startTransit`, `tankerArrived`, `damageTanker`, `finish`, then `progress()` to move on.
 
+## Episode 7: City of Freedom (real-world hypothetical)
+
+An urban operation in **Parvaneh**, an invented city composited from Iranian-inspired architecture (bazaar arcades, courtyard houses, domed squares, arched bridges). The player fights alongside three invented resistance squads (AI) against the regime's security forces, never the Iranian people. All characters, units and the resistance network are invented. Code: `src/gameplay/missions/episode07/`. Data: `data/missions/episode-07-city-of-freedom.json` + `data/maps/city-of-freedom.json`. It is not yet in `CAMPAIGN` (that list needs Episodes 5 and 6 first), so it runs standalone.
+
+1. **Link-up** (checkpoint). All three resistance squads meet at the rally point; the rules of engagement (ROE) come into force.
+2. **Old Bazaar** (checkpoint), then **Courtyard Quarter** (checkpoint): clear patrols around sheltering civilians and escort them to shelter.
+3. **Choose the crossing:** river bridges or the arcade route.
+4. **Dome Square** (checkpoint), then the **security compound** (checkpoint). Soldiers who surrender are detained, never fired on.
+5. **Side objectives:** treat 12 patients at the field hospital and deliver 3 aid drops. Each raises Hearts & Minds.
+
+**ROE:** harm to a civilian (-15 Hearts & Minds) or a surrendered soldier (-10) is a violation. It fails the objective that was active. Three violations fail the operation back to the last checkpoint. **SUCCESS:** no violations, Hearts & Minds at least 40 and both side objectives done. **PARTIAL:** the compound is taken but any of those is missed. **FAILED:** violation limit or reinforcements (25) exhausted.
+
+**Engine calls:** `linkUp`, `secureBazaar`, `shelterCivilians`, `chooseCrossing`, `secureCrossing`, `secureSquare`, `secureCompound`, `reportViolation('CIVILIAN_HARM' | 'SURRENDERED_HARM')`, `treatPatient`, `deliverAidDrop`, `resistanceLost`, `spendReinforcements`, `finish`, then `progress()`.
+
+Help: [Automation tests](https://dev.epicgames.com/documentation/en-us/unreal-engine/automation-system-in-unreal-engine), [AI in Unreal Engine](https://dev.epicgames.com/documentation/en-us/unreal-engine/artificial-intelligence-in-unreal-engine).
+
 ## Engine integration
 
 As with Mission 01, the engine reports results and the episode decides what happens:
