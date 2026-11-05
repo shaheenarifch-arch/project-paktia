@@ -61,6 +61,8 @@ jobs:
 
       - name: Add game to site
         run: |
+          # jekyll-build-pages runs in Docker as root, leaving _site root-owned.
+          sudo chown -R "$(id -u):$(id -g)" _site
           mkdir -p _site/play
           cp -r play/dist/. _site/play/
           touch _site/.nojekyll
