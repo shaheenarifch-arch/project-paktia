@@ -43,6 +43,10 @@ public:
         meta = (ToolTip = "Clear this hazard. It must be revealed first. Returns true if the mission accepted it."))
     bool Clear();
 
+    /** Back to hidden and uncleared. Used when a checkpoint restore puts the mission back into lane clearance. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Lane")
+    void ResetForCheckpoint();
+
     UFUNCTION(BlueprintImplementableEvent, Category = "Havoc|Lane")
     void OnRevealed();
 

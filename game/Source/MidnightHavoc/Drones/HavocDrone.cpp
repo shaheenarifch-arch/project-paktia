@@ -7,6 +7,9 @@
 #include "Drones/HavocDroneDetectable.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "EnhancedInputComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Input/HavocPlayInput.h"
 #include "EngineUtils.h"
 #include "Missions/HavocMissionJson.h"
 #include "Net/UnrealNetwork.h"
@@ -37,6 +40,8 @@ AHavocDrone::AHavocDrone()
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(Collision);
     Camera->SetAutoActivate(false);
+    // Recon view: look down and ahead. Piloting does not change the pitch.
+    Camera->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
 }
 
 void AHavocDrone::SetDefinition(const FHavocDroneDefinition& InDefinition)
@@ -147,7 +152,107 @@ void AHavocDrone::Tick(float DeltaSeconds)
 
     if (HasAuthority())
     {
+        ApplyPilotInput();
         UpdateServer(DeltaSeconds);
+    }
+}
+
+// ---------------------------------------------------------------- piloting (playable loop)
+
+void AHavocDrone::PawnClientRestart()
+{
+    Super::PawnClientRestart();
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        if (const UGameInstance* GI = GetGameInstance())
+        {
+            if (const UHavocPlayInput* Input = GI->GetSubsystem<UHavocPlayInput>())
+            {
+                Input->ApplyContexts(PC, Input->DroneContext, 1);
+            }
+        }
+    }
+}
+
+void AHavocDrone::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
+    UEnhancedInputComponent* Enhanced = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+    const UGameInstance* GI = GetGameInstance();
+    const UHavocPlayInput* Input = GI ? GI->GetSubsystem<UHavocPlayInput>() : nullptr;
+    if (!Enhanced || !Input)
+    {
+        return;
+    }
+    Enhanced->BindAction(Input->MoveAction, ETriggerEvent::Triggered, this, &AHavocDrone::OnPilotMove);
+    Enhanced->BindAction(Input->MoveAction, ETriggerEvent::Completed, this, &AHavocDrone::OnPilotReleased);
+    Enhanced->BindAction(Input->RiseAction, ETriggerEvent::Triggered, this, &AHavocDrone::OnPilotRise);
+    Enhanced->BindAction(Input->RiseAction, ETriggerEvent::Completed, this, &AHavocDrone::OnPilotReleased);
+    Enhanced->BindAction(Input->LookAction, ETriggerEvent::Triggered, this, &AHavocDrone::OnPilotLook);
+}
+
+void AHavocDrone::OnPilotMove(const FInputActionValue& Value)
+{
+    PilotMove = Value.Get<FVector2D>();
+    SendPilotInput();
+}
+
+void AHavocDrone::OnPilotRise(const FInputActionValue& Value)
+{
+    PilotRise = Value.Get<float>();
+    SendPilotInput();
+}
+
+void AHavocDrone::OnPilotReleased()
+{
+    // Completed fires for whichever action was released; the held state is re-read next Triggered.
+    PilotMove = FVector2D::ZeroVector;
+    PilotRise = 0.0;
+    SendPilotInput();
+}
+
+void AHavocDrone::OnPilotLook(const FInputActionValue& Value)
+{
+    // Yaw is applied locally and replicated by movement; the camera pitch stays fixed.
+    AddActorWorldRotation(FRotator(0.f, Value.Get<FVector2D>().X * PilotYawRate, 0.f));
+}
+
+void AHavocDrone::SendPilotInput()
+{
+    if (HasAuthority())
+    {
+        ServerSetPilotInput_Implementation(PilotMove, PilotRise);
+    }
+    else
+    {
+        ServerSetPilotInput(PilotMove, PilotRise);
+    }
+}
+
+void AHavocDrone::ServerSetPilotInput_Implementation(FVector2D InMove, double InRise)
+{
+    PilotMove = InMove;
+    PilotRise = InRise;
+}
+
+void AHavocDrone::ApplyPilotInput()
+{
+    // Returning (low battery or recalled) is not overridden by stick input.
+    if (!Core.IsControllable() || Core.State == EHavocDroneState::Returning)
+    {
+        return;
+    }
+    const FVector Input = GetActorForwardVector() * PilotMove.Y + GetActorRightVector() * PilotMove.X + FVector::UpVector * PilotRise;
+    if (!Input.IsNearlyZero(0.01))
+    {
+        MoveTo(GetActorLocation() + Input.GetSafeNormal() * PilotLeadCm, TEXT("PILOT"));
+        bPilotWasSteering = true;
+    }
+    else if (bPilotWasSteering)
+    {
+        // Released: hold position.
+        MoveTo(GetActorLocation(), TEXT("HOLD"));
+        bPilotWasSteering = false;
     }
 }
 

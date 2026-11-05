@@ -90,3 +90,11 @@ All events travel on `UHavocEventSubsystem` as `(FName EventName, FString JsonPa
 
 `mission:*` payloads match `MissionEvents` in `src/gameplay/missions/framework/MissionRunner.ts`.
 The `drone:*` and `helicopter:*` events are new in this port (the TypeScript has no equivalents).
+
+## Built-in playable HUD
+
+`UHavocPlayHUD` (`Source/MidnightHavoc/UI/HavocPlayHUD.h`) extends `UHavocTacticalHUD` and builds a complete HUD in C++:
+objective, hint line, toast, health bar, ammo, reinforcements, terminal and tanker status, Raven link and battery, and Falcon
+status. `AHavocPlayerController::HudClass` defaults to it, so Episode 04 needs no widget asset. To restyle it, make a Widget
+Blueprint child of `HavocPlayHUD` (steps 1 to 3 above) and set it as `HudClass` on a Blueprint child of `HavocPlayerController`.
+The same events and getters apply. Help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/using-cplusplus-with-umg-in-unreal-engine>

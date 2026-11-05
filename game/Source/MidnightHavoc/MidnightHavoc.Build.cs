@@ -17,6 +17,9 @@ public class MidnightHavoc : ModuleRules
                 "NetCore",
                 "UMG",
                 "AIModule",
+                "NavigationSystem",
+                "GameplayTasks",
+                "Niagara",
                 "Json",
                 "JsonUtilities"
             }

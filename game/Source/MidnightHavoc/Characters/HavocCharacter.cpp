@@ -116,7 +116,7 @@ void AHavocCharacter::ApplyAuthoritativeDamage(
     float DamageAmount
 )
 {
-    if (!HasAuthority() || DamageAmount <= 0.0f)
+    if (!HasAuthority() || DamageAmount <= 0.0f || bIsDead)
     {
         return;
     }
@@ -128,6 +128,22 @@ void AHavocCharacter::ApplyAuthoritativeDamage(
     );
 
     OnRep_Health();
+
+    if (Health <= 0.0f)
+    {
+        bIsDead = true;
+        HandleDeath();
+    }
+}
+
+void AHavocCharacter::SetMaximumHealthAndFill(float NewMaximum)
+{
+    MaximumHealth = FMath::Max(1.0f, NewMaximum);
+    Health = MaximumHealth;
+}
+
+void AHavocCharacter::HandleDeath()
+{
 }
 
 void AHavocCharacter::OnRep_Health()

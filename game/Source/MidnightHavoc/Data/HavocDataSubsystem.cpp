@@ -74,10 +74,11 @@ void UHavocDataSubsystem::LoadAll()
     LoadFolder(TEXT("aircraft"), [this](const TSharedRef<FJsonObject>& J, const FString& F) { RegisterAircraft(J, F); });
     LoadFolder(TEXT("vehicles"), [this](const TSharedRef<FJsonObject>& J, const FString& F) { RegisterVehicle(J, F); });
     LoadFolder(TEXT("weapons"), [this](const TSharedRef<FJsonObject>& J, const FString& F) { RegisterWeapon(J, F); });
+    LoadFolder(TEXT("units"), [this](const TSharedRef<FJsonObject>& J, const FString& F) { RegisterUnits(J, F); });
     LoadFolder(TEXT("missions"), [this](const TSharedRef<FJsonObject>& J, const FString& F) { RegisterMission(J, F); });
 
-    UE_LOG(LogHavocData, Log, TEXT("Loaded game data from '%s': %d missions, %d maps, %d aircraft, %d vehicles, %d weapons."),
-        *ResolvedDataDirectory, Missions.Num(), Maps.Num(), Aircraft.Num(), Vehicles.Num(), Weapons.Num());
+    UE_LOG(LogHavocData, Log, TEXT("Loaded game data from '%s': %d missions, %d maps, %d aircraft, %d vehicles, %d weapons, %d units."),
+        *ResolvedDataDirectory, Missions.Num(), Maps.Num(), Aircraft.Num(), Vehicles.Num(), Weapons.Num(), Units.Num());
 }
 
 void UHavocDataSubsystem::LoadFolder(const FString& SubFolder, TFunctionRef<void(const TSharedRef<FJsonObject>&, const FString& File)> Handler)
@@ -167,6 +168,49 @@ void UHavocDataSubsystem::RegisterWeapon(const TSharedRef<FJsonObject>& Json, co
     ReadBool(*Json, TEXT("fictional"), Def.bFictional);
     ReadBool(*Json, TEXT("enabled"), Def.bEnabled);
     Weapons.Add(FName(*Def.Id), MoveTemp(Def));
+}
+
+void UHavocDataSubsystem::RegisterUnits(const TSharedRef<FJsonObject>& Json, const FString& File)
+{
+    const TArray<TSharedPtr<FJsonValue>>* Array = nullptr;
+    if (!Json->TryGetArrayField(TEXT("units"), Array) || !Array)
+    {
+        UE_LOG(LogHavocData, Warning, TEXT("'%s' has no units array; skipping."), *File);
+        return;
+    }
+    auto Rating = [](const TSharedPtr<FJsonObject>& Object, const TCHAR* Group, const TCHAR* Key, int32 Default)
+    {
+        const TSharedPtr<FJsonObject>* Child = nullptr;
+        int32 Value = Default;
+        if (Object->TryGetObjectField(Group, Child) && Child)
+        {
+            (*Child)->TryGetNumberField(Key, Value);
+        }
+        return Value;
+    };
+    for (const TSharedPtr<FJsonValue>& Item : *Array)
+    {
+        const TSharedPtr<FJsonObject> Object = Item.IsValid() ? Item->AsObject() : nullptr;
+        FHavocUnitDef Def;
+        if (!Object.IsValid() || !Object->TryGetStringField(TEXT("id"), Def.Id) || Def.Id.IsEmpty())
+        {
+            continue;
+        }
+        ReadString(*Object, TEXT("name"), Def.Name);
+        ReadString(*Object, TEXT("faction"), Def.Faction);
+        ReadString(*Object, TEXT("branch"), Def.Branch);
+        ReadString(*Object, TEXT("role"), Def.Role);
+        Object->TryGetNumberField(TEXT("crew"), Def.Crew);
+        Def.AntiInfantry = Rating(Object, TEXT("firepower"), TEXT("antiInfantry"), Def.AntiInfantry);
+        Def.Optics = Rating(Object, TEXT("sensors"), TEXT("optics"), Def.Optics);
+        Object->TryGetNumberField(TEXT("stealth"), Def.Stealth);
+        const FName Key(*Def.Id);
+        if (!Units.Contains(Key))
+        {
+            UnitOrder.Add(Key);
+        }
+        Units.Add(Key, MoveTemp(Def));
+    }
 }
 
 void UHavocDataSubsystem::RegisterMission(const TSharedRef<FJsonObject>& Json, const FString& File)
@@ -265,6 +309,26 @@ bool UHavocDataSubsystem::GetWeapon(FName Id, FHavocWeaponDef& OutWeapon) const
 {
     if (const FHavocWeaponDef* Found = Weapons.Find(Id)) { OutWeapon = *Found; return true; }
     return false;
+}
+
+bool UHavocDataSubsystem::GetUnit(FName Id, FHavocUnitDef& OutUnit) const
+{
+    if (const FHavocUnitDef* Found = Units.Find(Id)) { OutUnit = *Found; return true; }
+    return false;
+}
+
+TArray<FHavocUnitDef> UHavocDataSubsystem::GetInfantryUnits(const FString& Faction) const
+{
+    TArray<FHavocUnitDef> Result;
+    for (const FName& Key : UnitOrder)
+    {
+        const FHavocUnitDef& Unit = Units[Key];
+        if (Unit.Faction == Faction && Unit.Branch == TEXT("infantry"))
+        {
+            Result.Add(Unit);
+        }
+    }
+    return Result;
 }
 
 TArray<FName> UHavocDataSubsystem::GetAllMissionIds() const
