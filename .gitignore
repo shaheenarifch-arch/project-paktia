@@ -40,3 +40,8 @@ Thumbs.db
 
 # sim build output
 build/
+
+# Unreal marketplace / Fab assets (add via Fab; never commit). See game/docs/fab-assets.md
+game/Content/ThirdParty/
+game/Content/Megascans/
+game/Content/MSPresets/

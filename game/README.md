@@ -35,7 +35,16 @@ Folders are under `Source/MidnightHavoc/`.
 | `World/` | `AHavocLevelDirector`, `AHavocSectorVolume`, `AHavocTerminalPart`, `AHavocLaneHazard`, `AHavocTankerSpline` (see `docs/kharg-level-guide.md`) | `data/maps/kharg-hormuz.json`, Episode 04 rules |
 | `AI/` | `AHavocAIController` | none yet |
 | `Audio/` | `UHavocAudioSubsystem` | none yet |
+| `Assets/` | `UHavocAssetSubsystem` (reads `Config/HavocAssets.ini`; see `docs/fab-assets.md`) | – |
 | `Characters/`, `Combat/`, `Networking/` | existing | – |
+
+## Art and audio assets (Fab / Megascans)
+
+Real third-party assets only; they are not committed. `docs/fab-assets.md` lists the free packs
+to add to the Fab library and the `Content/ThirdParty/<Pack>` target folders.
+`Config/HavocAssets.ini` maps game roles (`Terrain.Sand`, `Character.Marine`, `Aircraft.Falcon`, ...)
+to asset paths and `UHavocAssetSubsystem` reads it, so swapping a pack is config-only.
+Help: <https://dev.epicgames.com/documentation/en-us/fab/using-fab-in-unreal-engine>
 
 ## Game data
 
