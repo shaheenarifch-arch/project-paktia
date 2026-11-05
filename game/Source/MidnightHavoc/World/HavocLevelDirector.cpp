@@ -1,8 +1,11 @@
 #include "World/HavocLevelDirector.h"
 #include "World/HavocSectorVolume.h"
 #include "World/HavocWorldLog.h"
+#include "AI/HavocSquadSubsystem.h"
+#include "Core/HavocEventSubsystem.h"
 #include "Data/HavocDataSubsystem.h"
 #include "Data/HavocMapDef.h"
+#include "Missions/HavocMissionJson.h"
 #include "Missions/HavocMissionSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
@@ -36,9 +39,55 @@ void AHavocLevelDirector::BeginPlay()
         UE_LOG(LogHavocWorld, Warning, TEXT("Map '%s': sector check found problems (see above)"), *MapId.ToString());
     }
 
+    // Subscribe before the mission starts so the first state is seen too.
+    if (const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr)
+    {
+        if (UHavocEventSubsystem* Events = GameInstance->GetSubsystem<UHavocEventSubsystem>())
+        {
+            Events->Subscribe(TEXT("mission:state"), this, GET_FUNCTION_NAME_CHECKED(AHavocLevelDirector, OnMissionState));
+        }
+    }
+
     if (bStartMissionOnBeginPlay)
     {
         StartMission();
+    }
+}
+
+void AHavocLevelDirector::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    if (const UWorld* World = GetWorld())
+    {
+        if (const UGameInstance* GameInstance = World->GetGameInstance())
+        {
+            if (UHavocEventSubsystem* Events = GameInstance->GetSubsystem<UHavocEventSubsystem>())
+            {
+                Events->Unsubscribe(TEXT("mission:state"), this, GET_FUNCTION_NAME_CHECKED(AHavocLevelDirector, OnMissionState));
+            }
+        }
+    }
+    Super::EndPlay(EndPlayReason);
+}
+
+void AHavocLevelDirector::OnMissionState(FName EventName, const FString& Payload)
+{
+    const TSharedRef<FJsonObject> Json = HavocMissionJson::FromString(Payload);
+    FString MissionField, To;
+    if (!Json->TryGetStringField(TEXT("to"), To))
+    {
+        return;
+    }
+    if (Json->TryGetStringField(TEXT("missionId"), MissionField) && MissionField != MissionId.ToString())
+    {
+        return; // another mission's state
+    }
+    Phase = To;
+    if (UWorld* World = GetWorld())
+    {
+        if (UHavocSquadSubsystem* Squads = World->GetSubsystem<UHavocSquadSubsystem>())
+        {
+            Squads->ApplyPhase(Phase);
+        }
     }
 }
 

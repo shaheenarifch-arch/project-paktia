@@ -10,6 +10,8 @@
 #include "Engine/SkeletalMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "AI/HavocSquadLogic.h"
+#include "Player/HavocPlayerCharacter.h"
 
 AHavocEnemyCharacter::AHavocEnemyCharacter()
 {
@@ -57,6 +59,19 @@ void AHavocEnemyCharacter::BeginPlay()
     }
 }
 
+EHavocTeam AHavocEnemyCharacter::TeamOf(const AActor* Actor)
+{
+    if (Actor && Actor->IsA<AHavocPlayerCharacter>())
+    {
+        return EHavocTeam::Allied;
+    }
+    if (const AHavocEnemyCharacter* Unit = Cast<AHavocEnemyCharacter>(Actor))
+    {
+        return Unit->Team;
+    }
+    return EHavocTeam::Opposing;
+}
+
 void AHavocEnemyCharacter::PossessedBy(AController* NewController)
 {
     if (NewController && NewController->IsPlayerController())
@@ -71,6 +86,7 @@ void AHavocEnemyCharacter::ApplyUnitDef(const FHavocUnitDef& Def, FName InSector
 {
     UnitId = Def.Id;
     Faction = Def.Faction;
+    Team = HavocSquad::TeamForFaction(Def.Faction);
     SectorId = InSectorId;
 
     SetMaximumHealthAndFill(40.f + 8.f * Def.AntiInfantry);

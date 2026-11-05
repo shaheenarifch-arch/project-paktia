@@ -305,6 +305,35 @@ for (const [file, doc] of filesIn("world")) {
   }
 }
 
+// --- ai ---
+// data/ai/squad-behaviour.json: tuning for AI squads (game/docs/ai.md). Team comes from faction: coalition is allied, so ISIS can never be.
+for (const [file, doc] of filesIn("ai")) {
+  if (!isObject(doc) || !isObject(doc.tuning)) { fail(file, "tuning", "must be an object"); continue; }
+  for (const k of ["squadTickSeconds", "loseThreatSeconds", "disengageSeconds", "regroupSeconds", "maxFallbackSeconds", "patrolRadiusCm", "coverSearchRadiusCm", "coverGridSpacingCm"]) {
+    if (!isNum(doc.tuning[k]) || doc.tuning[k] <= 0) fail(file, `tuning.${k}`, "must be a number > 0");
+  }
+  if (!isNum(doc.tuning.fallbackStrength) || doc.tuning.fallbackStrength < 0 || doc.tuning.fallbackStrength > 1) fail(file, "tuning.fallbackStrength", "must be a number from 0 to 1");
+  if (isNum(doc.tuning.maxFallbackSeconds) && isNum(doc.tuning.regroupSeconds) && doc.tuning.maxFallbackSeconds < doc.tuning.regroupSeconds) fail(file, "tuning.maxFallbackSeconds", "must be >= regroupSeconds");
+  if (typeof doc.tuning.useEqsCover !== "boolean") fail(file, "tuning.useEqsCover", "must be true or false");
+  const kharg = json.get("data/maps/kharg-hormuz.json");
+  const sectorIds = new Set((kharg?.sectors ?? []).map((s) => s.id));
+  const missionStates = new Set((json.get("data/missions/episode-04-open-strait.json")?.states ?? []).map((s) => s.id));
+  if (!Array.isArray(doc.phases)) { fail(file, "phases", "must be an array"); continue; }
+  doc.phases.forEach((phase, i) => {
+    const at = `phases[${i}]`;
+    if (!missionStates.has(phase.state)) fail(file, `${at}.state`, `unknown Episode 04 state '${phase.state}'`);
+    if (!Array.isArray(phase.deployments)) return fail(file, `${at}.deployments`, "must be an array");
+    phase.deployments.forEach((d, j) => {
+      const dat = `${at}.deployments[${j}]`;
+      if (!factions.has(d.faction)) fail(file, `${dat}.faction`, `unknown faction '${d.faction}'`);
+      if (!sectorIds.has(d.sector)) fail(file, `${dat}.sector`, `unknown sector '${d.sector}'`);
+      if (!isInt(d.size) || d.size < 1 || d.size > 12) fail(file, `${dat}.size`, "must be an integer from 1 to 12");
+      if (!["patrol", "assault"].includes(d.posture)) fail(file, `${dat}.posture`, "must be 'patrol' or 'assault'");
+      if (d.team !== undefined) fail(file, `${dat}.team`, "not allowed: the team comes from the faction (coalition is allied, all others opposing)");
+    });
+  });
+}
+
 if (errors.length > 0) {
   console.error(`\n${errors.length} data validation error(s):`);
   for (const e of errors) console.error(`  - ${e}`);
