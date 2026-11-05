@@ -14,7 +14,7 @@
 #include "Aircraft/HavocHelicopterModel.h"
 #include "Drones/HavocDroneModel.h"
 
-#define HAVOC_AD_TEST_FLAGS (EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+#define HAVOC_AD_TEST_FLAGS (EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
 
 namespace HavocAircraftDroneTests
 {
