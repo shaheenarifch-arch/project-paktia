@@ -40,3 +40,7 @@ Supply keys used by units: `fuel_capacity`/`fuel_burn` → fuel, `ammo_loadout` 
 4. Keep ratings as integers in range; use generic class names and game-balance values, never real specifications.
 5. Optionally add the unit to a template in `formations/`.
 6. Run `npm run validate`.
+
+## Final stage data (Episodes 05–08)
+
+`final-stage/hearts-minds.json` and `final-stage/surrender-defection.json` hold the Hearts & Minds and surrender/defection specs. The resistance faction is `factions/iran-resistance.json`; regime security-force units and formations live in extra files named `iran-regime-security.json` under `units/` and `formations/`. Story bible and rules: `docs/final-stage.md`. Help: Epic docs links are at the end of that file, and the epic issue is <https://github.com/shaheenarifch-arch/project-paktia/issues/48>.

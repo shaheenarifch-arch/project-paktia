@@ -1,0 +1,110 @@
+{
+  "id": "final_stage_surrender_defection",
+  "setting": "real_world_hypothetical",
+  "fictional": false,
+  "summary": "Regime soldiers can be offered surrender. Most conscripts accept when beaten, some defect and join the resistance, and hardline enforcers fight on. Soldiers who surrender are protected; attacking them is penalised.",
+  "offer": {
+    "channels": [
+      "loudspeaker",
+      "broadcast",
+      "resistance_liaison"
+    ],
+    "conditions": [
+      "target_is_outnumbered_or_cut_off",
+      "no_friendly_fire_on_target_during_ceasefire"
+    ],
+    "ceasefireSeconds": 20,
+    "rangeMeters": 150,
+    "broadcastRequiresEffect": "surrender.broadcast",
+    "cooldownSeconds": 60
+  },
+  "acceptance": {
+    "formula": "acceptChance = clamp(baseAccept + (1 - morale) * moraleWeight + resistanceTrust * trustWeight, 0, 0.95); a unit with disposition 'never' always refuses",
+    "moraleWeight": 0.5,
+    "trustWeight": 0.2,
+    "trustSource": "hearts and minds score divided by 100"
+  },
+  "units": [
+    {
+      "unit": "iran_regime_conscript_squad",
+      "disposition": "may_defect",
+      "baseAccept": 0.45,
+      "defectShare": 0.35,
+      "defectsInto": "iran_resistance_defector_squad"
+    },
+    {
+      "unit": "iran_regime_checkpoint_post",
+      "disposition": "may_surrender",
+      "baseAccept": 0.35,
+      "defectShare": 0,
+      "defectsInto": null
+    },
+    {
+      "unit": "iran_regime_security_squad",
+      "disposition": "may_surrender",
+      "baseAccept": 0.15,
+      "defectShare": 0.1,
+      "defectsInto": "iran_resistance_defector_squad"
+    },
+    {
+      "unit": "iran_regime_patrol_vehicle",
+      "disposition": "may_surrender",
+      "baseAccept": 0.2,
+      "defectShare": 0,
+      "defectsInto": null
+    },
+    {
+      "unit": "iran_regime_armored_cordon",
+      "disposition": "may_surrender",
+      "baseAccept": 0.1,
+      "defectShare": 0,
+      "defectsInto": null
+    },
+    {
+      "unit": "iran_regime_command_post",
+      "disposition": "may_surrender",
+      "baseAccept": 0.1,
+      "defectShare": 0,
+      "defectsInto": null
+    },
+    {
+      "unit": "iran_regime_surveillance_drone",
+      "disposition": "never",
+      "baseAccept": 0,
+      "defectShare": 0,
+      "defectsInto": null,
+      "note": "Uncrewed from the player's view: nobody to offer to."
+    },
+    {
+      "unit": "iran_regime_enforcer_squad",
+      "disposition": "may_surrender",
+      "baseAccept": 0.05,
+      "defectShare": 0,
+      "defectsInto": null
+    }
+  ],
+  "outcomes": {
+    "surrender": {
+      "effect": "unit lays down weapons, leaves the fight and is held at a collection point",
+      "heartsMindsEvent": "surrender_accepted"
+    },
+    "defect": {
+      "effect": "unit is replaced by its defectsInto unit under resistance control, and counts toward the defector battalion",
+      "heartsMindsEvent": "defector_welcomed"
+    },
+    "refuse": {
+      "effect": "ceasefire ends and the unit fights on; the offer may be repeated after the cooldown",
+      "heartsMindsEvent": null
+    }
+  },
+  "protection": {
+    "surrenderedUnitsAreNotTargets": true,
+    "firingOnSurrenderPenalty": "surrendered_fired_upon",
+    "collectionPointRequired": true,
+    "unattendedPrisonerPenalty": "detainee_mistreated"
+  },
+  "limits": {
+    "defectorsPerEpisodeCap": 4,
+    "note": "Defectors only come from units with a defectShare above 0. Hardline enforcers can be offered surrender but almost never accept."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "gulshar_capital",
+  "name": "Gulshar, the capital",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "note": "Invented place for play. Names and layout are fictional composites with Iranian-inspired architecture; not a survey and not meant to match any real town.",
+  "sectors": [
+    {"id": "assembly_hall", "name": "Resistance assembly hall", "role": "ally_base"},
+    {"id": "northern_districts", "name": "Northern residential districts", "role": "protected_civilian"},
+    {"id": "central_square", "name": "Central square", "role": "protected_civilian"},
+    {"id": "state_broadcast_house", "name": "State broadcast house", "role": "broadcast"},
+    {"id": "guard_barracks", "name": "Capital guard barracks", "role": "regime_position"},
+    {"id": "ministry_quarter", "name": "Ministry quarter and public archives", "role": "protected_infrastructure"},
+    {"id": "ring_road", "name": "Ring road and approaches", "role": "route"}
+  ],
+  "surpriseEvents": ["communications_outage", "nightfall", "crowd_surge"]
+}

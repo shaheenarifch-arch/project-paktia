@@ -1,0 +1,17 @@
+{
+  "id": "first_light_highlands",
+  "name": "Highland border country: the road to Qanat Village",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "note": "Invented place for play. Names and layout are fictional composites with Iranian-inspired architecture; not a survey and not meant to match any real town.",
+  "sectors": [
+    {"id": "coalition_staging", "name": "Coalition staging area", "role": "attacker_staging"},
+    {"id": "border_ridge_pass", "name": "Border ridge pass", "role": "approach_route"},
+    {"id": "dry_wadi_route", "name": "Dry wadi route", "role": "approach_route"},
+    {"id": "resistance_safehouse", "name": "Resistance safehouse in the foothills", "role": "ally_base"},
+    {"id": "qanat_village", "name": "Qanat Village and its water channels", "role": "protected_civilian"},
+    {"id": "aid_drop_zone", "name": "Aid drop zone", "role": "aid_delivery"},
+    {"id": "regime_checkpoint_ridge", "name": "Regime checkpoint on the ridge road", "role": "regime_position"}
+  ],
+  "surpriseEvents": ["sandstorm", "communications_outage", "nightfall"]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "iran-resistance",
+  "name": "Iranian Resistance (invented network)",
+  "setting": "real_world_hypothetical",
+  "fictional": false,
+  "playable": true,
+  "doctrine": "A civilian-led resistance that frees its own country with coalition support, wins by protecting people and welcoming surrender, and hands power to an elected government.",
+  "strengths": [
+    "Local knowledge and popular trust",
+    "Defectors who bring skills and intelligence",
+    "Neighbourhood guards that hold liberated districts"
+  ],
+  "weaknesses": [
+    "Light weapons and little armor",
+    "Thin supply lines",
+    "Loses support quickly if civilians are harmed"
+  ],
+  "aiProfile": "ai_resistance_hearts_and_minds"
+}

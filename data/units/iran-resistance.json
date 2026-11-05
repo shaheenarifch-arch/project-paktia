@@ -1,0 +1,361 @@
+{
+  "faction": "iran-resistance",
+  "units": [
+    {
+      "id": "iran_resistance_cell_squad",
+      "name": "Resistance cell squad",
+      "faction": "iran-resistance",
+      "branch": "infantry",
+      "role": "light_infantry",
+      "echelon": "squad",
+      "crew": 8,
+      "cost_points": 8,
+      "build_time_days": 3,
+      "components": {
+        "small_arms_kit": 8,
+        "comms_set": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 8,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_resistance_neighbourhood_guard",
+      "name": "Neighbourhood guard squad",
+      "faction": "iran-resistance",
+      "branch": "infantry",
+      "role": "local_defence",
+      "echelon": "squad",
+      "crew": 10,
+      "cost_points": 5,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 10
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 6,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_resistance_defector_squad",
+      "name": "Defector squad",
+      "faction": "iran-resistance",
+      "branch": "infantry",
+      "role": "line_infantry",
+      "echelon": "squad",
+      "crew": 9,
+      "cost_points": 9,
+      "build_time_days": 3,
+      "components": {
+        "small_arms_kit": 9,
+        "comms_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 1,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_resistance_scout_team",
+      "name": "Resistance scout team",
+      "faction": "iran-resistance",
+      "branch": "infantry",
+      "role": "reconnaissance",
+      "echelon": "team",
+      "crew": 4,
+      "cost_points": 6,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 4,
+        "optics_set": 1,
+        "comms_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 2,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 5,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 1,
+      "stealth": 9,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_resistance_medical_aid_team",
+      "name": "Medical aid team",
+      "faction": "iran-resistance",
+      "branch": "support",
+      "role": "medical_aid",
+      "echelon": "team",
+      "crew": 5,
+      "cost_points": 7,
+      "build_time_days": 3,
+      "components": {
+        "comms_set": 1,
+        "small_arms_kit": 2
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 1,
+      "stealth": 6,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_resistance_light_truck",
+      "name": "Resistance light truck",
+      "faction": "iran-resistance",
+      "branch": "armor",
+      "role": "light_vehicle",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 18,
+      "build_time_days": 5,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "comms_set": 1,
+        "gun_system": 1
+      },
+      "mobility": 7,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.4,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 3,
+      "stealth": 4,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_resistance_aid_truck",
+      "name": "Aid convoy truck",
+      "faction": "iran-resistance",
+      "branch": "logistics",
+      "role": "aid_transport",
+      "echelon": "section",
+      "crew": 2,
+      "cost_points": 12,
+      "build_time_days": 4,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "comms_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0.5,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 3,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_resistance_signals_team",
+      "name": "Resistance signals team",
+      "faction": "iran-resistance",
+      "branch": "support",
+      "role": "communications",
+      "echelon": "team",
+      "crew": 4,
+      "cost_points": 10,
+      "build_time_days": 4,
+      "components": {
+        "comms_set": 2,
+        "electronics_suite": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 3,
+        "resist": 4
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 7,
+      "tech_requirements": [],
+      "era": "modern"
+    }
+  ]
+}

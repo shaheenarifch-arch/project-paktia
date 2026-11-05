@@ -1,0 +1,40 @@
+{
+  "id": "final_stage_hearts_minds",
+  "setting": "real_world_hypothetical",
+  "fictional": false,
+  "summary": "A 0-100 score for how much the Iranian people trust the resistance and its coalition supporters. It rises when civilians are protected, surrenders are accepted and aid is delivered; it falls when civilians or surrendered soldiers are harmed. It unlocks resistance support and selects the ending.",
+  "score": { "min": 0, "max": 100, "start": 30, "carriesBetweenEpisodes": true },
+  "gains": {
+    "civilian_protected": { "points": 0.25, "per": "civilian moved to safety or shielded from danger", "perEpisodeCap": 12 },
+    "surrender_accepted": { "points": 1, "per": "regime soldier who surrenders and is treated fairly", "perEpisodeCap": 8 },
+    "defector_welcomed": { "points": 1.5, "per": "regime soldier who defects and joins the resistance", "perEpisodeCap": 6 },
+    "aid_delivered": { "points": 3, "per": "aid convoy that reaches its destination", "perEpisodeCap": 10 }
+  },
+  "penalties": {
+    "civilian_harmed": { "points": -8, "per": "civilian injured or killed by coalition or resistance action", "uncapped": true },
+    "surrendered_fired_upon": { "points": -12, "per": "surrendering or surrendered soldier attacked", "uncapped": true },
+    "civilian_infrastructure_damaged": { "points": -4, "per": "hospital, water, power, archive or polling site damaged", "uncapped": true },
+    "aid_convoy_lost": { "points": -3, "per": "aid convoy destroyed or turned back", "uncapped": true },
+    "detainee_mistreated": { "points": -6, "per": "prisoner of war held or moved without care", "uncapped": true }
+  },
+  "rules": [
+    "The enemy is the regime's security forces, never the Iranian people. Civilians are never targets.",
+    "Gains are capped per category per episode so one easy action cannot win the arc; penalties are not capped.",
+    "The score is clamped to 0-100 and carries into the next episode.",
+    "If civilian_harmed reaches civilianHarmFailCount in one episode, that episode fails and restarts from its last checkpoint.",
+    "Every event carries the sector it happened in so the debrief can show where trust was won or lost."
+  ],
+  "civilianHarmFailCount": 5,
+  "supportTiers": [
+    { "id": "support_scouts", "minScore": 20, "name": "Resistance scouts", "unlocks": { "formations": ["iran_resistance_cell_network"], "effects": ["reveal_regime_positions"] } },
+    { "id": "support_guard", "minScore": 40, "name": "Neighbourhood guards", "unlocks": { "formations": ["iran_resistance_neighbourhood_guard_force", "iran_resistance_aid_convoy_group"], "effects": ["guards_hold_liberated_districts"] } },
+    { "id": "support_defectors", "minScore": 60, "name": "Defector battalion", "unlocks": { "formations": ["iran_resistance_defector_battalion"], "effects": ["surrender_offers_easier"] } },
+    { "id": "support_uprising", "minScore": 80, "name": "City uprising", "unlocks": { "formations": ["iran_resistance_uprising_force"], "effects": ["crowds_shelter_in_place"] } }
+  ],
+  "endings": [
+    { "id": "elected_government", "minScore": 75, "outcome": "SUCCESS", "state": "E08_END_ELECTED", "summary": "A free, elected civilian government takes office with the trust of its people." },
+    { "id": "fragile_handover", "minScore": 45, "outcome": "PARTIAL", "state": "E08_END_FRAGILE", "summary": "An elected government takes office, but trust is thin and the peace is fragile." },
+    { "id": "unfinished_peace", "minScore": 0, "outcome": "PARTIAL", "state": "E08_END_UNFINISHED", "summary": "The vote happened, but the transition is contested and the work is unfinished." }
+  ],
+  "endingRule": "At E08_ENDING pick the first ending, from highest minScore down, whose minScore is at most the current score."
+}
