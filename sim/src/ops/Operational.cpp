@@ -71,7 +71,7 @@ std::size_t Theater::AddBrigade(std::string id, const std::string& formation, st
 
 void Theater::Attach(World& world) {
   world.RegisterSystem(Layer::Operational, [this](World& w) { StepHour(&w); });
-  world.SetCommandHandler([this](World& w, const Command& c) {
+  world.AddCommandHandler([this](World& w, const Command& c) {
     if (c.entity >= brigades_.size()) return;
     const auto b = static_cast<std::size_t>(c.entity);
     if (c.kind == kCmdSetPosture && c.a >= 0 && c.a <= static_cast<std::int64_t>(Posture::Refit)) {

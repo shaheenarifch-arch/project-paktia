@@ -53,8 +53,14 @@ class World {
   // Systems run in registration order within their layer. Layers run
   // strategic -> operational -> tactical on ticks where they fire.
   void RegisterSystem(Layer layer, System s);
-  void SetCommandHandler(CommandHandler h) { handler_ = std::move(h); }
-  void ApplyCommand(const Command& c) { if (handler_) handler_(*this, c); }
+  // SetCommandHandler replaces all handlers; AddCommandHandler appends one so
+  // several layers (operational, strategic) can each handle their own kinds.
+  // Every handler sees every command, in registration order.
+  void SetCommandHandler(CommandHandler h) { handlers_.clear(); handlers_.push_back(std::move(h)); }
+  void AddCommandHandler(CommandHandler h) { handlers_.push_back(std::move(h)); }
+  void ApplyCommand(const Command& c) {
+    for (std::size_t i = 0; i < handlers_.size(); ++i) if (handlers_[i]) handlers_[i](*this, c);
+  }
 
   // Advance one master tick.
   void Step() { clock_.Advance(); }
@@ -87,7 +93,7 @@ class World {
   EventLog log_;
   EntityId nextEntity_ = 1;
   std::vector<System> systems_[3];
-  CommandHandler handler_;
+  std::vector<CommandHandler> handlers_;
 };
 
 }  // namespace havoc
