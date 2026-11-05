@@ -42,7 +42,7 @@ jobs:
 
       - name: Show test results and editor log (on failure)
         if: failure()
-        shell: pwsh
+        shell: powershell
         run: |
           # Prints why the headless tests failed straight into the run log (no artifact download needed).
           # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/automation-test-framework-in-unreal-engine
@@ -56,7 +56,7 @@ jobs:
 
       - name: Zip the packaged build
         if: success()
-        shell: pwsh
+        shell: powershell
         run: |
           Compress-Archive -Path "$env:GITHUB_WORKSPACE\out\Windows\*" `
             -DestinationPath "$env:GITHUB_WORKSPACE\MidnightHavoc-Win64.zip" -Force
@@ -103,11 +103,11 @@ jobs:
           path: smoke-in
 
       - name: Unzip build
-        shell: pwsh
+        shell: powershell
         run: Expand-Archive -Path smoke-in\MidnightHavoc-Win64.zip -DestinationPath smoke-build -Force
 
       - name: Smoke run (3 min) and parse results
-        shell: pwsh
+        shell: powershell
         run: >
           ./game/scripts/smoke-run.ps1
           -BuildDir "$env:GITHUB_WORKSPACE\smoke-build"
@@ -116,7 +116,7 @@ jobs:
 
       - name: Job summary
         if: always()
-        shell: pwsh
+        shell: powershell
         run: |
           if (Test-Path smoke-out\summary.md) { Get-Content smoke-out\summary.md -Raw | Add-Content $env:GITHUB_STEP_SUMMARY }
           else { 'Smoke test produced no summary (script failed before writing).' | Add-Content $env:GITHUB_STEP_SUMMARY }
