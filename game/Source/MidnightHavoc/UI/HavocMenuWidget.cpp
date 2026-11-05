@@ -59,10 +59,10 @@ void UHavocMenuWidget::AddLabel(const FString& Text, int32 Size, const FLinearCo
 {
     UTextBlock* Block = HavocUI::MakeText(WidgetTree, Text, Size, Color);
     Block->SetJustification(ETextJustify::Center);
-    if (UVerticalBoxSlot* Slot = List->AddChildToVerticalBox(Block))
+    if (UVerticalBoxSlot* BoxSlot = List->AddChildToVerticalBox(Block))
     {
-        Slot->SetPadding(FMargin(40.f, 6.f));
-        Slot->SetHorizontalAlignment(HAlign_Center);
+        BoxSlot->SetPadding(FMargin(40.f, 6.f));
+        BoxSlot->SetHorizontalAlignment(HAlign_Center);
     }
 }
 
@@ -75,10 +75,10 @@ void UHavocMenuWidget::AddButton(const FString& Label, FName Handler)
     FScriptDelegate Delegate;
     Delegate.BindUFunction(this, Handler);
     Button->OnClicked.Add(Delegate);
-    if (UVerticalBoxSlot* Slot = List->AddChildToVerticalBox(Button))
+    if (UVerticalBoxSlot* BoxSlot = List->AddChildToVerticalBox(Button))
     {
-        Slot->SetPadding(FMargin(0.f, 6.f));
-        Slot->SetHorizontalAlignment(HAlign_Fill);
+        BoxSlot->SetPadding(FMargin(0.f, 6.f));
+        BoxSlot->SetHorizontalAlignment(HAlign_Fill);
     }
 }
 

@@ -29,7 +29,7 @@ jobs:
           -platform=Win64 -clientconfig=Development
           -build -cook -stage -pak -archive
           -archivedirectory="%GITHUB_WORKSPACE%\out"
-          -unattended -utf8output -nop4 -NoCompileEditor
+          -unattended -utf8output -nop4
 
       - name: Automation tests (headless)
         shell: cmd
