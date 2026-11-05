@@ -1,0 +1,17 @@
+{
+  "id": "homeland_handover",
+  "name": "The handover: interim assembly and the polling districts",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "note": "Invented place for play. Names and layout are fictional composites with Iranian-inspired architecture; not a survey and not meant to match any real town.",
+  "sectors": [
+    {"id": "interim_assembly_hall", "name": "Interim assembly hall", "role": "civilian_government"},
+    {"id": "polling_districts_north", "name": "Northern polling districts", "role": "protected_civilian"},
+    {"id": "polling_districts_south", "name": "Southern polling districts", "role": "protected_civilian"},
+    {"id": "ballot_depot", "name": "Ballot depot", "role": "protected_infrastructure"},
+    {"id": "supply_road", "name": "Supply road to the districts", "role": "route"},
+    {"id": "remnant_enclave", "name": "Hardliner remnant enclave", "role": "regime_position"},
+    {"id": "coalition_withdrawal_point", "name": "Coalition withdrawal point", "role": "attacker_staging"}
+  ],
+  "surpriseEvents": ["sandstorm", "communications_outage", "nightfall"]
+}

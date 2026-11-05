@@ -1,0 +1,17 @@
+{
+  "id": "shahrbaran_city",
+  "name": "Shahrbaran, a provincial city",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "note": "Invented place for play. Names and layout are fictional composites with Iranian-inspired architecture; not a survey and not meant to match any real town.",
+  "sectors": [
+    {"id": "resistance_staging", "name": "Resistance and coalition staging yards", "role": "ally_base"},
+    {"id": "river_bridges", "name": "River bridges", "role": "chokepoint"},
+    {"id": "old_bazaar_quarter", "name": "Old bazaar quarter", "role": "protected_civilian"},
+    {"id": "hospital_district", "name": "Hospital district", "role": "protected_civilian"},
+    {"id": "detention_compound", "name": "Security detention compound", "role": "rescue_objective"},
+    {"id": "city_radio_station", "name": "City radio station", "role": "broadcast"},
+    {"id": "security_headquarters", "name": "Regime security headquarters", "role": "regime_position"}
+  ],
+  "surpriseEvents": ["communications_outage", "nightfall", "crowd_surge"]
+}

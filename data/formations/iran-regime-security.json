@@ -1,0 +1,52 @@
+{
+  "formations": [
+    {
+      "id": "iran_regime_provincial_garrison",
+      "faction": "iran",
+      "name": "Regime provincial garrison",
+      "units": {
+        "iran_regime_conscript_squad": 6,
+        "iran_regime_checkpoint_post": 3,
+        "iran_regime_patrol_vehicle": 2,
+        "iran_regime_security_squad": 2
+      }
+    },
+    {
+      "id": "iran_regime_city_security_cordon",
+      "faction": "iran",
+      "name": "Regime city security cordon",
+      "units": {
+        "iran_regime_security_squad": 6,
+        "iran_regime_conscript_squad": 4,
+        "iran_regime_checkpoint_post": 4,
+        "iran_regime_patrol_vehicle": 4,
+        "iran_regime_armored_cordon": 2,
+        "iran_regime_surveillance_drone": 1,
+        "iran_regime_command_post": 1
+      }
+    },
+    {
+      "id": "iran_regime_capital_guard",
+      "faction": "iran",
+      "name": "Regime capital guard",
+      "units": {
+        "iran_regime_enforcer_squad": 6,
+        "iran_regime_security_squad": 6,
+        "iran_regime_armored_cordon": 4,
+        "iran_regime_patrol_vehicle": 4,
+        "iran_regime_surveillance_drone": 2,
+        "iran_regime_command_post": 2
+      }
+    },
+    {
+      "id": "iran_regime_hardliner_remnant",
+      "faction": "iran",
+      "name": "Regime hardliner remnant",
+      "units": {
+        "iran_regime_enforcer_squad": 4,
+        "iran_regime_patrol_vehicle": 2,
+        "iran_regime_command_post": 1
+      }
+    }
+  ]
+}

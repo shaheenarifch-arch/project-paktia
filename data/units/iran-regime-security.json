@@ -1,0 +1,369 @@
+{
+  "faction": "iran",
+  "units": [
+    {
+      "id": "iran_regime_conscript_squad",
+      "name": "Regime conscript garrison squad",
+      "faction": "iran",
+      "branch": "infantry",
+      "role": "conscript_garrison",
+      "echelon": "squad",
+      "crew": 9,
+      "cost_points": 5,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 9
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 2,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 1
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 4,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_regime_security_squad",
+      "name": "Regime internal security squad",
+      "faction": "iran",
+      "branch": "infantry",
+      "role": "internal_security",
+      "echelon": "squad",
+      "crew": 8,
+      "cost_points": 8,
+      "build_time_days": 3,
+      "components": {
+        "small_arms_kit": 8,
+        "comms_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 1,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_regime_enforcer_squad",
+      "name": "Regime hardline enforcer squad",
+      "faction": "iran",
+      "branch": "infantry",
+      "role": "hardline_security",
+      "echelon": "squad",
+      "crew": 8,
+      "cost_points": 10,
+      "build_time_days": 4,
+      "components": {
+        "small_arms_kit": 8,
+        "comms_set": 1
+      },
+      "mobility": 3,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 5,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 3,
+        "ammo_missile_at": 1
+      },
+      "maintenance_hours": 1,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_regime_checkpoint_post",
+      "name": "Regime checkpoint post",
+      "faction": "iran",
+      "branch": "infantry",
+      "role": "static_checkpoint",
+      "echelon": "squad",
+      "crew": 6,
+      "cost_points": 6,
+      "build_time_days": 2,
+      "components": {
+        "small_arms_kit": 6,
+        "comms_set": 1
+      },
+      "mobility": 1,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 3,
+        "antiArmor": 2,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 1,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0,
+      "fuel_burn": 0,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 1,
+      "stealth": 3,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_regime_patrol_vehicle",
+      "name": "Regime security patrol vehicle",
+      "faction": "iran",
+      "branch": "armor",
+      "role": "patrol_vehicle",
+      "echelon": "section",
+      "crew": 3,
+      "cost_points": 20,
+      "build_time_days": 6,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "comms_set": 1,
+        "gun_system": 1
+      },
+      "mobility": 7,
+      "armor": {
+        "front": 2,
+        "side": 2,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 3,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 1,
+        "resist": 2
+      },
+      "fuel_capacity": 0.4,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 2
+      },
+      "maintenance_hours": 3,
+      "stealth": 4,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_regime_armored_cordon",
+      "name": "Regime armored cordon vehicle",
+      "faction": "iran",
+      "branch": "armor",
+      "role": "armored_support",
+      "echelon": "platoon",
+      "crew": 4,
+      "cost_points": 45,
+      "build_time_days": 10,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "armor_plating": 1,
+        "gun_system": 1,
+        "optics_set": 1
+      },
+      "mobility": 5,
+      "armor": {
+        "front": 5,
+        "side": 4,
+        "top": 3
+      },
+      "firepower": {
+        "antiInfantry": 4,
+        "antiArmor": 5,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 4,
+        "thermal": 2,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 3
+      },
+      "fuel_capacity": 1.0,
+      "fuel_burn": 0.6,
+      "ammo_loadout": {
+        "ammo_small_arms": 2,
+        "ammo_tank_shell": 2
+      },
+      "maintenance_hours": 5,
+      "stealth": 3,
+      "tech_requirements": [
+        "armor_doctrine"
+      ],
+      "era": "modern"
+    },
+    {
+      "id": "iran_regime_surveillance_drone",
+      "name": "Regime surveillance drone",
+      "faction": "iran",
+      "branch": "air",
+      "role": "surveillance",
+      "echelon": "section",
+      "crew": 2,
+      "cost_points": 22,
+      "build_time_days": 6,
+      "components": {
+        "drone_airframe": 1,
+        "optics_set": 1,
+        "comms_set": 1
+      },
+      "mobility": 8,
+      "armor": {
+        "front": 0,
+        "side": 0,
+        "top": 0
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 6,
+        "thermal": 4,
+        "radar": 1
+      },
+      "ew": {
+        "jam": 2,
+        "resist": 2
+      },
+      "fuel_capacity": 0.3,
+      "fuel_burn": 0.2,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 2,
+      "stealth": 5,
+      "tech_requirements": [],
+      "era": "modern"
+    },
+    {
+      "id": "iran_regime_command_post",
+      "name": "Regime command post",
+      "faction": "iran",
+      "branch": "support",
+      "role": "command_post",
+      "echelon": "section",
+      "crew": 6,
+      "cost_points": 25,
+      "build_time_days": 6,
+      "components": {
+        "vehicle_chassis": 1,
+        "engine": 1,
+        "comms_set": 2,
+        "electronics_suite": 1
+      },
+      "mobility": 4,
+      "armor": {
+        "front": 1,
+        "side": 1,
+        "top": 1
+      },
+      "firepower": {
+        "antiInfantry": 1,
+        "antiArmor": 1,
+        "antiAir": 1
+      },
+      "sensors": {
+        "optics": 3,
+        "thermal": 2,
+        "radar": 2
+      },
+      "ew": {
+        "jam": 4,
+        "resist": 4
+      },
+      "fuel_capacity": 0.5,
+      "fuel_burn": 0.3,
+      "ammo_loadout": {
+        "ammo_small_arms": 1
+      },
+      "maintenance_hours": 3,
+      "stealth": 3,
+      "tech_requirements": [],
+      "era": "modern"
+    }
+  ]
+}

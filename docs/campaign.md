@@ -1,6 +1,6 @@
 # Campaign
 
-Four episodes, each handing results to the next. Episodes 1–3 are fictional.
+Four episodes, each handing results to the next. The final stage (Episodes 05–08, Iran liberation arc) is planned in `docs/final-stage.md`. Help: `docs/final-stage.md` and the Epic issue <https://github.com/shaheenarifch-arch/project-paktia/issues/48>. Episodes 1–3 are fictional.
 Episode 4 is a declared real-world hypothetical (see `README.md`, Safety boundary).
 
 | Episode | Operation | Where | Code | Data |

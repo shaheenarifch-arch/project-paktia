@@ -1,0 +1,60 @@
+{
+  "formations": [
+    {
+      "id": "iran_resistance_cell_network",
+      "faction": "iran-resistance",
+      "name": "Resistance cell network",
+      "units": {
+        "iran_resistance_cell_squad": 4,
+        "iran_resistance_scout_team": 2,
+        "iran_resistance_light_truck": 2,
+        "iran_resistance_signals_team": 1,
+        "iran_resistance_medical_aid_team": 1
+      }
+    },
+    {
+      "id": "iran_resistance_neighbourhood_guard_force",
+      "faction": "iran-resistance",
+      "name": "Neighbourhood guard force",
+      "units": {
+        "iran_resistance_neighbourhood_guard": 6,
+        "iran_resistance_cell_squad": 2,
+        "iran_resistance_medical_aid_team": 2
+      }
+    },
+    {
+      "id": "iran_resistance_defector_battalion",
+      "faction": "iran-resistance",
+      "name": "Defector battalion",
+      "units": {
+        "iran_resistance_defector_squad": 8,
+        "iran_resistance_light_truck": 3,
+        "iran_resistance_medical_aid_team": 1,
+        "iran_resistance_signals_team": 1
+      }
+    },
+    {
+      "id": "iran_resistance_aid_convoy_group",
+      "faction": "iran-resistance",
+      "name": "Aid convoy group",
+      "units": {
+        "iran_resistance_aid_truck": 4,
+        "iran_resistance_medical_aid_team": 2,
+        "iran_resistance_neighbourhood_guard": 2
+      }
+    },
+    {
+      "id": "iran_resistance_uprising_force",
+      "faction": "iran-resistance",
+      "name": "City uprising force",
+      "units": {
+        "iran_resistance_neighbourhood_guard": 10,
+        "iran_resistance_cell_squad": 6,
+        "iran_resistance_defector_squad": 4,
+        "iran_resistance_light_truck": 4,
+        "iran_resistance_medical_aid_team": 3,
+        "iran_resistance_signals_team": 2
+      }
+    }
+  ]
+}
