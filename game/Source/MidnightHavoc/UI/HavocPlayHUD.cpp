@@ -16,7 +16,11 @@
 #include "Missions/HavocMissionSubsystem.h"
 #include "Player/HavocPlayerCharacter.h"
 #include "Player/HavocPlayerController.h"
+#include "Player/HavocPlaySettings.h"
+#include "UI/HavocHudModel.h"
+#include "UI/HavocMinimapWidget.h"
 #include "UI/HavocUIHelpers.h"
+#include "Engine/GameInstance.h"
 
 void UHavocPlayHUD::NativeOnInitialized()
 {
@@ -61,13 +65,30 @@ void UHavocPlayHUD::NativeOnInitialized()
     AmmoText->SetJustification(ETextJustify::Right);
     Place(Canvas, AmmoText, FAnchors(1.f, 1.f), FVector2D(1.f, 1.f), FVector2D(-30.f, -30.f), FVector2D(420.f, 50.f));
 
+    // Top right: minimap with the sector name under it; the status block and links sit below.
+    Minimap = WidgetTree->ConstructWidget<UHavocMinimapWidget>(UHavocMinimapWidget::StaticClass(), TEXT("Minimap"));
+    Place(Canvas, Minimap, FAnchors(1.f, 0.f), FVector2D(1.f, 0.f), FVector2D(-30.f, 20.f), FVector2D(260.f, 200.f));
+
+    SectorText = MakeText(WidgetTree, TEXT(""), 16, FLinearColor(1.f, 0.85f, 0.3f));
+    SectorText->SetJustification(ETextJustify::Right);
+    Place(Canvas, SectorText, FAnchors(1.f, 0.f), FVector2D(1.f, 0.f), FVector2D(-30.f, 224.f), FVector2D(420.f, 28.f));
+
     StatusText = MakeText(WidgetTree, TEXT(""), 18, FLinearColor(0.85f, 0.95f, 1.f));
     StatusText->SetJustification(ETextJustify::Right);
-    Place(Canvas, StatusText, FAnchors(1.f, 0.f), FVector2D(1.f, 0.f), FVector2D(-30.f, 120.f), FVector2D(460.f, 140.f));
+    Place(Canvas, StatusText, FAnchors(1.f, 0.f), FVector2D(1.f, 0.f), FVector2D(-30.f, 256.f), FVector2D(560.f, 120.f));
 
     LinkText = MakeText(WidgetTree, TEXT(""), 22, FLinearColor(0.4f, 1.f, 0.6f));
     LinkText->SetJustification(ETextJustify::Right);
-    Place(Canvas, LinkText, FAnchors(1.f, 0.f), FVector2D(1.f, 0.f), FVector2D(-30.f, 260.f), FVector2D(560.f, 60.f));
+    Place(Canvas, LinkText, FAnchors(1.f, 0.f), FVector2D(1.f, 0.f), FVector2D(-30.f, 380.f), FVector2D(560.f, 60.f));
+
+    // Top left: the objective tracker.
+    TrackerText = MakeText(WidgetTree, TEXT(""), 17, FLinearColor(0.85f, 0.95f, 1.f));
+    Place(Canvas, TrackerText, FAnchors(0.f, 0.f), FVector2D(0.f, 0.f), FVector2D(30.f, 20.f), FVector2D(420.f, 190.f));
+
+    // Bottom centre, above the hint line: vehicle instruments while flying the Raven or Falcon.
+    VehicleText = MakeText(WidgetTree, TEXT(""), 20, FLinearColor(0.4f, 1.f, 0.6f));
+    VehicleText->SetJustification(ETextJustify::Center);
+    Place(Canvas, VehicleText, FAnchors(0.5f, 1.f), FVector2D(0.5f, 1.f), FVector2D(0.f, -170.f), FVector2D(900.f, 60.f));
 }
 
 void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -79,10 +100,24 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     const UHavocMissionSubsystem* Missions = GetWorld() ? GetWorld()->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
     UHavocOpenStraitMission* Mission = Missions ? Missions->GetOpenStrait() : nullptr;
 
-    // Objective, hint, toast.
-    ObjectiveText->SetText(FText::FromString(Mission && Mission->GetRunner() ? Mission->GetRunner()->GetObjective() : FString()));
-    HintText->SetText(FText::FromString(Flow ? Flow->GetHint() : FString()));
-    ToastText->SetText(FText::FromString(Flow ? Flow->GetToast() : FString()));
+    // Subtitles setting: when off, the toast and hint lines are hidden (the objective and tracker stay).
+    const UGameInstance* GI = GetGameInstance();
+    const UHavocPlaySettings* Settings = GI ? GI->GetSubsystem<UHavocPlaySettings>() : nullptr;
+    const bool bSubtitles = !Settings || Settings->bSubtitles;
+    const FHavocHudSnapshot Snapshot = HavocHudModel::Build(Mission);
+
+    ObjectiveText->SetText(FText::FromString(Snapshot.Objective));
+    TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : FString()));
+    HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : FString()));
+    ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : FString()));
+
+    // Current sector, from the minimap's sector volumes.
+    FString SectorName;
+    if (Minimap && !Minimap->GetCurrentSector().IsNone())
+    {
+        SectorName = TEXT("Sector: ") + Minimap->GetCurrentSector().ToString().Replace(TEXT("_"), TEXT(" "));
+    }
+    SectorText->SetText(FText::FromString(SectorName));
 
     // Marine health and ammo (the Marine stays alive in the world while the Raven or Falcon is flown).
     const AHavocPlayerCharacter* Marine = PC ? PC->GetMarine() : nullptr;
@@ -98,17 +133,12 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
             : *FString::Printf(TEXT("KR-47  %d / %d"), Weapon->AmmoInMagazine, Weapon->ReserveAmmo)));
     }
 
-    // Mission status block.
+    // Mission status block: reinforcements, terminal, lane progress, escort, Falcon.
     FString Status;
     if (Mission)
     {
-        const FHavocEpisode04Result R = Mission->GetResult();
-        Status += FString::Printf(TEXT("Reinforcements: %d\nTerminal integrity: %d%%"), Mission->GetReinforcements(), FMath::RoundToInt(R.TerminalIntegrity * 100.0));
-        if (R.TankersThrough + R.TankersLost > 0 || Mission->GetState() == TEXT("E04_TANKER_ESCORT"))
-        {
-            Status += FString::Printf(TEXT("\nTankers through: %d  lost: %d"), R.TankersThrough, R.TankersLost);
-        }
-        if (Mission->HasAirSupport() && Flow)
+        Status = Snapshot.StatusBlock();
+        if (Snapshot.bAirSupport && Flow)
         {
             Status += TEXT("\n") + Flow->GetSupportStatus();
         }
@@ -130,5 +160,17 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         Link = TEXT("FALCON: Space = lift, W/A/S/D = tilt, Q/E = yaw, Tab = back to Marine");
     }
     LinkText->SetText(FText::FromString(Link));
+
+    // Vehicle instruments: altitude above the sea (world Z, cm to m) and speed while flying.
+    FString Vehicle;
+    if (const APawn* Flying = PC ? PC->GetPawn() : nullptr)
+    {
+        if (Cast<AHavocDrone>(Flying) || Cast<AHavocFalconHelicopter>(Flying))
+        {
+            Vehicle = FString::Printf(TEXT("%s   ALT %d m   SPD %d m/s"), Cast<AHavocDrone>(Flying) ? TEXT("RAVEN") : TEXT("FALCON"),
+                FMath::RoundToInt(Flying->GetActorLocation().Z / 100.0), FMath::RoundToInt(Flying->GetVelocity().Size() / 100.0));
+        }
+    }
+    VehicleText->SetText(FText::FromString(Vehicle));
     Crosshair->SetVisibility(Marine && PC && PC->GetPawn() == Marine ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 }

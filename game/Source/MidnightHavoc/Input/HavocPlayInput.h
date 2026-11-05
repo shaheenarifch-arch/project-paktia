@@ -16,6 +16,7 @@
 class APlayerController;
 class UInputAction;
 class UInputMappingContext;
+class UHavocPlaySettings;
 
 UCLASS()
 class MIDNIGHTHAVOC_API UHavocPlayInput : public UGameInstanceSubsystem
@@ -64,6 +65,9 @@ public:
     UPROPERTY() TObjectPtr<UInputAction> CollectiveAction;
     UPROPERTY() TObjectPtr<UInputAction> CyclicAction;
     UPROPERTY() TObjectPtr<UInputAction> YawAction;
+
+    /** Re-maps the rebindable keys (interact, reload, Raven, Falcon, return) from the saved settings. */
+    void ApplyBindings(const UHavocPlaySettings& Settings);
 
     /** Adds the Meta context only (idempotent). Used after possessing a pawn that clears all mappings. */
     void EnsureMeta(APlayerController* Controller) const;
