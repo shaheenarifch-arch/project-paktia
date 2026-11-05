@@ -9,6 +9,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "Net/UnrealNetwork.h"
+#include "AI/HavocEnemyCharacter.h"
 #include "Player/HavocPlayerCharacter.h"
 #include "Perception/AISense_Hearing.h"
 #include "TimerManager.h"
@@ -132,11 +133,9 @@ void UHavocWeaponComponent::ApplyValidatedFireIntent(const MidnightHavoc::FFireI
         bool bDamaged = false;
         if (AHavocCharacter* Character = Cast<AHavocCharacter>(Target))
         {
-            // Player rounds hurt enemies and enemy rounds hurt the player; no friendly fire between AI units.
+            // Rounds hurt the other team only: the player and allied squads against opposing units. No friendly fire.
             // Decided by class, not controller, so the Marine stays a valid target while the Raven is flown.
-            const bool bOwnerIsPlayer = Owner->IsA<AHavocPlayerCharacter>();
-            const bool bTargetIsPlayer = Character->IsA<AHavocPlayerCharacter>();
-            if (bOwnerIsPlayer != bTargetIsPlayer)
+            if (AHavocEnemyCharacter::TeamOf(Owner) != AHavocEnemyCharacter::TeamOf(Character))
             {
                 Character->ApplyAuthoritativeDamage(DamagePerHit);
                 bDamaged = true;

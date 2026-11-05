@@ -1,0 +1,36 @@
+{
+  "id": "squad_behaviour",
+  "note": "Tuning for AI squads (game/Source/MidnightHavoc/AI, game/docs/ai.md). Seconds, centimetres and 0-1 fractions are game-balance values for play feel, never real-world figures. A unit's team comes from its faction: coalition is allied, every other faction (iran, houthi, isis) is opposing, so ISIS can never be on the player's side.",
+  "tuning": {
+    "squadTickSeconds": 0.25,
+    "loseThreatSeconds": 6,
+    "disengageSeconds": 8,
+    "fallbackStrength": 0.4,
+    "regroupSeconds": 8,
+    "maxFallbackSeconds": 20,
+    "patrolRadiusCm": 1800,
+    "coverSearchRadiusCm": 1500,
+    "coverGridSpacingCm": 250,
+    "useEqsCover": true
+  },
+  "phases": [
+    {
+      "state": "E04_NORTH_LANDING",
+      "deployments": [
+        { "faction": "coalition", "sector": "kharg_north_beach", "size": 3, "posture": "patrol" }
+      ]
+    },
+    {
+      "state": "E04_WEST_LANDING",
+      "deployments": [
+        { "faction": "coalition", "sector": "kharg_west_beach", "size": 3, "posture": "patrol" }
+      ]
+    },
+    {
+      "state": "E04_ISLAND_SECURED",
+      "deployments": [
+        { "faction": "coalition", "sector": "kharg_oil_terminal", "size": 3, "posture": "patrol" }
+      ]
+    }
+  ]
+}

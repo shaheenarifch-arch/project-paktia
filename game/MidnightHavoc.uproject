@@ -23,6 +23,14 @@
       ]
     },
     {
+      "Name": "StateTree",
+      "Enabled": true
+    },
+    {
+      "Name": "GameplayStateTree",
+      "Enabled": true
+    },
+    {
       "Name": "Niagara",
       "Enabled": true
     },

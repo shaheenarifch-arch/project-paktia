@@ -32,3 +32,14 @@ Help: [Packaging](https://dev.epicgames.com/documentation/en-us/unreal-engine/pa
 
 ## Sound and effects
 - [ ] If the Fab packs are imported: rifle fire, muzzle flash, explosions and coast ambience play. If not, `LogHavocAssets` lists the roles to fill in `Config/HavocAssets.ini`; the game still plays.
+
+## Tactical UI (item 9, see `docs/ui.md`)
+
+- [ ] Objective tracker (top left) advances `[>]` through every step of a full run; earlier steps show `[x]`.
+- [ ] Minimap shows the sector boxes, highlights the sector the Marine is in, and the sector name appears under it.
+- [ ] During lane clearance the lane line counts up, revealed hazards appear red on the minimap and turn green when cleared.
+- [ ] Raven and Falcon show ALT and SPD; the Marine shows health and ammo.
+- [ ] Menus (main, pause, settings, results): arrows / D-pad move focus, Enter / A presses, Esc / B goes back, Start opens pause.
+- [ ] Settings: quality changes the look, Subtitles off hides toast and hint lines, each setting shows its help line.
+- [ ] Rebinding interact (for example to F) works in game; binding W or Esc is refused; the rebind survives a restart.
+

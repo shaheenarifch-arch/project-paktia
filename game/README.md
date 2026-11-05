@@ -33,7 +33,7 @@ Folders are under `Source/MidnightHavoc/`.
 | `Vehicles/` | `AHavocVehicleBase`, `AHavocBoatVehicle`, `AHavocGroundVehicle`, `AHavocHelicopterVehicle`, `AHavocDroneVehicle` (see `docs/vehicles.md`) | `data/vehicles/` (stats, seats) |
 | `TacticalUI/` | `UHavocTacticalHUD` (see `docs/hud-guide.md`) | `src/gameplay/command/TacticalMap.ts` |
 | `World/` | `AHavocLevelDirector`, `AHavocSectorVolume`, `AHavocTerminalPart`, `AHavocLaneHazard`, `AHavocTankerSpline` (see `docs/kharg-level-guide.md`) | `data/maps/kharg-hormuz.json`, Episode 04 rules |
-| `AI/` | `AHavocAIController` (perception, patrol / cover / engage / search), `AHavocEnemyCharacter` (Iran, Houthi, ISIS units; AI-only) | `data/units/` (game-balance ratings only) |
+| `AI/` | `AHavocAIController` (perception, patrol / cover / engage / search / fallback), `AHavocEnemyCharacter` (Iran, Houthi, ISIS opposing and coalition allied units; AI-only), `UHavocSquadSubsystem` + `HavocSquadLogic.h` (squad patrol / engage / fallback), `UHavocEnvQueryTest_Cover` (EQS cover); see `docs/ai.md` | `data/units/` (game-balance ratings only), `data/ai/squad-behaviour.json` (squad tuning and phase deployments) |
 | `Audio/` | `UHavocAudioSubsystem` (plays item-3 sound and Niagara roles; see `docs/audio-voice-plan.md`, `docs/vfx-plan.md`) | none yet |
 | `Assets/` | `UHavocAssetSubsystem` (reads `Config/HavocAssets.ini`; see `docs/fab-assets.md`) | – |
 | `Characters/`, `Networking/` | existing | – |
@@ -176,7 +176,7 @@ The tests in `Source/MidnightHavoc/Tests/` are Unreal Automation Tests
 (`IMPLEMENT_SIMPLE_AUTOMATION_TEST`, built when `WITH_DEV_AUTOMATION_TESTS` is on, i.e. Development Editor).
 They read `data/missions/episode-04-open-strait.json` from `<ProjectDir>/../data`.
 
-- In the editor: **Tools > Session Frontend > Automation**, tick `MidnightHavoc` (or just `MidnightHavoc.Missions`, `MidnightHavoc.Aircraft`, `MidnightHavoc.Drones` or `MidnightHavoc.Playable`), then **Start Tests**.
+- In the editor: **Tools > Session Frontend > Automation**, tick `MidnightHavoc` (or just `MidnightHavoc.Missions`, `MidnightHavoc.Aircraft`, `MidnightHavoc.Drones`, `MidnightHavoc.Playable` or `MidnightHavoc.AI`), then **Start Tests**.
   Help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/automation-system-in-unreal-engine>
   and <https://dev.epicgames.com/documentation/en-us/unreal-engine/session-frontend-in-unreal-engine>.
 - From the command line (headless):

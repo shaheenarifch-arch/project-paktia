@@ -3,7 +3,7 @@
 // The in-game HUD for the playable loop, built in C++ (no widget assets needed). It extends
 // UHavocTacticalHUD, so a designer can still make a Blueprint child (game/docs/hud-guide.md) and use
 // the same events. It shows: objective, hint, toast, health, ammo, reinforcements, terminal and
-// supply status, drone link and battery while flying the Raven, and Falcon support status.
+// supply status, objective tracker, minimap, lane progress, vehicle instruments, subtitles, drone link and battery while flying the Raven, and Falcon support status.
 // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/umg-ui-designer-for-unreal-engine
 
 #include "CoreMinimal.h"
@@ -12,6 +12,7 @@
 
 class UProgressBar;
 class UTextBlock;
+class UHavocMinimapWidget;
 
 UCLASS()
 class MIDNIGHTHAVOC_API UHavocPlayHUD : public UHavocTacticalHUD
@@ -32,4 +33,8 @@ private:
     UPROPERTY() TObjectPtr<UTextBlock> StatusText;
     UPROPERTY() TObjectPtr<UTextBlock> LinkText;
     UPROPERTY() TObjectPtr<UTextBlock> Crosshair;
+    UPROPERTY() TObjectPtr<UTextBlock> TrackerText;   // objective tracker: ordered steps with [x] / [>] / [ ]
+    UPROPERTY() TObjectPtr<UTextBlock> SectorText;    // current sector name under the minimap
+    UPROPERTY() TObjectPtr<UTextBlock> VehicleText;   // Raven / Falcon instruments
+    UPROPERTY() TObjectPtr<UHavocMinimapWidget> Minimap;
 };

@@ -279,6 +279,18 @@ def build_gameplay(eas, manifest):
     for name, (x, y, z, yaw) in PLAYER_STARTS.items():
         spawn(eas, unreal.PlayerStart, "PlayerStart_" + name, (x, y, z), (0, 0, yaw))
     spawn(eas, havoc("HavocLevelDirector"), "HavocLevelDirector", DIRECTOR_POS)
+    build_navmesh(eas)
+
+
+def build_navmesh(eas):
+    cls = getattr(unreal, "NavMeshBoundsVolume", None)
+    if cls is None:
+        warn("NavMeshBoundsVolume not available; place one over the island by hand (docs/ai.md)")
+        return
+    x, y, z, hx, hy, hz = NAV_BOUNDS
+    # A new volume's brush is a 200 cm cube (half extent 100).
+    spawn(eas, cls, "NavMeshBounds_Kharg", (x, y, z), scale=(hx / 100.0, hy / 100.0, hz / 100.0))
+    log("Placed NavMeshBounds_Kharg; press P in the viewport to check the green NavMesh covers the island")
 
     for cls_name, (x, y, z, yaw) in VEHICLES.items():
         spawn(eas, havoc(cls_name), cls_name, (x, y, z), (0, 0, yaw))

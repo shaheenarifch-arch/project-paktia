@@ -98,3 +98,5 @@ objective, hint line, toast, health bar, ammo, reinforcements, terminal and tank
 status. `AHavocPlayerController::HudClass` defaults to it, so Episode 04 needs no widget asset. To restyle it, make a Widget
 Blueprint child of `HavocPlayHUD` (steps 1 to 3 above) and set it as `HudClass` on a Blueprint child of `HavocPlayerController`.
 The same events and getters apply. Help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/using-cplusplus-with-umg-in-unreal-engine>
+
+Objective tracker, minimap, vehicle HUD, settings and menu navigation are described in `docs/ui.md`.

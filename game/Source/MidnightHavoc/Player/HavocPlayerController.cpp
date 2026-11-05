@@ -140,6 +140,8 @@ void AHavocPlayerController::ShowMenu(EHavocMenuMode Mode)
     InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
     SetInputMode(InputMode);
     bShowMouseCursor = true;
+    // The input mode focuses the menu root; move focus onto a button so arrows / D-pad and Enter / A work.
+    Menu->FocusDefault();
 }
 
 void AHavocPlayerController::HideMenu()
