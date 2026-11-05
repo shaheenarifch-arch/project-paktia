@@ -28,6 +28,13 @@ void AHavocLaneHazard::BeginPlay()
     SetActorHiddenInGame(true);
 }
 
+void AHavocLaneHazard::ResetForCheckpoint()
+{
+    bRevealed = false;
+    bCleared = false;
+    SetActorHiddenInGame(true);
+}
+
 bool AHavocLaneHazard::Reveal()
 {
     if (bRevealed || bCleared)

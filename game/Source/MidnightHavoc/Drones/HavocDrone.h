@@ -12,6 +12,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "InputActionValue.h"
 #include "Drones/HavocDroneTypes.h"
 #include "Drones/HavocDroneModel.h"
 #include "HavocDrone.generated.h"
@@ -32,6 +33,16 @@ public:
 
     virtual void Tick(float DeltaSeconds) override;
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+    virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+    virtual void PawnClientRestart() override;
+
+    /** Piloting (playable loop): how far ahead of the drone each held input steers it, in cm. */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Havoc|Drone")
+    double PilotLeadCm = 3000.0;
+
+    /** Piloting: yaw degrees per unit of mouse look. */
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Havoc|Drone")
+    float PilotYawRate = 1.5f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Havoc|Drone")
     TObjectPtr<USphereComponent> Collision;
@@ -123,7 +134,22 @@ protected:
     UFUNCTION()
     void OnRep_Core();
 
+    /** Clients send pilot input here; the server turns it into MoveTo commands. */
+    UFUNCTION(Server, Unreliable)
+    void ServerSetPilotInput(FVector2D InMove, double InRise);
+
 private:
+    void OnPilotMove(const FInputActionValue& Value);
+    void OnPilotLook(const FInputActionValue& Value);
+    void OnPilotRise(const FInputActionValue& Value);
+    void OnPilotReleased();
+    void SendPilotInput();
+    void ApplyPilotInput();
+
+    FVector2D PilotMove = FVector2D::ZeroVector;
+    double PilotRise = 0.0;
+    bool bPilotWasSteering = false;
+
     void UpdateServer(float DeltaSeconds);
     void FlyToward(float DeltaSeconds);
     double ComputeSignal() const;

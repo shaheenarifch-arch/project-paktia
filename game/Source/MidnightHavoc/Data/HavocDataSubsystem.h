@@ -10,6 +10,7 @@
 #include "HavocAircraftDef.h"
 #include "HavocVehicleDef.h"
 #include "HavocWeaponDef.h"
+#include "HavocUnitDef.h"
 #include "HavocDataSubsystem.generated.h"
 
 class FJsonObject;
@@ -39,6 +40,14 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|Data")
     bool GetWeapon(FName Id, FHavocWeaponDef& OutWeapon) const;
 
+    /** A unit from data/units (game-balance ratings only). */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Data")
+    bool GetUnit(FName Id, FHavocUnitDef& OutUnit) const;
+
+    /** Infantry-branch units of a faction ("iran", "houthi", "isis"), in file order. Used for AI enemy squads. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Data")
+    TArray<FHavocUnitDef> GetInfantryUnits(const FString& Faction) const;
+
     /** Ids of all registered missions, sorted by name. */
     UFUNCTION(BlueprintCallable, Category = "Havoc|Data")
     TArray<FName> GetAllMissionIds() const;
@@ -66,6 +75,7 @@ private:
     void RegisterAircraft(const TSharedRef<FJsonObject>& Json, const FString& File);
     void RegisterVehicle(const TSharedRef<FJsonObject>& Json, const FString& File);
     void RegisterWeapon(const TSharedRef<FJsonObject>& Json, const FString& File);
+    void RegisterUnits(const TSharedRef<FJsonObject>& Json, const FString& File);
 
     FString ResolvedDataDirectory;
 
@@ -74,4 +84,6 @@ private:
     TMap<FName, FHavocAircraftDef> Aircraft;
     TMap<FName, FHavocVehicleDef> Vehicles;
     TMap<FName, FHavocWeaponDef> Weapons;
+    TMap<FName, FHavocUnitDef> Units;
+    TArray<FName> UnitOrder;
 };

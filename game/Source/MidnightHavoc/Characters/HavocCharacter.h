@@ -41,6 +41,12 @@ public:
     UFUNCTION(BlueprintCallable)
     void ApplyAuthoritativeDamage(float DamageAmount);
 
+    UFUNCTION(BlueprintPure, Category = "Operation Midnight Havoc|Combat")
+    bool IsDead() const { return bIsDead || Health <= 0.0f; }
+
+    /** Server: sets health (clamped to 0..MaximumHealth), e.g. when a unit definition changes it. */
+    void SetMaximumHealthAndFill(float NewMaximum);
+
 protected:
     virtual void BeginPlay() override;
 
@@ -56,8 +62,13 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     TObjectPtr<UInputAction> JumpAction;
 
-    void Move(const struct FInputActionValue& Value);
-    void Look(const struct FInputActionValue& Value);
+    virtual void Move(const struct FInputActionValue& Value);
+    virtual void Look(const struct FInputActionValue& Value);
+
+    /** Server: called once when health reaches zero. Base class only records it. */
+    virtual void HandleDeath();
+
+    bool bIsDead = false;
 
     UFUNCTION()
     void OnRep_Health();
