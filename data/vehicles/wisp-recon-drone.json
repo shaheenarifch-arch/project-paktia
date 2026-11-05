@@ -1,0 +1,10 @@
+{
+  "id": "wisp_recon_drone",
+  "name": "Wisp Recon Drone",
+  "fictional": true,
+  "class": "recon_drone",
+  "seats": ["operator"],
+  "systems": ["flight", "camera"],
+  "stats": { "maxSpeed": 30, "acceleration": 12, "turnRate": 90, "climbRate": 10 },
+  "enabled": true
+}

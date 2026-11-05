@@ -60,6 +60,12 @@ PLAYER_STARTS = {  # north and west beaches
     "west_beach_1": (-225000, -30000, 300, 0), "west_beach_2": (-225000, 30000, 300, 0),
 }
 DIRECTOR_POS = (0, -330000, 300)
+VEHICLES = {  # class name -> (x, y, z, yaw); one of each playable vehicle (item 7), docs/vehicles.md. Boat sits on the sea (z = water level).
+    "HavocBoatVehicle": (0, -440000, 0, 90),
+    "HavocGroundVehicle": (90000, -360000, 300, 90),
+    "HavocHelicopterVehicle": (-90000, -360000, 300, 90),
+    "HavocDroneVehicle": (0, -320000, 300, 90),
+}
 
 # Fab manifest slots used here (item 3 may add more). Each slot: {"path": "/Game/Fab/...", "pack": "<Fab pack name>"}.
 SLOTS = {
@@ -273,6 +279,9 @@ def build_gameplay(eas, manifest):
     for name, (x, y, z, yaw) in PLAYER_STARTS.items():
         spawn(eas, unreal.PlayerStart, "PlayerStart_" + name, (x, y, z), (0, 0, yaw))
     spawn(eas, havoc("HavocLevelDirector"), "HavocLevelDirector", DIRECTOR_POS)
+
+    for cls_name, (x, y, z, yaw) in VEHICLES.items():
+        spawn(eas, havoc(cls_name), cls_name, (x, y, z), (0, 0, yaw))
 
 
 def main():

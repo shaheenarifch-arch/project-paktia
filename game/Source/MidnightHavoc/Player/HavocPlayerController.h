@@ -62,7 +62,12 @@ private:
     void OnDeployRaven();
     void OnCallFalcon();
     void OnReturn();
+    void OnVehicle();
     void EnsureMetaContext();
+
+    /** F on foot enters the nearest vehicle in range, F in a vehicle exits (state changes are server only). */
+    UFUNCTION(Server, Reliable)
+    void ServerToggleVehicle();
 
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;

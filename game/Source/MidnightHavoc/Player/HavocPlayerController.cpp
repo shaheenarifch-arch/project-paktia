@@ -12,6 +12,7 @@
 #include "TimerManager.h"
 #include "UI/HavocMenuWidget.h"
 #include "UI/HavocPlayHUD.h"
+#include "Vehicles/HavocVehicleBase.h"
 
 AHavocPlayerController::AHavocPlayerController()
 {
@@ -65,6 +66,7 @@ void AHavocPlayerController::SetupInputComponent()
     Enhanced->BindAction(Input->DeployRavenAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnDeployRaven);
     Enhanced->BindAction(Input->CallFalconAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnCallFalcon);
     Enhanced->BindAction(Input->ReturnAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnReturn);
+    Enhanced->BindAction(Input->VehicleAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnVehicle);
 }
 
 AHavocEpisode04Flow* AHavocPlayerController::GetFlow()
@@ -86,6 +88,28 @@ void AHavocPlayerController::OnInteract() { if (AHavocEpisode04Flow* F = GetFlow
 void AHavocPlayerController::OnDeployRaven() { if (AHavocEpisode04Flow* F = GetFlow()) { F->DeployRaven(); } }
 void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisode04Flow* F = GetFlow()) { F->CallFalcon(); } }
 void AHavocPlayerController::OnReturn() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ReturnToMarine(); } }
+
+void AHavocPlayerController::OnVehicle() { ServerToggleVehicle(); }
+
+void AHavocPlayerController::ServerToggleVehicle_Implementation()
+{
+    if (IsMenuOpen())
+    {
+        return;
+    }
+    if (AHavocVehicleBase* Current = Cast<AHavocVehicleBase>(GetPawn()))
+    {
+        Current->Exit();
+    }
+    else if (AHavocVehicleBase* Near = AHavocVehicleBase::FindEnterable(this))
+    {
+        // Only the on-foot Marine may get in; the Raven and Falcon are mission pawns.
+        if (Cast<AHavocPlayerCharacter>(GetPawn()))
+        {
+            Near->Enter(this);
+        }
+    }
+}
 
 bool AHavocPlayerController::IsMenuOpen() const
 {
