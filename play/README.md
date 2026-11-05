@@ -50,6 +50,25 @@ npm run typecheck
 npm run build      # static site in play/dist
 ```
 
+## Deploy (GitHub Pages)
+
+`.github/workflows/deploy-play.yml` builds this app and publishes it at
+`https://shaheenarifch-arch.github.io/project-paktia/play/`. It runs on pushes
+to `main` that touch `play/**`, `src/**` or `data/**`, and can be started by
+hand from the Actions tab (workflow_dispatch).
+
+The workflow runs `npm ci` and `npm run build` in `play/`, puts `play/dist`
+under `/play/` next to the README landing page (`/project-paktia/`), and
+deploys with `actions/deploy-pages`. `vite.config.ts` uses `base: './'`, so
+the built asset paths are relative and work under the `/play/` sub-path.
+
+One-time setup: repo **Settings → Pages → Source: GitHub Actions**.
+
+Help:
+
+- [Using custom workflows with GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+- [Vite: deploying a static site to GitHub Pages](https://vite.dev/guide/static-deploy.html#github-pages)
+
 ## How to play
 
 Common: **WASD** move, **Shift** sprint, **mouse** aim, **click** fire, **R** reload, **B** auto/single, **Esc** pause, **M** sound.
