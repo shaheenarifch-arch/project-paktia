@@ -1,0 +1,80 @@
+name: Deploy play to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'play/**'
+      - 'src/**'
+      - 'data/**'
+      - '.github/workflows/deploy-play.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: play/package-lock.json
+
+      # play/ imports ../src and ../data, which Vite bundles; only play/'s
+      # own dependencies (three, vite, typescript) are needed.
+      - name: Install play dependencies
+        run: npm ci
+        working-directory: play
+
+      - name: Build play
+        run: npm run build
+        working-directory: play
+
+      - name: Check build output is bundled
+        run: |
+          grep -q 'assets/.*\.js' play/dist/index.html
+          ! grep -q '/src/main.ts' play/dist/index.html
+
+      # Keep the README landing page at /project-paktia/ (what Pages'
+      # built-in Jekyll build served before), and put the game at /play/.
+      - name: Stage landing page
+        run: |
+          mkdir landing
+          cp README.md landing/
+
+      - name: Build landing page
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./landing
+          destination: ./_site
+
+      - name: Add game to site
+        run: |
+          mkdir -p _site/play
+          cp -r play/dist/. _site/play/
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
