@@ -1,0 +1,45 @@
+{
+  "id": "episode_07_city_of_freedom",
+  "episode": 7,
+  "name": "City of Freedom",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "map": "city_of_freedom",
+  "summary": "Hypothetical scenario: an urban operation in the invented city of Parvaneh, fought alongside an invented resistance network against the regime's security forces, under strict rules of engagement. Civilians and surrendered soldiers are never targets.",
+  "sectors": ["parvaneh_outskirts", "parvaneh_old_bazaar", "parvaneh_courtyard_quarter", "parvaneh_dome_square", "parvaneh_river_bridges", "parvaneh_field_hospital", "parvaneh_aid_drop_zone", "parvaneh_security_compound"],
+  "start": "E07_BRIEFING",
+  "failState": "E07_OPERATION_FAILED",
+  "resistanceSquads": [
+    { "id": "lantern_squad", "name": "Lantern Squad", "strength": 6 },
+    { "id": "willow_squad", "name": "Willow Squad", "strength": 6 },
+    { "id": "cistern_squad", "name": "Cistern Squad", "strength": 5 }
+  ],
+  "civilians": { "parvaneh_old_bazaar": 40, "parvaneh_courtyard_quarter": 60, "parvaneh_dome_square": 30 },
+  "roe": {
+    "startingHeartsAndMinds": 50,
+    "civilianHarmPenalty": 15,
+    "surrenderedHarmPenalty": 10,
+    "failMissionAtViolations": 3,
+    "heartsAndMindsTarget": 40,
+    "fieldHospitalBonus": 5,
+    "aidDropBonus": 3
+  },
+  "baseReinforcements": 25,
+  "patientsToTreat": 12,
+  "aidDropsToDeliver": 3,
+  "states": [
+    { "id": "E07_BRIEFING", "objective": "Briefing: help the resistance free Parvaneh. The enemy is the regime's security forces. Civilians and anyone who surrenders are protected: harming them fails objectives and costs Hearts & Minds.", "next": "E07_LINK_UP" },
+    { "id": "E07_LINK_UP", "objective": "Reach the outskirts rally point and link up with the three resistance squads.", "requires": ["resistance_linked"], "effects": ["roe.activate"], "checkpoint": true, "next": "E07_OLD_BAZAAR" },
+    { "id": "E07_OLD_BAZAAR", "objective": "Clear the security patrols from the Old Bazaar arcades without harming the shoppers sheltering there.", "requires": ["bazaar_secure"], "checkpoint": true, "next": "E07_PROTECT_COURTYARDS" },
+    { "id": "E07_PROTECT_COURTYARDS", "objective": "Hold the Courtyard Quarter and escort civilians to shelter. Take surrendering soldiers into custody.", "requires": ["civilians_sheltered"], "checkpoint": true, "next": "E07_CHOOSE_CROSSING" },
+    { "id": "E07_CHOOSE_CROSSING", "objective": "Choose the approach to Dome Square. The bridges are fast but narrow; the Dome Square arcades are slower but keep the fight away from the river crowds.", "branches": { "river_bridges": "E07_BRIDGE_ASSAULT", "arcade_route": "E07_ARCADE_ROUTE" } },
+    { "id": "E07_BRIDGE_ASSAULT", "objective": "Cross the arched bridges with the resistance and secure the far bank.", "requires": ["crossing_secure"], "next": "E07_DOME_SQUARE" },
+    { "id": "E07_ARCADE_ROUTE", "objective": "Work through the arcades to Dome Square with the resistance.", "requires": ["crossing_secure"], "next": "E07_DOME_SQUARE" },
+    { "id": "E07_DOME_SQUARE", "objective": "Secure Dome Square. Keep the crowds clear of the fighting.", "requires": ["square_secure"], "checkpoint": true, "next": "E07_SECURITY_COMPOUND" },
+    { "id": "E07_SECURITY_COMPOUND", "objective": "Take the security forces compound. Soldiers who lay down their arms are detained, never fired on.", "requires": ["compound_secure"], "checkpoint": true, "next": "E07_DEBRIEF" },
+    { "id": "E07_DEBRIEF", "objective": "Debrief: rules-of-engagement record, Hearts & Minds, field hospital and aid drops.", "branches": { "full_success": "E07_CITY_FREED", "partial": "E07_CITY_FREED_PARTIAL" } },
+    { "id": "E07_CITY_FREED", "objective": "Parvaneh is free. The rules of engagement held, the people trust the resistance, and the aid is flowing.", "terminal": true, "outcome": "SUCCESS" },
+    { "id": "E07_CITY_FREED_PARTIAL", "objective": "The compound is taken, but rules-of-engagement violations or lost trust cost the city's confidence.", "terminal": true, "outcome": "PARTIAL" },
+    { "id": "E07_OPERATION_FAILED", "objective": "The operation failed: too many rules-of-engagement violations or the force ran out of reinforcements. Restart from the last checkpoint.", "terminal": true, "outcome": "FAILED" }
+  ]
+}

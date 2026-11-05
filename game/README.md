@@ -184,3 +184,19 @@ They read `data/missions/episode-04-open-strait.json` from `<ProjectDir>/../data
   (see <https://dev.epicgames.com/documentation/en-us/unreal-engine/run-automation-tests-in-unreal-engine>).
 
 The TypeScript suite (`npm test`) remains the reference behaviour.
+
+## How to play (Episode 07)
+
+Episode 07, *City of Freedom*, is a hypothetical urban operation in the invented city of Parvaneh. The controls are the same as Episode 04 (above). The rules and objectives come from `data/missions/episode-07-city-of-freedom.json`.
+
+- Link up with the three resistance squads (AI allies), then clear the Old Bazaar, hold the Courtyard Quarter, take Dome Square and the security compound.
+- Civilians are in the streets. Never fire on them. Escort them to shelter.
+- Soldiers who surrender are detained, never fired on.
+- Any harm to a civilian or a surrendered soldier fails the current objective and lowers Hearts & Minds. Three violations fail the operation.
+- Side objectives: treat patients at the field hospital and deliver aid drops to raise Hearts & Minds.
+- The enemy is the regime's security forces, never the Iranian people. No real people, equipment specs or targeting data appear.
+
+Status: the mission rules and automation test (`npm test`, `src/tests/episode07.test.ts`) are in. The Unreal level, resistance AI and civilian actors still need building and a Windows build check. Playtest checklist: `docs/episode-07-playtest-checklist.md`.
+
+Help: [Packaging](https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects), [AI in Unreal Engine](https://dev.epicgames.com/documentation/en-us/unreal-engine/artificial-intelligence-in-unreal-engine), [Automation tests](https://dev.epicgames.com/documentation/en-us/unreal-engine/automation-system-in-unreal-engine).
+

@@ -1,0 +1,18 @@
+{
+  "id": "city_of_freedom",
+  "name": "Parvaneh, the City of Freedom",
+  "fictional": false,
+  "setting": "real_world_hypothetical",
+  "note": "A hypothetical future scenario. Parvaneh is an invented city composited from Iranian-inspired architecture (bazaar arcades, courtyard houses, domed squares, arched bridges). It is not a real city and every name here is invented. The enemy is the regime's security forces, never the Iranian people.",
+  "sectors": [
+    { "id": "parvaneh_outskirts", "name": "Outskirts rally point", "role": "attacker_staging" },
+    { "id": "parvaneh_old_bazaar", "name": "Old Bazaar arcades", "role": "contested_urban" },
+    { "id": "parvaneh_courtyard_quarter", "name": "Courtyard Quarter", "role": "protected_civilian" },
+    { "id": "parvaneh_dome_square", "name": "Dome Square", "role": "contested_urban" },
+    { "id": "parvaneh_river_bridges", "name": "Arched river bridges", "role": "choke_point" },
+    { "id": "parvaneh_field_hospital", "name": "Field hospital (converted school)", "role": "protected_civilian" },
+    { "id": "parvaneh_aid_drop_zone", "name": "Aid-drop zone (stadium car park)", "role": "logistics" },
+    { "id": "parvaneh_security_compound", "name": "Security forces compound", "role": "objective" }
+  ],
+  "surpriseEvents": ["communications_outage", "nightfall"]
+}
