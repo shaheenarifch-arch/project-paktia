@@ -1,0 +1,67 @@
+name: Unreal build (Win64)
+
+on:
+  push:
+    branches: ['bhaddru/**', main]
+  workflow_dispatch:
+
+concurrency:
+  group: unreal-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: [self-hosted, windows, unreal]
+    timeout-minutes: 120
+    env:
+      # Repo variable UE_ROOT (Settings > Secrets and variables > Actions > Variables).
+      UE_ROOT: ${{ vars.UE_ROOT || 'C:\Program Files\Epic Games\UE_5.5' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: false   # LFS skip is fine for compile/cook of code + data
+
+      - name: Build, cook, stage, pak and archive (Win64 Development)
+        shell: cmd
+        run: >
+          "%UE_ROOT%\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun
+          -project="%GITHUB_WORKSPACE%\game\MidnightHavoc.uproject"
+          -platform=Win64 -clientconfig=Development
+          -build -cook -stage -pak -archive
+          -archivedirectory="%GITHUB_WORKSPACE%\out"
+          -unattended -utf8output -nop4 -NoCompileEditor
+
+      - name: Automation tests (headless)
+        shell: cmd
+        run: >
+          "%UE_ROOT%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe"
+          "%GITHUB_WORKSPACE%\game\MidnightHavoc.uproject"
+          -ExecCmds="Automation RunTests MidnightHavoc; Quit"
+          -unattended -nullrhi -nosplash -log
+          -ReportExportPath="%GITHUB_WORKSPACE%\out\test-report"
+
+      - name: Zip the packaged build
+        if: success()
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "$env:GITHUB_WORKSPACE\out\Windows\*" `
+            -DestinationPath "$env:GITHUB_WORKSPACE\MidnightHavoc-Win64.zip" -Force
+
+      - name: Upload packaged build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MidnightHavoc-Win64
+          path: MidnightHavoc-Win64.zip
+          if-no-files-found: error
+
+      - name: Upload logs and test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unreal-logs
+          path: |
+            out/test-report/**
+            game/Saved/Logs/**
+            ${{ env.APPDATA }}/Unreal Engine/AutomationTool/Logs/**
+          if-no-files-found: warn
