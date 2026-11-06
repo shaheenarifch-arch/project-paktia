@@ -6,6 +6,7 @@
 #include "Aircraft/HavocFalconHelicopter.h"
 #include "Assets/HavocAssetSubsystem.h"
 #include "Audio/HavocAudioSubsystem.h"
+#include "Campaign/HavocCampaign.h"
 #include "Combat/HavocWeaponComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -215,12 +216,6 @@ bool AHavocEpisode04Flow::IsPiloting() const
     return Pawn && (Pawn == Raven.Get() || Pawn == Falcon.Get());
 }
 
-void AHavocEpisode04Flow::ShowToast(const FString& Text, float Seconds)
-{
-    Toast = Text;
-    ToastTime = Seconds;
-}
-
 void AHavocEpisode04Flow::Publish(const TCHAR* EventName, const FString& Payload) const
 {
     if (const UGameInstance* GI = GetGameInstance())
@@ -230,6 +225,25 @@ void AHavocEpisode04Flow::Publish(const TCHAR* EventName, const FString& Payload
             Events->Publish(EventName, Payload);
         }
     }
+}
+
+void AHavocEpisode04Flow::PauseEpisode()
+{
+    if (Phase == EHavocFlowPhase::Playing)
+    {
+        UGameplayStatics::SetGamePaused(this, true);
+    }
+}
+
+void AHavocEpisode04Flow::ResumeEpisode()
+{
+    UGameplayStatics::SetGamePaused(this, false);
+}
+
+FString AHavocEpisode04Flow::GetCurrentObjective() const
+{
+    const UHavocOpenStraitMission* Mission = GetMission();
+    return Phase == EHavocFlowPhase::Playing && Mission && Mission->GetRunner() ? Mission->GetRunner()->GetObjective() : FString();
 }
 
 FString AHavocEpisode04Flow::GetSupportStatus() const
@@ -255,6 +269,18 @@ FString AHavocEpisode04Flow::GetSupportStatus() const
 void AHavocEpisode04Flow::StartEpisode()
 {
     UHavocMissionSubsystem* Missions = GetWorld() ? GetWorld()->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
+    // Episode 03 SUCCESS adds the Episode 04 reinforcement bonus.
+    const UGameInstance* GI = GetGameInstance();
+    const UHavocCampaign* Campaign = GI ? GI->GetSubsystem<UHavocCampaign>() : nullptr;
+    if (Campaign && !Campaign->IsUnlocked(4))
+    {
+        ShowToast(TEXT("Episode 04 is locked. Finish Episode 03 first."), 6.f);
+        return;
+    }
+    if (Missions && Campaign)
+    {
+        Missions->SetEpisode3Outcome(Campaign->GetEpisode3Outcome());
+    }
     if (!Missions || !Missions->StartMission(MissionId))
     {
         ShowToast(TEXT("Episode 04 could not start. Check that the data folder is packaged beside the game (game/README.md)."), 10.f);
@@ -434,9 +460,16 @@ void AHavocEpisode04Flow::EndEpisode()
         FMath::RoundToInt(R.SupplyFlow * 100.0), Mission->GetReinforcements());
     Publish(TEXT("episode:results"), Mission->GetSummaryJson());
 
-    // Outro fly-over, then the results screen (skippable).
-    TWeakObjectPtr<AHavocEpisode04Flow> Self(this);
-    PlayCutscene(false, [Self]()
+    // Save progress. A worse replay never overwrites a better stored result (UHavocCampaign::Record).
+    if (const UGameInstance* GI = GetGameInstance())
+    {
+        if (UHavocCampaign* Campaign = GI->GetSubsystem<UHavocCampaign>())
+        {
+            Campaign->Record(4, Outcome, FHavocCarryover());
+        }
+    }
+
+    if (AHavocPlayerController* PC = GetPC())
     {
         if (AHavocEpisode04Flow* Flow = Self.Get())
         {

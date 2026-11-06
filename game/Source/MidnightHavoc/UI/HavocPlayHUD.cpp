@@ -10,7 +10,7 @@
 #include "Components/VerticalBox.h"
 #include "Drones/HavocDrone.h"
 #include "Aircraft/HavocFalconHelicopter.h"
-#include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Missions/HavocEpisodeFlow.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 #include "Missions/HavocMissionRunner.h"
 #include "Missions/HavocMissionSubsystem.h"
@@ -50,6 +50,10 @@ void UHavocPlayHUD::NativeOnInitialized()
     HintText = MakeText(WidgetTree, TEXT(""), 20, FLinearColor::White);
     HintText->SetJustification(ETextJustify::Center);
     Place(Canvas, HintText, FAnchors(0.5f, 1.f), FVector2D(0.5f, 1.f), FVector2D(0.f, -95.f), FVector2D(1300.f, 70.f));
+
+    FirstHintText = MakeText(WidgetTree, TEXT(""), 22, FLinearColor(0.7f, 1.f, 0.85f));
+    FirstHintText->SetJustification(ETextJustify::Center);
+    Place(Canvas, FirstHintText, FAnchors(0.5f, 0.35f), FVector2D(0.5f, 0.f), FVector2D::ZeroVector, FVector2D(1000.f, 140.f));
 
     UVerticalBox* HealthBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
     HealthText = MakeText(WidgetTree, TEXT("HEALTH"), 20, FLinearColor::White);
@@ -98,7 +102,7 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     Super::NativeTick(MyGeometry, InDeltaTime);
 
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
-    AHavocEpisode04Flow* Flow = PC ? PC->GetFlow() : nullptr;
+    IHavocEpisodeFlow* Flow = PC ? PC->GetFlow() : nullptr;
     const UHavocMissionSubsystem* Missions = GetWorld() ? GetWorld()->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
     UHavocOpenStraitMission* Mission = Missions ? Missions->GetOpenStrait() : nullptr;
 
@@ -108,14 +112,14 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     const bool bSubtitles = !Settings || Settings->bSubtitles;
     const FHavocHudSnapshot Snapshot = HavocHudModel::Build(Mission);
 
-    ObjectiveText->SetText(FText::FromString(Snapshot.Objective));
-    TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : FString()));
-    // During an intro/outro fly-over the subtitle line replaces the toast, and the hint says how to skip.
-    const bool bCutscene = Flow && Flow->IsCutsceneActive();
-    HintText->SetText(FText::FromString(bCutscene ? FString(TEXT("Press Space or Enter to skip"))
-                                                  : (bSubtitles && Flow ? Flow->GetHint() : FString())));
-    ToastText->SetText(FText::FromString(!bSubtitles || !Flow ? FString()
-                                                              : (bCutscene ? Flow->GetCutsceneSubtitle() : Flow->GetToast())));
+    // Episode 04 reads the mission snapshot; other episodes (Episode 02) give their own text through the flow.
+    const bool bFlowText = !Mission && Flow;
+    ObjectiveText->SetText(FText::FromString(bFlowText ? Flow->GetObjectiveText() : Snapshot.Objective));
+    TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : bFlowText ? Flow->GetTrackerText() : FString()));
+    HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : FString()));
+    ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : FString()));
+    // First-time control hint: not tied to the Subtitles setting, because it explains the controls.
+    FirstHintText->SetText(FText::FromString(PC ? PC->GetActiveHint() : FString()));
 
     // Current sector, from the minimap's sector volumes.
     FString SectorName;
@@ -148,6 +152,10 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         {
             Status += TEXT("\n") + Flow->GetSupportStatus();
         }
+    }
+    else if (bFlowText)
+    {
+        Status = Flow->GetStatusText();
     }
     StatusText->SetText(FText::FromString(Status));
 

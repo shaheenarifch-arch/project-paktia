@@ -2,10 +2,13 @@
 
 #include "Core/HavocEventSubsystem.h"
 #include "Data/HavocDataSubsystem.h"
+#include "Data/HavocMapDef.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "Missions/HavocMissionRunner.h"
+#include "Missions/Episode01/HavocMountainShieldMission.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
+#include "Misc/DateTime.h"
 
 bool UHavocMissionSubsystem::GetMissionDef(FName Id, FHavocMissionDef& OutMission) const
 {
@@ -30,8 +33,20 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
 
     ActiveRunner = nullptr;
     ActiveOpenStrait = nullptr;
+    ActiveMountainShield = nullptr;
 
     FString Error;
+    if (Def.Id == TEXT("mission_01_mountain_shield"))
+    {
+        UHavocMountainShieldMission* Mission = NewObject<UHavocMountainShieldMission>(this);
+        if (!Mission->Initialize(Def, Events, Error))
+        {
+            return false;
+        }
+        ActiveMountainShield = Mission;
+        ActiveRunner = Mission->GetRunner();
+        return true;
+    }
     if (Def.Id == TEXT("episode_04_open_strait"))
     {
         UHavocOpenStraitMission* Mission = NewObject<UHavocOpenStraitMission>(this);
@@ -40,6 +55,19 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
             return false;
         }
         ActiveOpenStrait = Mission;
+        ActiveRunner = Mission->GetRunner();
+        return true;
+    }
+
+    if (Def.Id == TEXT("episode_02_silent_corridor"))
+    {
+        UHavocSilentCorridorMission* Mission = NewObject<UHavocSilentCorridorMission>(this);
+        if (!Mission->Initialize(Def, bEpisode1CrewRecovered, Events, Error))
+        {
+            UE_LOG(LogHavocMission, Error, TEXT("StartMission '%s': %s"), *MissionId.ToString(), *Error);
+            return false;
+        }
+        ActiveSilentCorridor = Mission;
         ActiveRunner = Mission->GetRunner();
         return true;
     }

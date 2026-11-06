@@ -1,0 +1,155 @@
+# Generate a game level on paktia-pc, commit it through Git LFS, then start the Unreal build.
+# Pick the level by hand: Actions > Build level > Run workflow > level (Kharg, PaktiaHighlands, Gardun).
+# On a push to a bhaddru/** branch the level is chosen from the files that changed (Paktia files -> PaktiaHighlands, otherwise Kharg).
+# Kharg: L_KhargHormuz (the packaged game starts on it, Config/DefaultEngine.ini GameDefaultMap).
+# PaktiaHighlands: L_PaktiaHighlands, Episode 01 greybox (always loaded, not World Partition).
+# Gardun: no builder script yet; the run stops with a clear message.
+# Steps: heightmap from Copernicus DEM -> build the editor -> run the level's builder headless -> commit -> start the Unreal build.
+# One runner on paktia-pc: runs queue (never cancel each other) so Unreal builds never overlap.
+# Help: game/Content/Python/build_kharg_level.py, game/Content/Python/build_paktia_highlands_level.py,
+#       game/scripts/run-build-kharg-level.ps1
+#       https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python
+#       https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage
+name: Build level
+
+on:
+  push:
+    branches: ['bhaddru/**']
+    paths:
+      - '.github/workflows/build-level.yml'
+      - 'game/Content/Python/build_kharg_level.py'
+      - 'game/Content/Python/make_kharg_heightmap.py'
+      - 'game/Content/Python/build_paktia_highlands_level.py'
+      - 'game/Content/Python/make_paktia_heightmap.py'
+      - 'data/maps/paktia-highlands.json'
+  workflow_dispatch:
+    inputs:
+      level:
+        description: 'Level to build'
+        type: choice
+        options: [Kharg, PaktiaHighlands, Gardun]
+        default: Kharg
+
+concurrency:
+  group: build-level-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # push the level commit
+  actions: write    # start the Unreal build afterwards
+
+jobs:
+  build-level:
+    runs-on: [self-hosted, windows, unreal]
+    timeout-minutes: 120
+    env:
+      UE_ROOT: ${{ vars.UE_ROOT || 'C:\Program Files\Epic Games\UE_5.5' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 2   # the push trigger compares HEAD with HEAD~1 to pick the level
+
+      - name: Choose the level
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        env:
+          LEVEL_INPUT: ${{ inputs.level }}
+        run: |
+          # Table of levels. Add a row (and its two scripts) to support a new level.
+          $levels = @{
+            Kharg           = @{ Heightmap = 'make_kharg_heightmap.py';   Builder = 'build_kharg_level.py';            Tag = 'KhargBuilder';  Umap = 'game\Content\Maps\Kharg\L_KhargHormuz.umap';                 Dir = 'game/Content/Maps/Kharg';           Name = 'L_KhargHormuz' }
+            PaktiaHighlands = @{ Heightmap = 'make_paktia_heightmap.py';  Builder = 'build_paktia_highlands_level.py'; Tag = 'PaktiaBuilder'; Umap = 'game\Content\Maps\PaktiaHighlands\L_PaktiaHighlands.umap'; Dir = 'game/Content/Maps/PaktiaHighlands'; Name = 'L_PaktiaHighlands' }
+            Gardun          = @{ Heightmap = $null;                       Builder = $null }
+          }
+          $level = $env:LEVEL_INPUT
+          if (-not $level) {
+            $changed = git diff --name-only HEAD~1 HEAD 2>$null
+            $level = if ($changed -match 'paktia') { 'PaktiaHighlands' } else { 'Kharg' }
+            Write-Host "Push trigger: level chosen from changed files = $level"
+          }
+          if (-not $levels.ContainsKey($level)) { Write-Error "Unknown level '$level'. Use Kharg, PaktiaHighlands or Gardun."; exit 1 }
+          $cfg = $levels[$level]
+          if (-not $cfg.Builder) {
+            Write-Error "Level '$level' has no builder script yet (game/Content/Python/build_<level>_level.py). Nothing to build."; exit 1
+          }
+          foreach ($f in $cfg.Heightmap, $cfg.Builder) {
+            if (-not (Test-Path (Join-Path 'game\Content\Python' $f))) { Write-Error "Missing game/Content/Python/$f"; exit 1 }
+          }
+          Write-Host "Building level: $level ($($cfg.Name))"
+          $out = @("LEVEL=$level", "LEVEL_HEIGHTMAP=$($cfg.Heightmap)", "LEVEL_BUILDER=$($cfg.Builder)", "LEVEL_TAG=$($cfg.Tag)",
+                   "LEVEL_UMAP=$($cfg.Umap)", "LEVEL_DIR=$($cfg.Dir)", "LEVEL_NAME=$($cfg.Name)")
+          $out | Add-Content -Path $env:GITHUB_ENV -Encoding utf8
+
+      - name: Make the heightmap (Copernicus DEM GLO-30)
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          # The level's make_*_heightmap.py runs in normal Python 3, not inside Unreal.
+          # Use py/python if installed; otherwise the Python 3 that ships inside UE 5.5 (paktia-pc has no system Python).
+          $py = if (Get-Command py -ErrorAction SilentlyContinue) { 'py' } elseif (Get-Command python -ErrorAction SilentlyContinue) { 'python' } else { Join-Path $env:UE_ROOT 'Engine\Binaries\ThirdParty\Python3\Win64\python.exe' }
+          Write-Host "Using Python: $py"
+          & $py -m pip install --user --quiet rasterio numpy pillow
+          if ($LASTEXITCODE) { Write-Error "pip install failed. Install Python 3 on paktia-pc: https://www.python.org/downloads/windows/"; exit 1 }
+          & $py (Join-Path 'game/Content/Python' $env:LEVEL_HEIGHTMAP) --download
+          if ($LASTEXITCODE) { exit 1 }
+
+      - name: Build the editor (MidnightHavocEditor Win64)
+        shell: cmd
+        run: >
+          "%UE_ROOT%\Engine\Build\BatchFiles\Build.bat" MidnightHavocEditor Win64 Development
+          -Project="%GITHUB_WORKSPACE%\game\MidnightHavoc.uproject" -WaitMutex
+
+      - name: Run the level builder headless
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          # Same launch as game/scripts/run-build-kharg-level.ps1 (builder = $env:LEVEL_BUILDER), plus -RenderOffscreen: the runner is a Windows service with
+          # no desktop, so the editor cannot open its main window (run #2 failed with DXGI_ERROR_NOT_CURRENTLY_AVAILABLE).
+          # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/command-line-arguments-in-unreal-engine
+          & (Join-Path $env:UE_ROOT 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe') (Join-Path $env:GITHUB_WORKSPACE 'game\MidnightHavoc.uproject') `
+            "-ExecutePythonScript=$(Join-Path $env:GITHUB_WORKSPACE (Join-Path 'game\Content\Python' $env:LEVEL_BUILDER))" `
+            -unattended -nop4 -nosplash -log -RenderOffscreen
+          $code = $LASTEXITCODE
+          $log = Join-Path $env:GITHUB_WORKSPACE 'game\Saved\Logs\MidnightHavoc.log'
+          if (Test-Path $log) {
+            Write-Host '--- builder messages and errors ---'
+            Select-String -Path $log -Pattern "\[$($env:LEVEL_TAG)\]|Error:|Traceback|Exception" | Select-Object -Last 100 | ForEach-Object { $_.Line }
+          }
+          # The .umap is saved as soon as the level is created, so also fail on any Python error (no half-built level).
+          if ((Test-Path $log) -and (Select-String -Path $log -Pattern 'Python script executed with errors' -Quiet)) {
+            Write-Error "$($env:LEVEL_BUILDER) raised an error (see the Traceback above). Not committing a half-built level."; exit 1
+          }
+          if (-not (Test-Path $env:LEVEL_UMAP)) {
+            Write-Error "$($env:LEVEL_NAME).umap was not created (editor exit code $code). See the messages above."; exit 1
+          }
+
+      - name: Commit the level (Git LFS)
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # .umap/.uasset are LFS-tracked in .gitattributes. World Partition keeps actors in __ExternalActors__.
+          foreach ($p in $env:LEVEL_DIR, 'game/Content/__ExternalActors__', 'game/Content/__ExternalObjects__', 'game/Config') {
+            if (Test-Path $p) { git add -- $p }
+          }
+          git diff --cached --stat
+          git commit -m "$($env:LEVEL) level: generate $($env:LEVEL_NAME) with $($env:LEVEL_BUILDER) (Build level workflow)"
+          if ($LASTEXITCODE) { Write-Error 'Nothing to commit'; exit 1 }
+          git push
+          if ($LASTEXITCODE) { exit 1 }
+
+      - name: Start the Unreal build for this branch
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Pushes made with GITHUB_TOKEN do not trigger other workflows, so start it explicitly.
+          $uri = "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/actions/workflows/unreal-build.yml/dispatches"
+          $h = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
+          Invoke-RestMethod -Method Post -Uri $uri -Headers $h -Body (@{ ref = $env:GITHUB_REF_NAME } | ConvertTo-Json)
+
+      - name: Upload editor log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: level-logs-${{ env.LEVEL || 'unknown' }}
+          path: game/Saved/Logs/**
+          if-no-files-found: warn

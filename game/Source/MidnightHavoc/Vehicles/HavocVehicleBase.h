@@ -27,6 +27,17 @@ class USpringArmComponent;
 class UStaticMeshComponent;
 class UInputMappingContext;
 
+/** Damage state of a vehicle; thresholds mirror HelicopterDamageState.ts / ConvoyEscort.ts (integrity 0..1). */
+UENUM(BlueprintType)
+enum class EHavocVehicleDamage : uint8
+{
+    Operational,
+    Damaged,
+    Critical,
+    Disabled,
+    Destroyed
+};
+
 /** Pure movement helpers (unit tested). Units: cm and seconds unless stated. */
 namespace HavocVehicleMath
 {
@@ -35,6 +46,18 @@ namespace HavocVehicleMath
 
     /** Yaw change in degrees: full TurnRate at MaxSpeed, none when stopped (surface vehicles). Reversing flips steering like a car. */
     MIDNIGHTHAVOC_API double SurfaceYawDelta(double Steer, double Speed, double MaxSpeed, double TurnRate, double Dt);
+
+    /** Tracked (skid) steering: full TurnRate even when stopped (pivot turn); reversing flips steering. */
+    MIDNIGHTHAVOC_API double TrackedYawDelta(double Steer, double Speed, double TurnRate, double Dt);
+
+    /** Damage level from integrity 0..1: <=0 Destroyed, <=0.15 Disabled, <=0.35 Critical, <=0.7 Damaged. */
+    MIDNIGHTHAVOC_API EHavocVehicleDamage DamageLevel(double Integrity);
+
+    /** Speed / turn multiplier for a damage level: 1, 0.8, 0.5, then 0 once disabled. */
+    MIDNIGHTHAVOC_API double MobilityFactor(EHavocVehicleDamage Level);
+
+    /** Convoy follow: throttle / steer in [-1, 1] to reach a point Gap cm behind the target (ground plane only). */
+    MIDNIGHTHAVOC_API void FollowInput(const FVector& SelfLocation, const FVector& SelfForward, const FVector& TargetLocation, double Gap, double& OutThrottle, double& OutSteer);
 }
 
 UCLASS(Abstract)
@@ -92,6 +115,33 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Havoc|Vehicle")
     FVector ExitOffset = FVector(0.0, 350.0, 100.0);
 
+    /** Convoy id used in the "convoy:vehicle" event, matching ConvoyEscort ids ("warden-1", "nomad-1", ...). Empty: no event. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Havoc|Vehicle")
+    FName ConvoyId;
+
+    // ---- Damage (server) ----
+    /** 0..1; 0 is destroyed. Same scale as ConvoyEscort integrity. */
+    UFUNCTION(BlueprintPure, Category = "Havoc|Vehicle")
+    float GetIntegrity() const { return Integrity; }
+
+    UFUNCTION(BlueprintPure, Category = "Havoc|Vehicle")
+    EHavocVehicleDamage GetDamageLevel() const { return HavocVehicleMath::DamageLevel(Integrity); }
+
+    UFUNCTION(BlueprintPure, Category = "Havoc|Vehicle")
+    bool IsDestroyed() const { return Integrity <= 0.f; }
+
+    /** 1 at full speed down to 0 when disabled or destroyed. */
+    UFUNCTION(BlueprintPure, Category = "Havoc|Vehicle")
+    double GetMobilityFactor() const { return HavocVehicleMath::MobilityFactor(GetDamageLevel()); }
+
+    /** Reduces integrity by Amount (0..1 scale). A destroyed vehicle throws its driver out. Publishes "convoy:vehicle" when ConvoyId is set. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Vehicle")
+    void ApplyVehicleDamage(float Amount);
+
+    /** Restores integrity; a destroyed vehicle cannot be repaired in the field. False if destroyed. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Vehicle")
+    bool RepairVehicle(float Amount);
+
     // ---- Queries ----
     UFUNCTION(BlueprintPure, Category = "Havoc|Vehicle")
     bool IsOccupied() const { return Driver != nullptr; }
@@ -143,8 +193,10 @@ protected:
     double Lift = 0.0;
     /** Forward speed, cm/s. */
     double Speed = 0.0;
+    float Integrity = 1.f;
 
 private:
+    void PublishDamage() const;
     void LoadVisual();
     void OnThrottle(const FInputActionValue& Value);
     void OnSteer(const FInputActionValue& Value);

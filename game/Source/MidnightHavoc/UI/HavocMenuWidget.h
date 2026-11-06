@@ -1,6 +1,6 @@
 #pragma once
 
-// Main menu (Campaign, Settings, Quit), campaign select (Episodes 01-04, Start), pause menu (Resume, Restart from checkpoint, Settings,
+// Main menu (Campaign, How to play, Settings, Quit), campaign select (Episodes 01-04, Start), pause menu (Resume, Restart from checkpoint, How to play, Settings,
 // Quit) and results screen (outcome, stats, Restart / Play again, Quit), all built in C++.
 // Settings: graphics quality, subtitles, reduce flashes and camera shake (docs/vfx-plan.md
 // accessibility), look sensitivity, master volume and key bindings, each with a help line, saved by
@@ -37,10 +37,12 @@ protected:
 
     UFUNCTION() void OnPlay();
     UFUNCTION() void OnCampaign();
+    UFUNCTION() void OnUnlockAll();
     UFUNCTION() void OnMainMenu();
     UFUNCTION() void OnResume();
     UFUNCTION() void OnRestartCheckpoint();
     UFUNCTION() void OnSettings();
+    UFUNCTION() void OnHowToPlay();
     UFUNCTION() void OnBack();
     UFUNCTION() void OnQuit();
     UFUNCTION() void OnToggleFlashes();
@@ -67,7 +69,8 @@ private:
     void FocusButton(int32 Index);
 
     class UHavocPlaySettings* GetSettings() const;
-    class AHavocEpisode04Flow* GetFlow() const;
+    class IHavocEpisodeFlow* GetFlow() const;
+    class UHavocCampaign* GetCampaign() const;
 
     EHavocMenuMode Mode = EHavocMenuMode::Main;
     EHavocMenuMode ReturnMode = EHavocMenuMode::Main;
@@ -81,4 +84,5 @@ private:
     UPROPERTY() TArray<TObjectPtr<class UButton>> Buttons;
     UPROPERTY() TObjectPtr<UBorder> Backdrop;
     UPROPERTY() TObjectPtr<UVerticalBox> List;
+    UPROPERTY() TObjectPtr<class UScrollBox> Scroll;
 };

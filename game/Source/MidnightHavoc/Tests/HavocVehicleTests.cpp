@@ -29,7 +29,7 @@
 namespace HavocVehicleTests
 {
     /** Ids of the four vehicles placed in L_KhargHormuz. */
-    const TCHAR* const VehicleIds[] = { TEXT("tern_patrol_boat"), TEXT("warden_tank"), TEXT("kestrel_scout_helicopter"), TEXT("wisp_recon_drone") };
+    const TCHAR* const VehicleIds[] = { TEXT("tern_patrol_boat"), TEXT("warden_tank"), TEXT("nomad_transport"), TEXT("kestrel_scout_helicopter"), TEXT("wisp_recon_drone") };
 
     bool LoadDef(FAutomationTestBase& Test, const FString& Id, FHavocVehicleDef& Out)
     {
@@ -134,6 +134,83 @@ bool FHavocVehicleMathTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocVehicleDamageMathTest, "MidnightHavoc.Vehicles.DamageMath", HAVOC_VEHICLE_TEST_FLAGS)
+bool FHavocVehicleDamageMathTest::RunTest(const FString& Parameters)
+{
+    using namespace HavocVehicleMath;
+    TestTrue(TEXT("full integrity operational"), DamageLevel(1.0) == EHavocVehicleDamage::Operational);
+    TestTrue(TEXT("0.7 damaged"), DamageLevel(0.7) == EHavocVehicleDamage::Damaged);
+    TestTrue(TEXT("0.35 critical"), DamageLevel(0.35) == EHavocVehicleDamage::Critical);
+    TestTrue(TEXT("0.1 disabled"), DamageLevel(0.1) == EHavocVehicleDamage::Disabled);
+    TestTrue(TEXT("0 destroyed"), DamageLevel(0.0) == EHavocVehicleDamage::Destroyed);
+    TestEqual(TEXT("mobility full"), MobilityFactor(EHavocVehicleDamage::Operational), 1.0);
+    TestEqual(TEXT("mobility disabled"), MobilityFactor(EHavocVehicleDamage::Disabled), 0.0);
+    TestEqual(TEXT("tracked pivot turn when stopped"), TrackedYawDelta(1.0, 0.0, 45.0, 1.0), 45.0);
+    TestTrue(TEXT("tracked reverse flips"), TrackedYawDelta(1.0, -100.0, 45.0, 1.0) < 0.0);
+
+    double Throttle = 0.0, Steer = 0.0;
+    FollowInput(FVector::ZeroVector, FVector::ForwardVector, FVector(10000, 0, 0), 2500.0, Throttle, Steer);
+    TestTrue(TEXT("far ahead: drive forward"), Throttle > 0.5);
+    TestEqual(TEXT("far ahead: no steer"), Steer, 0.0);
+    FollowInput(FVector::ZeroVector, FVector::ForwardVector, FVector(1000, 0, 0), 2500.0, Throttle, Steer);
+    TestEqual(TEXT("inside the gap: stop"), Throttle, 0.0);
+    FollowInput(FVector::ZeroVector, FVector::ForwardVector, FVector(5000, 5000, 0), 2500.0, Throttle, Steer);
+    TestTrue(TEXT("target to the right: steer right"), Steer > 0.0);
+    FollowInput(FVector::ZeroVector, FVector::ForwardVector, FVector(5000, -5000, 0), 2500.0, Throttle, Steer);
+    TestTrue(TEXT("target to the left: steer left"), Steer < 0.0);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocVehicleDamageTest, "MidnightHavoc.Vehicles.Damage", HAVOC_VEHICLE_TEST_FLAGS)
+bool FHavocVehicleDamageTest::RunTest(const FString& Parameters)
+{
+    HavocVehicleTests::FTestWorld TestWorld;
+    UWorld* World = TestWorld.World;
+    if (!TestNotNull(TEXT("world"), World))
+    {
+        return false;
+    }
+    ACharacter* Marine = World->SpawnActor<ACharacter>(FVector(0, 0, 100), FRotator::ZeroRotator);
+    AAIController* Player = World->SpawnActor<AAIController>();
+    AHavocNomadVehicle* Nomad = World->SpawnActor<AHavocNomadVehicle>(FVector(200, 0, 100), FRotator::ZeroRotator);
+    if (!Marine || !Player || !Nomad)
+    {
+        AddError(TEXT("actors not spawned"));
+        return false;
+    }
+    FHavocVehicleDef Def;
+    if (HavocVehicleTests::LoadDef(*this, TEXT("nomad_transport"), Def)) { Nomad->ApplyDefinition(Def); }
+    Player->Possess(Marine);
+
+    TestEqual(TEXT("starts at full integrity"), Nomad->GetIntegrity(), 1.f);
+    Nomad->ApplyVehicleDamage(0.4f);
+    TestTrue(TEXT("damaged"), Nomad->GetDamageLevel() == EHavocVehicleDamage::Damaged);
+    TestTrue(TEXT("repair works"), Nomad->RepairVehicle(0.2f));
+    TestEqual(TEXT("repaired"), Nomad->GetIntegrity(), 0.8f);
+
+    TestTrue(TEXT("enter"), Nomad->Enter(Player));
+    Nomad->ApplyVehicleDamage(1.f);
+    TestTrue(TEXT("destroyed"), Nomad->IsDestroyed());
+    TestFalse(TEXT("driver thrown out"), Nomad->IsOccupied());
+    TestTrue(TEXT("player back on foot"), Player->GetPawn() == Marine);
+    TestFalse(TEXT("cannot enter a wreck"), Nomad->CanEnter(Player));
+    TestFalse(TEXT("cannot repair a wreck"), Nomad->RepairVehicle(0.5f));
+
+    // A disabled vehicle does not move even at full throttle.
+    AHavocGroundVehicle* Warden = World->SpawnActor<AHavocGroundVehicle>(FVector(0, 5000, 100), FRotator::ZeroRotator);
+    if (Warden)
+    {
+        Warden->Stats.MaxSpeed = 14.0;
+        Warden->Stats.Acceleration = 5.0;
+        Warden->ApplyVehicleDamage(0.9f);
+        Warden->SetInput(1.0, 0.0, 0.0);
+        const FVector Start = Warden->GetActorLocation();
+        for (int32 i = 0; i < 10; ++i) { Warden->StepMovement(0.1f); }
+        TestTrue(TEXT("disabled tank stays put"), FVector::Dist2D(Warden->GetActorLocation(), Start) < 1.0);
+    }
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocVehicleSpawnTest, "MidnightHavoc.Vehicles.Spawn", HAVOC_VEHICLE_TEST_FLAGS)
 bool FHavocVehicleSpawnTest::RunTest(const FString& Parameters)
 {
@@ -148,6 +225,7 @@ bool FHavocVehicleSpawnTest::RunTest(const FString& Parameters)
     const FCase Cases[] = {
         { AHavocBoatVehicle::StaticClass(), TEXT("tern_patrol_boat") },
         { AHavocGroundVehicle::StaticClass(), TEXT("warden_tank") },
+        { AHavocNomadVehicle::StaticClass(), TEXT("nomad_transport") },
         { AHavocHelicopterVehicle::StaticClass(), TEXT("kestrel_scout_helicopter") },
         { AHavocDroneVehicle::StaticClass(), TEXT("wisp_recon_drone") },
     };

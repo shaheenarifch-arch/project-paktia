@@ -2,7 +2,7 @@
 
 Versioned JSON game definitions. `npm run validate` (see `scripts/validate-data.mjs`) checks every file here and prints errors as `file: field: message`.
 
-All ratings are **game-balance values** on a 1–10 scale (armor 0–10). They are never real performance figures. Real-world-hypothetical content declares `"setting": "real_world_hypothetical"` with `"fictional": false`; fictional content uses `"fictional": true`. The two must agree, and ISIS is never `playable`. There are no real people and no real operating, targeting or building instructions anywhere in this data.
+All ratings are **game-balance values** on a 1–10 scale (armor 0–10). They are never real performance figures. Convoy vehicles also publish damage (`ConvoyId`) to the mission; see `game/docs/vehicles.md`. Real-world-hypothetical content declares `"setting": "real_world_hypothetical"` with `"fictional": false`; fictional content uses `"fictional": true`. The two must agree, and ISIS is never `playable`. There are no real people and no real operating, targeting or building instructions anywhere in this data.
 
 ## Folders
 

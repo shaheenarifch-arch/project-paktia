@@ -7,10 +7,13 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Styling/SlateTypes.h"
 #include "Engine/GameInstance.h"
 #include "Input/Events.h"
+#include "Campaign/HavocCampaign.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Missions/HavocEpisodeFlow.h"
+#include "Input/HavocPlayInput.h"
 #include "Player/HavocPlaySettings.h"
 #include "Player/HavocPlayerController.h"
 #include "UI/HavocUIHelpers.h"
@@ -21,10 +24,22 @@ UHavocPlaySettings* UHavocMenuWidget::GetSettings() const
     return GI ? GI->GetSubsystem<UHavocPlaySettings>() : nullptr;
 }
 
-AHavocEpisode04Flow* UHavocMenuWidget::GetFlow() const
+UHavocCampaign* UHavocMenuWidget::GetCampaign() const
+{
+    const UGameInstance* GI = GetGameInstance();
+    return GI ? GI->GetSubsystem<UHavocCampaign>() : nullptr;
+}
+
+IHavocEpisodeFlow* UHavocMenuWidget::GetFlow() const
 {
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
     return PC ? PC->GetFlow() : nullptr;
+}
+
+AHavocEpisode03Flow* UHavocMenuWidget::GetFlow03() const
+{
+    AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
+    return PC ? PC->GetFlow03() : nullptr;
 }
 
 void UHavocMenuWidget::NativeOnInitialized()
@@ -43,7 +58,7 @@ void UHavocMenuWidget::NativeOnInitialized()
 
     List = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("List"));
     // A scroll box so the long settings page fits small screens; focus moves scroll it into view.
-    UScrollBox* Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("Scroll"));
+    Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("Scroll"));
     Scroll->AddChild(List);
     Backdrop->SetContent(Scroll);
     Rebuild();
@@ -51,7 +66,8 @@ void UHavocMenuWidget::NativeOnInitialized()
 
 void UHavocMenuWidget::SetMode(EHavocMenuMode NewMode)
 {
-    if (NewMode == EHavocMenuMode::Settings && Mode != EHavocMenuMode::Settings)
+    const auto IsSub = [](EHavocMenuMode M) { return M == EHavocMenuMode::Settings || M == EHavocMenuMode::HowToPlay; };
+    if (IsSub(NewMode) && !IsSub(Mode))
     {
         ReturnMode = Mode;
     }
@@ -77,6 +93,15 @@ void UHavocMenuWidget::AddButton(const FString& Label, FName Handler)
     UTextBlock* Text = HavocUI::MakeText(WidgetTree, Label, 24, FLinearColor::White);
     Text->SetJustification(ETextJustify::Center);
     Button->AddChild(Text);
+    // A visible resting / hover / pressed colour so the mouse and the keyboard focus both show which item is chosen.
+    FButtonStyle Style = Button->GetStyle();
+    Style.Normal.TintColor = FSlateColor(FLinearColor(0.10f, 0.13f, 0.18f, 0.95f));
+    Style.Hovered.TintColor = FSlateColor(FLinearColor(0.26f, 0.34f, 0.46f, 1.f));
+    Style.Pressed.TintColor = FSlateColor(FLinearColor(0.40f, 0.48f, 0.62f, 1.f));
+    Button->SetStyle(Style);
+    Button->SetIsFocusable(true);
+    Button->SetClickMethod(EButtonClickMethod::MouseDown); // a click registers even if the pointer drifts
+    Buttons.Add(Button); // keyboard / gamepad focus (FocusButton) needs this list
     FScriptDelegate Delegate;
     Delegate.BindUFunction(this, Handler);
     Button->OnClicked.Add(Delegate);
@@ -118,29 +143,58 @@ void UHavocMenuWidget::Rebuild()
     {
     case EHavocMenuMode::Main:
         AddLabel(TEXT("OPERATION MIDNIGHT HAVOC"), 44, Gold);
-        AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
-        AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+        if (GetFlow03())
+        {
+            AddLabel(TEXT("Episode 03: Operation Broken Citadel"), 28, FLinearColor::White);
+            AddLabel(TEXT("Take Gardun in five phases: open the city, break enemy communications, hold Old Gardun, take the high ground, then assault the Citadel. (Greybox build.)"), 18, Soft);
+        }
+        else
+        {
+            AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
+            AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+        }
         AddButton(TEXT("Campaign"), TEXT("OnCampaign"));
+        AddButton(TEXT("How to play"), TEXT("OnHowToPlay"));
         AddButton(TEXT("Settings"), TEXT("OnSettings"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
-        AddLabel(TEXT("Move W/A/S/D   Look mouse   Shift sprint   C crouch   Right mouse aim   Left mouse fire   R reload   E interact\nT Raven drone   G Falcon support   Tab back to Marine   1 / 2 choose beach   Esc pause"), 16, Soft);
+        AddLabel(TEXT("Choose with the mouse, Up / Down and Enter, or a gamepad (D-pad, A). How to play lists every key."), 16, Soft);
         break;
 
     case EHavocMenuMode::Campaign:
     {
-        // Episodes 01-03 are playable in the browser prototype (play/, docs/campaign.md); their Unreal maps are
-        // not built yet, so they show as locked. Episode 04 is playable here.
+        // Lock state comes from the saved campaign (UHavocCampaign): an episode unlocks when the one before it
+        // ended in SUCCESS or PARTIAL. Episodes 01-03 are playable in the browser prototype (docs/campaign.md);
+        // their Unreal maps are not built yet. Episode 04 is playable here.
         const FLinearColor Locked(0.55f, 0.58f, 0.64f);
+        const UHavocCampaign* Campaign = GetCampaign();
         AddLabel(TEXT("CAMPAIGN"), 40, Gold);
-        AddLabel(TEXT("Choose an episode, then press Start."), 18, Soft);
-        AddLabel(TEXT("Episode 01: Operation Mountain Shield  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 02: Operation Silent Corridor  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 03: Operation Broken Citadel  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
-        AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
-        AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+        AddLabel(TEXT("Episodes unlock in order: finish one with SUCCESS or PARTIAL to open the next."), 18, Soft);
+        for (int32 Episode = UHavocCampaign::FirstEpisode; Episode <= UHavocCampaign::LastEpisode; ++Episode)
+        {
+            const bool bOpen = !Campaign || Campaign->IsUnlocked(Episode);
+            const FString Status = Campaign ? Campaign->StatusText(Episode) : FString(TEXT("Unlocked"));
+            const TCHAR* Where = Episode == 4 ? TEXT("") : TEXT(" (Unreal version in progress)");
+            AddLabel(FString::Printf(TEXT("Episode %02d: %s  -  %s%s"), Episode, *UHavocCampaign::EpisodeName(Episode), *Status, Where),
+                Episode == 4 ? 24 : 20, bOpen ? FLinearColor::White : Locked);
+        }
+        AddLabel(TEXT("Episode 04: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait. A hypothetical scenario."), 18, Soft);
+        if (!Campaign || Campaign->IsUnlocked(4))
+        {
+            const bool bBonus = Campaign && Campaign->GetEpisode3Outcome() == TEXT("SUCCESS");
+            AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+            if (bBonus)
+            {
+                AddLabel(TEXT("Episode 03 success: +10 reinforcements."), 15, Gold);
+            }
+        }
+        else
+        {
+            AddLabel(TEXT("Episode 04 is locked: finish Episode 03 first."), 18, Gold);
+            AddButton(TEXT("Unlock all episodes (testing)"), TEXT("OnUnlockAll"));
+            AddLabel(TEXT("Episodes 01-03 are not playable in Unreal yet, so this opens Episode 04 for testing. Your saved results are kept."), 15, Locked);
+        }
         AddButton(TEXT("Back"), TEXT("OnMainMenu"));
-        AddLabel(TEXT("Episodes 01-03 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
+        AddLabel(TEXT("Episodes 01-02 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
         break;
     }
 
@@ -148,9 +202,37 @@ void UHavocMenuWidget::Rebuild()
         AddLabel(TEXT("PAUSED"), 40, Gold);
         AddButton(TEXT("Resume"), TEXT("OnResume"));
         AddButton(TEXT("Restart from last checkpoint"), TEXT("OnRestartCheckpoint"));
+        AddButton(TEXT("How to play"), TEXT("OnHowToPlay"));
         AddButton(TEXT("Settings"), TEXT("OnSettings"));
         AddButton(TEXT("Quit to desktop"), TEXT("OnQuit"));
         break;
+
+    case EHavocMenuMode::HowToPlay:
+    {
+        // Read from the live mapping contexts, so a rebind in Settings shows here at once.
+        const UGameInstance* GI = GetGameInstance();
+        const UHavocPlayInput* Input = GI ? GI->GetSubsystem<UHavocPlayInput>() : nullptr;
+        AddLabel(TEXT("HOW TO PLAY"), 40, Gold);
+        AddButton(TEXT("Back"), TEXT("OnBack"));
+        AddLabel(UHavocPlaySettings::HelpFor(TEXT("howtoplay")), 15, Soft);
+        FString LastSection;
+        if (Input)
+        {
+            for (const FHavocControlRow& Row : Input->BuildControlRows())
+            {
+                if (Row.Section != LastSection)
+                {
+                    LastSection = Row.Section;
+                    AddLabel(Row.Section, 24, Gold);
+                }
+                AddLabel(FString::Printf(TEXT("%s:  %s"), *Row.Action, *Row.Keys), 18, FLinearColor::White);
+            }
+        }
+        AddLabel(TEXT("Gamepad: menus only for now (D-pad or stick, A to choose, B back, Start pause). Flying and driving use keyboard and mouse. Change keys in Settings."), 15, Soft);
+        AddLabel(TEXT("Scroll with the mouse wheel, Up / Down, Page Up / Page Down or the D-pad."), 15, Soft);
+        AddButton(TEXT("Back"), TEXT("OnBack"));
+        break;
+    }
 
     case EHavocMenuMode::Settings:
     {
@@ -194,18 +276,16 @@ void UHavocMenuWidget::Rebuild()
 
     case EHavocMenuMode::Results:
     {
-        const AHavocEpisode04Flow* Flow = GetFlow();
+        const IHavocEpisodeFlow* Flow = GetFlow();
         const FString Outcome = Flow ? Flow->GetOutcome() : FString();
         const bool bFailed = Outcome == TEXT("FAILED");
-        AddLabel(Outcome == TEXT("SUCCESS") ? TEXT("STRAIT OPEN - MISSION COMPLETE")
-            : Outcome == TEXT("PARTIAL") ? TEXT("STRAIT OPEN - PARTIAL SUCCESS")
-            : TEXT("OPERATION FAILED"), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
+        AddLabel(Flow ? Flow->GetResultTitle() : FString(TEXT("OPERATION FAILED")), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
         AddLabel(Flow ? Flow->GetResultSummary() : FString(), 22, FLinearColor::White);
         if (bFailed)
         {
             AddButton(TEXT("Restart from last checkpoint"), TEXT("OnRestartCheckpoint"));
         }
-        AddButton(TEXT("Play Episode 04 again"), TEXT("OnPlay"));
+        AddButton(Flow ? Flow->GetReplayLabel() : FString(TEXT("Play again")), TEXT("OnPlay"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
         break;
     }
@@ -255,7 +335,7 @@ void UHavocMenuWidget::FinishRebind(const FKey& Key)
         return;
     }
     static const TArray<FKey> Reserved = { EKeys::Escape, EKeys::P, EKeys::One, EKeys::Two, EKeys::W, EKeys::A, EKeys::S, EKeys::D,
-        EKeys::SpaceBar, EKeys::LeftShift, EKeys::LeftControl, EKeys::C, EKeys::Q };
+        EKeys::SpaceBar, EKeys::LeftShift, EKeys::LeftControl, EKeys::C, EKeys::Q, EKeys::F, EKeys::H };
     if (Reserved.Contains(Key))
     {
         RebindMessage = FString::Printf(TEXT("%s is used for movement, pause or beach choice. Pick another key."), *Key.GetDisplayName().ToString());
@@ -307,7 +387,7 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
             OnResume();
             return FReply::Handled();
         }
-        if (Mode == EHavocMenuMode::Settings)
+        if (Mode == EHavocMenuMode::Settings || Mode == EHavocMenuMode::HowToPlay)
         {
             OnBack();
             return FReply::Handled();
@@ -318,15 +398,43 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
             return FReply::Handled();
         }
     }
+    if (Mode == EHavocMenuMode::HowToPlay && Scroll)
+    {
+        // Few buttons on this page, so keys scroll the list (the mouse wheel works too).
+        const FKey Key = InKeyEvent.GetKey();
+        float Delta = 0.f;
+        if (Key == EKeys::Down || Key == EKeys::Gamepad_DPad_Down || Key == EKeys::Gamepad_LeftStick_Down) { Delta = 120.f; }
+        else if (Key == EKeys::Up || Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_LeftStick_Up) { Delta = -120.f; }
+        else if (Key == EKeys::PageDown) { Delta = 600.f; }
+        else if (Key == EKeys::PageUp) { Delta = -600.f; }
+        if (Delta != 0.f)
+        {
+            Scroll->SetScrollOffset(FMath::Clamp(Scroll->GetScrollOffset() + Delta, 0.f, Scroll->GetScrollOffsetOfEnd()));
+            return FReply::Handled();
+        }
+    }
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 void UHavocMenuWidget::OnPlay()
 {
-    if (AHavocEpisode04Flow* Flow = GetFlow())
+    if (IHavocEpisodeFlow* Flow = GetFlow())
     {
         Flow->StartEpisode();
     }
+    else if (AHavocEpisode03Flow* Flow03 = GetFlow03())
+    {
+        Flow03->StartEpisode();
+    }
+}
+
+void UHavocMenuWidget::OnUnlockAll()
+{
+    if (UHavocCampaign* Campaign = GetCampaign())
+    {
+        Campaign->SetUnlockAll(true);
+    }
+    Rebuild();
 }
 
 void UHavocMenuWidget::OnCampaign() { SetMode(EHavocMenuMode::Campaign); }
@@ -342,12 +450,17 @@ void UHavocMenuWidget::OnResume()
 
 void UHavocMenuWidget::OnRestartCheckpoint()
 {
-    if (AHavocEpisode04Flow* Flow = GetFlow())
+    if (IHavocEpisodeFlow* Flow = GetFlow())
     {
         Flow->RestartFromCheckpoint();
     }
+    else if (AHavocEpisode03Flow* Flow03 = GetFlow03())
+    {
+        Flow03->RestartFromCheckpoint();
+    }
 }
 
+void UHavocMenuWidget::OnHowToPlay() { RebindMessage.Reset(); SetMode(EHavocMenuMode::HowToPlay); }
 void UHavocMenuWidget::OnSettings() { RebindMessage.Reset(); SetMode(EHavocMenuMode::Settings); }
 void UHavocMenuWidget::OnBack() { RebindingAction = NAME_None; RebindMessage.Reset(); SetMode(ReturnMode); }
 
