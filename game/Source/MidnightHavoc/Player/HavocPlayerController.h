@@ -74,6 +74,9 @@ private:
     void StartSmokeRun();
     FTimerHandle SmokeStartTimer;
     FTimerHandle SmokeShotTimer;
+    FTimerHandle SmokeDiagTimer;
+    FTimerHandle SmokeDiagShotTimer;
+    int32 SmokeDiagStep = 0;
 
     /** F on foot enters the nearest vehicle in range, F in a vehicle exits (state changes are server only). */
     UFUNCTION(Server, Reliable)

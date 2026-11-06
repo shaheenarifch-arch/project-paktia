@@ -129,6 +129,24 @@ void AHavocPlayerController::StartSmokeRun()
             const AActor* Target = GetViewTarget();
             UE_LOG(LogTemp, Display, TEXT("HavocSmoke: taking screenshot (view target %s)"), Target ? *Target->GetName() : TEXT("none"));
             ConsoleCommand(TEXT("HighResShot 1280x720"));
+            // Diagnostic shots (taken after the scored one, so they don't affect the result): which effect hides the island?
+            SmokeDiagStep = 0;
+            GetWorldTimerManager().SetTimer(SmokeDiagTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+            {
+                static const TCHAR* Steps[] = { TEXT("r.VolumetricFog 0"), TEXT("ShowFlag.Fog 0"), TEXT("ShowFlag.EyeAdaptation 0") };
+                if (SmokeDiagStep >= static_cast<int32>(UE_ARRAY_COUNT(Steps)))
+                {
+                    GetWorldTimerManager().ClearTimer(SmokeDiagTimer);
+                    return;
+                }
+                ConsoleCommand(Steps[SmokeDiagStep]);
+                UE_LOG(LogTemp, Display, TEXT("HavocSmoke: diag shot %d after '%s'"), SmokeDiagStep + 1, Steps[SmokeDiagStep]);
+                ++SmokeDiagStep;
+                GetWorldTimerManager().SetTimer(SmokeDiagShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+                {
+                    ConsoleCommand(TEXT("HighResShot 1280x720"));
+                }), 2.f, false);
+            }), 4.f, true, 3.f);
         }), 4.f, false);
     }), 30.f, false);
 }
