@@ -150,6 +150,17 @@ def open_or_create_level():
 
 
 def clear_previous(eas):
+    # World Partition: get_all_level_actors() only sees loaded actors, so load every actor first; otherwise a
+    # streamed copy from an earlier run survives and the sector ends up placed twice.
+    # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition-in-unreal-engine
+    try:
+        wpl = unreal.WorldPartitionBlueprintLibrary
+        guids = [d.get_editor_property("guid") for d in wpl.get_actor_descs()]
+        if guids:
+            wpl.load_actors(guids)
+            log("Loaded %d World Partition actors before clearing" % len(guids))
+    except Exception as e:
+        warn("Could not load all World Partition actors (%s); old streamed copies may remain." % e)
     n = 0
     for a in eas.get_all_level_actors():
         if unreal.Name(TAG) in a.tags:
