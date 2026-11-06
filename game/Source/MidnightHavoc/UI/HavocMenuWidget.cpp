@@ -11,7 +11,7 @@
 #include "Engine/GameInstance.h"
 #include "Input/Events.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Missions/HavocEpisodeFlow.h"
 #include "Input/HavocPlayInput.h"
 #include "Player/HavocPlaySettings.h"
 #include "Player/HavocPlayerController.h"
@@ -23,7 +23,7 @@ UHavocPlaySettings* UHavocMenuWidget::GetSettings() const
     return GI ? GI->GetSubsystem<UHavocPlaySettings>() : nullptr;
 }
 
-AHavocEpisode04Flow* UHavocMenuWidget::GetFlow() const
+IHavocEpisodeFlow* UHavocMenuWidget::GetFlow() const
 {
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
     return PC ? PC->GetFlow() : nullptr;
@@ -235,7 +235,7 @@ void UHavocMenuWidget::Rebuild()
 
     case EHavocMenuMode::Results:
     {
-        const AHavocEpisode04Flow* Flow = GetFlow();
+        const IHavocEpisodeFlow* Flow = GetFlow();
         const FString Outcome = Flow ? Flow->GetOutcome() : FString();
         const bool bFailed = Outcome == TEXT("FAILED");
         AddLabel(Outcome == TEXT("SUCCESS") ? TEXT("STRAIT OPEN - MISSION COMPLETE")
@@ -379,7 +379,7 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
 
 void UHavocMenuWidget::OnPlay()
 {
-    if (AHavocEpisode04Flow* Flow = GetFlow())
+    if (IHavocEpisodeFlow* Flow = GetFlow())
     {
         Flow->StartEpisode();
     }
@@ -398,7 +398,7 @@ void UHavocMenuWidget::OnResume()
 
 void UHavocMenuWidget::OnRestartCheckpoint()
 {
-    if (AHavocEpisode04Flow* Flow = GetFlow())
+    if (IHavocEpisodeFlow* Flow = GetFlow())
     {
         Flow->RestartFromCheckpoint();
     }

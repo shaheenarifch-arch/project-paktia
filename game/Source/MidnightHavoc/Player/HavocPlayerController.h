@@ -12,6 +12,7 @@
 #include "HavocPlayerController.generated.h"
 
 class AHavocEpisode04Flow;
+class IHavocEpisodeFlow;
 class UHavocMenuWidget;
 class UHavocPlayHUD;
 
@@ -45,7 +46,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|UI")
     void TogglePause();
 
-    AHavocEpisode04Flow* GetFlow();
+    /** The active episode flow through the shared interface (null if the level has none). */
+    IHavocEpisodeFlow* GetFlow();
+    /** Episode 04 only: for its specific inputs (beach choice, Raven, Falcon). */
+    AHavocEpisode04Flow* GetEpisode04Flow();
 
     /** The first-time hint on screen now (empty if none). Shown by the HUD until dismissed or it times out. */
     const FString& GetActiveHint() const { return ActiveHint; }
@@ -92,6 +96,6 @@ private:
 
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;
-    UPROPERTY() TObjectPtr<AHavocEpisode04Flow> Flow;
+    UPROPERTY() TScriptInterface<IHavocEpisodeFlow> Flow;
     TWeakObjectPtr<AHavocPlayerCharacter> Marine;
 };

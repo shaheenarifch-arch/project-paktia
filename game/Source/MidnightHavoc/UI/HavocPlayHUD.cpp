@@ -10,7 +10,7 @@
 #include "Components/VerticalBox.h"
 #include "Drones/HavocDrone.h"
 #include "Aircraft/HavocFalconHelicopter.h"
-#include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Missions/HavocEpisodeFlow.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 #include "Missions/HavocMissionRunner.h"
 #include "Missions/HavocMissionSubsystem.h"
@@ -102,7 +102,7 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     Super::NativeTick(MyGeometry, InDeltaTime);
 
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
-    AHavocEpisode04Flow* Flow = PC ? PC->GetFlow() : nullptr;
+    IHavocEpisodeFlow* Flow = PC ? PC->GetFlow() : nullptr;
     const UHavocMissionSubsystem* Missions = GetWorld() ? GetWorld()->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
     UHavocOpenStraitMission* Mission = Missions ? Missions->GetOpenStrait() : nullptr;
 
