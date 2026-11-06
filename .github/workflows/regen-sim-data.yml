@@ -1,0 +1,32 @@
+# Regenerates sim/generated/*.inc from data/ (npm run sim:gen) and commits them to the branch,
+# so the "Simulation core" check in validate.yml never fails on stale generated files.
+# Runs when data/ or the generator changes on a bhaddru/** branch, or by hand (Actions > Run workflow).
+# Help: https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows
+name: Regenerate sim data
+
+on:
+  push:
+    branches: ['bhaddru/**']
+    paths: ['data/**', 'scripts/gen-sim-data.mjs', '.github/workflows/regen-sim-data.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run sim:gen
+      - name: Commit regenerated files (if changed)
+        run: |
+          if git diff --quiet -- sim/generated; then echo "sim/generated is already up to date"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sim/generated
+          git commit -m "Regenerate sim/generated from data/ (npm run sim:gen)"
+          git push
