@@ -101,7 +101,7 @@ elseif ($avg -lt $MinFpsFloor) { $reasons += "Average FPS $avg is below floor $M
 $shotSpread = $null
 $shot = Get-ChildItem -Path $searchRoot -Recurse -Filter '*.png' -ErrorAction SilentlyContinue |
   Where-Object { $_.FullName -match '\\Screenshots\\' -and $_.LastWriteTime -ge $startedAt.AddMinutes(-1) } |
-  Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  Sort-Object LastWriteTime | Select-Object -First 1
 if (-not $shot) {
   $reasons += 'No in-game screenshot was taken (the episode did not start or HighResShot failed)'
 } else {
@@ -121,6 +121,12 @@ if (-not $shot) {
       $row = for ($x = 0; $x -lt 16; $x++) { $c = $bmp.GetPixel([int]($bmp.Width * ($x + 0.5) / 16), [int]($bmp.Height * ($y + 0.5) / 9)); '{0,3}' -f [int](0.2126 * $c.R + 0.7152 * $c.G + 0.0722 * $c.B) }
       Write-Host ($row -join ' ')
     }
+    # Small JPEG of the shot as base64 in the job log, so it can be viewed without downloading artifacts.
+    $thumb = New-Object System.Drawing.Bitmap($bmp, 240, 135)
+    $ms = New-Object System.IO.MemoryStream
+    $thumb.Save($ms, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+    Write-Host "SMOKE_THUMB_B64 $([Convert]::ToBase64String($ms.ToArray()))"
+    $thumb.Dispose(); $ms.Dispose()
     $bmp.Dispose()
     $mean = ($lum | Measure-Object -Average).Average
     $shotSpread = [math]::Round([math]::Sqrt((($lum | ForEach-Object { ($_ - $mean) * ($_ - $mean) }) | Measure-Object -Average).Average), 1)
@@ -133,6 +139,18 @@ if (-not $shot) {
 Get-ChildItem -Path $OutDir -Filter '*.log' -ErrorAction SilentlyContinue | Select-String -Pattern 'HavocSmoke|LogLoad: (Game class|LoadMap)|Took .* seconds to LoadMap' -ErrorAction SilentlyContinue |
   Select-Object -First 20 | ForEach-Object { Write-Host "smoke log: $($_.Line)" }
 Write-Host "Screenshot spread: $shotSpread"
+# Thumbnails of every screenshot from this run, oldest first (the first is the scored one; the rest are diag shots).
+Add-Type -AssemblyName System.Drawing
+Get-ChildItem -Path $searchRoot -Recurse -Filter '*.png' -ErrorAction SilentlyContinue |
+  Where-Object { $_.FullName -match '\\Screenshots\\' -and $_.LastWriteTime -ge $startedAt.AddMinutes(-1) } |
+  Sort-Object LastWriteTime | ForEach-Object {
+    try {
+      $b = [System.Drawing.Bitmap]::FromFile($_.FullName); $t = New-Object System.Drawing.Bitmap($b, 240, 135)
+      $m = New-Object System.IO.MemoryStream; $t.Save($m, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+      Write-Host "SMOKE_SHOT $($_.Name) $([Convert]::ToBase64String($m.ToArray()))"
+      $t.Dispose(); $b.Dispose(); $m.Dispose()
+    } catch { Write-Host "SMOKE_SHOT $($_.Name) unreadable: $_" }
+  }
 $pass = ($reasons.Count -eq 0)
 $fpsText = if ($null -ne $avg) { "avg **$avg** / min **$min**" } else { 'n/a' }
 $sb = New-Object System.Text.StringBuilder
