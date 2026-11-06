@@ -10,6 +10,7 @@
 #include "Engine/GameInstance.h"
 #include "Input/Events.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Missions/Episode03/HavocEpisode03Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Player/HavocPlaySettings.h"
 #include "Player/HavocPlayerController.h"
@@ -25,6 +26,12 @@ AHavocEpisode04Flow* UHavocMenuWidget::GetFlow() const
 {
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
     return PC ? PC->GetFlow() : nullptr;
+}
+
+AHavocEpisode03Flow* UHavocMenuWidget::GetFlow03() const
+{
+    AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
+    return PC ? PC->GetFlow03() : nullptr;
 }
 
 void UHavocMenuWidget::NativeOnInitialized()
@@ -118,8 +125,16 @@ void UHavocMenuWidget::Rebuild()
     {
     case EHavocMenuMode::Main:
         AddLabel(TEXT("OPERATION MIDNIGHT HAVOC"), 44, Gold);
-        AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
-        AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+        if (GetFlow03())
+        {
+            AddLabel(TEXT("Episode 03: Operation Broken Citadel"), 28, FLinearColor::White);
+            AddLabel(TEXT("Take Gardun in five phases: open the city, break enemy communications, hold Old Gardun, take the high ground, then assault the Citadel. (Greybox build.)"), 18, Soft);
+        }
+        else
+        {
+            AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
+            AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+        }
         AddButton(TEXT("Campaign"), TEXT("OnCampaign"));
         AddButton(TEXT("Settings"), TEXT("OnSettings"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
@@ -135,12 +150,21 @@ void UHavocMenuWidget::Rebuild()
         AddLabel(TEXT("Choose an episode, then press Start."), 18, Soft);
         AddLabel(TEXT("Episode 01: Operation Mountain Shield  -  locked (Unreal version in progress)"), 20, Locked);
         AddLabel(TEXT("Episode 02: Operation Silent Corridor  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 03: Operation Broken Citadel  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
-        AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
-        AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+        if (GetFlow03())
+        {
+            AddLabel(TEXT("Episode 03: Operation Broken Citadel"), 28, FLinearColor::White);
+            AddLabel(TEXT("Five phases across Gardun (greybox): open the city, break communications, hold Old Gardun, take the high ground, assault the Citadel. Reinforcements: 20, +5 per surviving Nomad from Episode 02."), 18, Soft);
+            AddButton(TEXT("Start Episode 03"), TEXT("OnPlay"));
+        }
+        else
+        {
+            AddLabel(TEXT("Episode 03: Operation Broken Citadel  -  start the game with -HavocEpisode=3 (greybox Gardun)"), 20, Locked);
+            AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
+            AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+            AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+        }
         AddButton(TEXT("Back"), TEXT("OnMainMenu"));
-        AddLabel(TEXT("Episodes 01-03 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
+        AddLabel(TEXT("Episodes 01-02 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
         break;
     }
 
@@ -195,17 +219,18 @@ void UHavocMenuWidget::Rebuild()
     case EHavocMenuMode::Results:
     {
         const AHavocEpisode04Flow* Flow = GetFlow();
-        const FString Outcome = Flow ? Flow->GetOutcome() : FString();
+        const AHavocEpisode03Flow* Flow03 = GetFlow03();
+        const FString Outcome = Flow ? Flow->GetOutcome() : (Flow03 ? Flow03->GetOutcome() : FString());
         const bool bFailed = Outcome == TEXT("FAILED");
-        AddLabel(Outcome == TEXT("SUCCESS") ? TEXT("STRAIT OPEN - MISSION COMPLETE")
+        AddLabel(Outcome == TEXT("SUCCESS") ? (Flow03 ? TEXT("CITADEL SECURED - MISSION COMPLETE") : TEXT("STRAIT OPEN - MISSION COMPLETE"))
             : Outcome == TEXT("PARTIAL") ? TEXT("STRAIT OPEN - PARTIAL SUCCESS")
             : TEXT("OPERATION FAILED"), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
-        AddLabel(Flow ? Flow->GetResultSummary() : FString(), 22, FLinearColor::White);
+        AddLabel(Flow ? Flow->GetResultSummary() : (Flow03 ? Flow03->GetResultSummary() : FString()), 22, FLinearColor::White);
         if (bFailed)
         {
             AddButton(TEXT("Restart from last checkpoint"), TEXT("OnRestartCheckpoint"));
         }
-        AddButton(TEXT("Play Episode 04 again"), TEXT("OnPlay"));
+        AddButton(Flow03 ? TEXT("Play Episode 03 again") : TEXT("Play Episode 04 again"), TEXT("OnPlay"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
         break;
     }
@@ -327,6 +352,10 @@ void UHavocMenuWidget::OnPlay()
     {
         Flow->StartEpisode();
     }
+    else if (AHavocEpisode03Flow* Flow03 = GetFlow03())
+    {
+        Flow03->StartEpisode();
+    }
 }
 
 void UHavocMenuWidget::OnCampaign() { SetMode(EHavocMenuMode::Campaign); }
@@ -345,6 +374,10 @@ void UHavocMenuWidget::OnRestartCheckpoint()
     if (AHavocEpisode04Flow* Flow = GetFlow())
     {
         Flow->RestartFromCheckpoint();
+    }
+    else if (AHavocEpisode03Flow* Flow03 = GetFlow03())
+    {
+        Flow03->RestartFromCheckpoint();
     }
 }
 

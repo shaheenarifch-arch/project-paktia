@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Missions/Episode03/HavocEpisode03Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Player/HavocPlayerCharacter.h"
 #include "TimerManager.h"
@@ -35,13 +36,14 @@ void AHavocPlayerController::BeginPlay()
 void AHavocPlayerController::StartSmokeRun()
 {
     AHavocEpisode04Flow* F = GetFlow();
-    if (!F)
+    AHavocEpisode03Flow* F3 = GetFlow03();
+    if (!F && !F3)
     {
-        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 04 flow in this level; cannot start the episode"));
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no episode flow in this level; cannot start the episode"));
         return;
     }
-    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 04"));
-    F->StartEpisode();
+    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %s"), F3 ? TEXT("03") : TEXT("04"));
+    if (F3) { F3->StartEpisode(); } else { F->StartEpisode(); }
     // 30 s in: the Raven is over the beaches, so the island, sea and sky should all be in view.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
     GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
@@ -107,11 +109,24 @@ AHavocEpisode04Flow* AHavocPlayerController::GetFlow()
     return Flow;
 }
 
+AHavocEpisode03Flow* AHavocPlayerController::GetFlow03()
+{
+    if (!Flow03)
+    {
+        for (TActorIterator<AHavocEpisode03Flow> It(GetWorld()); It; ++It)
+        {
+            Flow03 = *It;
+            break;
+        }
+    }
+    return Flow03;
+}
+
 void AHavocPlayerController::OnChooseNorth() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ChooseBeach(true); } }
 void AHavocPlayerController::OnChooseWest() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ChooseBeach(false); } }
-void AHavocPlayerController::OnInteract() { if (AHavocEpisode04Flow* F = GetFlow()) { F->HandleInteract(); } }
+void AHavocPlayerController::OnInteract() { if (AHavocEpisode04Flow* F = GetFlow()) { F->HandleInteract(); } else if (AHavocEpisode03Flow* F3 = GetFlow03()) { F3->HandleInteract(); } }
 void AHavocPlayerController::OnDeployRaven() { if (AHavocEpisode04Flow* F = GetFlow()) { F->DeployRaven(); } }
-void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisode04Flow* F = GetFlow()) { F->CallFalcon(); } }
+void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisode04Flow* F = GetFlow()) { F->CallFalcon(); } else if (AHavocEpisode03Flow* F3 = GetFlow03()) { F3->CallFalcon(); } }
 void AHavocPlayerController::OnReturn() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ReturnToMarine(); } }
 
 void AHavocPlayerController::OnVehicle() { ServerToggleVehicle(); }
@@ -195,7 +210,9 @@ void AHavocPlayerController::ShowHud()
 void AHavocPlayerController::TogglePause()
 {
     AHavocEpisode04Flow* F = GetFlow();
-    if (!F || F->GetPhase() != EHavocFlowPhase::Playing)
+    AHavocEpisode03Flow* F3 = GetFlow03();
+    const EHavocFlowPhase FlowPhase = F ? F->GetPhase() : (F3 ? F3->GetPhase() : EHavocFlowPhase::Menu);
+    if (FlowPhase != EHavocFlowPhase::Playing)
     {
         return;
     }

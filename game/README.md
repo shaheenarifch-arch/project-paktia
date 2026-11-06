@@ -26,6 +26,7 @@ Folders are under `Source/MidnightHavoc/`.
 | `Core/` | `UHavocEventSubsystem` | `src/core/EventBus.ts` |
 | `Missions/` | `UHavocMissionSubsystem`, `UHavocMissionRunner`, `IHavocMissionSystems` | `src/gameplay/missions/framework/MissionRunner.ts` |
 | `Missions/Episode04/` | `UHavocOpenStraitMission`, `UHavocOilTerminal`, `UHavocShippingLanes`, `UHavocTankerEscort` | `src/gameplay/missions/episode04/` (OpenStrait, OilTerminal, ShippingLanes, TankerEscort) |
+| `Missions/Episode03/` | `UHavocBrokenCitadelMission`, `FHavocSurpriseEventDirector`, `AHavocEpisode03Flow` | `src/gameplay/missions/episode03/` (BrokenCitadel, SurpriseEventDirector) |
 | `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
 | `Drones/` | `AHavocDrone` (Raven, Warden, Talon subclasses), `IHavocDroneDetectable` | `src/gameplay/drones/` (DroneBase, DroneFlightController, DroneBattery, DroneSignalManager, DroneSensor, DroneCamera) |
@@ -187,6 +188,22 @@ They read `data/missions/episode-04-open-strait.json` from `<ProjectDir>/../data
   (see <https://dev.epicgames.com/documentation/en-us/unreal-engine/run-automation-tests-in-unreal-engine>).
 
 The TypeScript suite (`npm test`) remains the reference behaviour.
+
+## How to play (Episode 03, greybox)
+
+Episode 03, *Operation Broken Citadel*, plays in a greybox Gardun that the flow builds at run time (a floor, the ten sector volumes and a pillar on every objective, 3 km above the level origin so it works in any map). No Gardun level is needed yet.
+
+- Start it with the command line `-HavocEpisode=3`, the travel option `?Episode=3`, or a map whose name contains `Gardun`. Without any of these the game starts Episode 04 as before. `-HavocSmokeStart` also starts whichever episode is loaded.
+- The rules, phases, unlocks and surprise event come from `data/missions/episode-03-broken-citadel.json` and `operation-broken-citadel.json` (`UHavocBrokenCitadelMission`; the TypeScript reference is `src/gameplay/missions/episode03/`).
+- Five phases, in order: open the city (Airfield **or** Industrial Depot), break communications (West Ridge radio and Government relay), control Old Gardun (Market Square, Medical Station, Municipal Ruins), neutralise the high ground (Mountain Fort, East Power Station), assault the Citadel (Outer Gate, Inner Courtyard, Command Hall, Operations Room).
+- To take an objective: clear its garrison, then stand in its marker for a few seconds. The Medical Station is a protected location with no garrison: just hold it.
+- Unlocks: the airfield gives Falcon air support (**G**, an abstract strike) only if Episode 02 delivered the crew; both relay sites cut enemy counterattacks to 60%; the Mountain Fort brings Aegis online (abstract); the Medical Station becomes a protected zone no support may target.
+- A surprise event, picked from the match seed, fires once when phase 3 starts and ends with it. The HUD status block names it and `surprise:event` is published on the event bus.
+- Reinforcements start at 20, +5 per surviving Nomad from Episode 02 (`UHavocMissionSubsystem::SetEpisode2Carryover`; `SetSurpriseSeed` fixes the seed). A death costs 2 and returns you to the last checkpoint; at zero the assault fails and you can restart from the last checkpoint.
+- On finishing, the outcome is passed to Episode 04 (`SetEpisode3Outcome`) for its +10 reinforcements on SUCCESS.
+- Greybox limits: no nav mesh, so garrisons hold position instead of patrolling; enemy stats come from existing `data/units` factions (`EnemyFactions` on the flow) until Gardun has faction data.
+
+More: playtest checklist `docs/episode-03-playtest-checklist.md`.
 
 ## How to play (Episode 07)
 

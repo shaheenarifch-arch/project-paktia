@@ -68,6 +68,7 @@ private:
 
     class UHavocPlaySettings* GetSettings() const;
     class AHavocEpisode04Flow* GetFlow() const;
+    class AHavocEpisode03Flow* GetFlow03() const;
 
     EHavocMenuMode Mode = EHavocMenuMode::Main;
     EHavocMenuMode ReturnMode = EHavocMenuMode::Main;

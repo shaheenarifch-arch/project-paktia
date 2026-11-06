@@ -10,6 +10,7 @@
 #include "Components/VerticalBox.h"
 #include "Drones/HavocDrone.h"
 #include "Aircraft/HavocFalconHelicopter.h"
+#include "Missions/Episode03/HavocEpisode03Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 #include "Missions/HavocMissionRunner.h"
@@ -99,6 +100,7 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
     AHavocEpisode04Flow* Flow = PC ? PC->GetFlow() : nullptr;
+    const AHavocEpisode03Flow* Flow03 = PC ? PC->GetFlow03() : nullptr;
     const UHavocMissionSubsystem* Missions = GetWorld() ? GetWorld()->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
     UHavocOpenStraitMission* Mission = Missions ? Missions->GetOpenStrait() : nullptr;
 
@@ -110,8 +112,14 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
     ObjectiveText->SetText(FText::FromString(Snapshot.Objective));
     TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : FString()));
-    HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : FString()));
-    ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : FString()));
+    HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : (bSubtitles && Flow03 ? Flow03->GetHint() : FString())));
+    ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : (bSubtitles && Flow03 ? Flow03->GetToast() : FString())));
+    if (Flow03)
+    {
+        // Episode 03 has its own objective line and status block (no Episode 04 mission).
+        ObjectiveText->SetText(FText::FromString(Flow03->GetObjectiveText()));
+        TrackerText->SetText(FText::GetEmpty());
+    }
 
     // Current sector, from the minimap's sector volumes.
     FString SectorName;
@@ -144,6 +152,10 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         {
             Status += TEXT("\n") + Flow->GetSupportStatus();
         }
+    }
+    if (Flow03)
+    {
+        Status = Flow03->GetStatusBlock();
     }
     StatusText->SetText(FText::FromString(Status));
 

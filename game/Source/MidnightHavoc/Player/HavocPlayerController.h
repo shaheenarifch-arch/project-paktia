@@ -11,6 +11,7 @@
 #include "Player/HavocPlayerCharacter.h"
 #include "HavocPlayerController.generated.h"
 
+class AHavocEpisode03Flow;
 class AHavocEpisode04Flow;
 class UHavocMenuWidget;
 class UHavocPlayHUD;
@@ -47,6 +48,9 @@ public:
 
     AHavocEpisode04Flow* GetFlow();
 
+    /** The Episode 03 flow when the session plays Episode 03 (greybox Gardun), else null. */
+    AHavocEpisode03Flow* GetFlow03();
+
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }
 
@@ -78,5 +82,6 @@ private:
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;
     UPROPERTY() TObjectPtr<AHavocEpisode04Flow> Flow;
+    UPROPERTY() TObjectPtr<AHavocEpisode03Flow> Flow03;
     TWeakObjectPtr<AHavocPlayerCharacter> Marine;
 };
