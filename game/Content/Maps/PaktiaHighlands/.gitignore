@@ -1,0 +1,4 @@
+# Generated heightmap; run Content/Python/make_paktia_heightmap.py
+Source/*.png
+Source/*.tif
+Source/*.obj
