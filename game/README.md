@@ -24,10 +24,11 @@ Folders are under `Source/MidnightHavoc/`.
 | Folder | Class | TypeScript / data source |
 | --- | --- | --- |
 | `Core/` | `UHavocEventSubsystem` | `src/core/EventBus.ts` |
+| `Campaign/` | `UHavocCampaign` (GameInstance subsystem: unlock order, best-result rule, carryover, `USaveGame` slot `HavocCampaign`) | `src/gameplay/campaign/Campaign.ts` |
 | `Missions/` | `UHavocMissionSubsystem`, `UHavocMissionRunner`, `IHavocMissionSystems` | `src/gameplay/missions/framework/MissionRunner.ts` |
+| `Missions/Episode01/` | `FHavocMountainShield` (state machine, drone tutorial, Ridge Station, counterattack, Falcon-2 crash chain; Aegis is a flag for now) | `src/gameplay/missions/mission01/` |
 | `Missions/Episode04/` | `UHavocOpenStraitMission`, `UHavocOilTerminal`, `UHavocShippingLanes`, `UHavocTankerEscort` | `src/gameplay/missions/episode04/` (OpenStrait, OilTerminal, ShippingLanes, TankerEscort) |
-| `Missions/Episode03/` | `UHavocBrokenCitadelMission`, `FHavocSurpriseEventDirector`, `AHavocEpisode03Flow` | `src/gameplay/missions/episode03/` (BrokenCitadel, SurpriseEventDirector) |
-| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
+| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Campaign.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
 | `Drones/` | `AHavocDrone` (Raven, Warden, Talon subclasses), `IHavocDroneDetectable` | `src/gameplay/drones/` (DroneBase, DroneFlightController, DroneBattery, DroneSignalManager, DroneSensor, DroneCamera) |
 | `Aircraft/` | `AHavocFalconHelicopter`, `UHavocCrashSequence` | `src/gameplay/aircraft/` (HelicopterController, HelicopterDamageState, CrewState, HelicopterCrashController) |
@@ -43,7 +44,8 @@ Folders are under `Source/MidnightHavoc/`.
 | `Input/` | `UHavocPlayInput` (Enhanced Input actions and key mappings built in C++) | – |
 | `UI/` | `UHavocPlayHUD`, `UHavocMenuWidget` (main, pause, settings, results; built in C++) | – |
 | `Game/` | `AHavocPlayableGameMode` | – |
-| `Missions/Episode04/` (flow) | `AHavocEpisode04Flow` drives the playable loop on top of `UHavocOpenStraitMission` | – |
+| `Missions/HavocEpisodeFlow.h` | `IHavocEpisodeFlow`: shared episode interface (start, pause/resume, restart from checkpoint, objective, result) used by the controller, HUD and menus; [Unreal interfaces](https://dev.epicgames.com/documentation/en-us/unreal-engine/interfaces-in-unreal-engine) | – |
+| `Missions/Episode04/` (flow) | `AHavocEpisode04Flow` implements `IHavocEpisodeFlow` and drives the playable loop on top of `UHavocOpenStraitMission` | – |
 
 ## Art and audio assets (Fab / Megascans)
 
@@ -111,7 +113,7 @@ Branch order in `GetChoices()` relies on `TMap` keeping JSON insertion order.
 ## How to play (Episode 04)
 
 Start the game (packaged build: `MidnightHavoc.exe`; editor: open `L_KhargHormuz` and press Play). The main menu opens first:
-**Play Episode 04**, **Settings**, **Quit**. Esc pauses (Resume, Restart from last checkpoint, Settings, Quit). The results screen
+**Campaign**, **How to play**, **Settings**, **Quit**. Esc pauses (Resume, Restart from last checkpoint, How to play, Settings, Quit). **How to play** lists every key from your current bindings. The first time you fly the Raven, drive a vehicle or fly the Falcon, a hint shows once (H or gamepad X dismisses it). The results screen
 shows the outcome, terminal integrity, tankers through/lost and supply flow.
 
 | Key | Action |
@@ -131,6 +133,7 @@ shows the outcome, terminal integrity, tankers through/lost and supply flow.
 | Space, W / A / S / D, Q / E | Falcon: collective, cyclic tilt, yaw |
 | Tab | Return to the Marine from the Raven or the Falcon |
 | F | Get into the nearest vehicle (on foot, within ~4.5 m) or out of the one you drive; see `docs/vehicles.md` |
+| H | Dismiss a first-time hint |
 | Esc or P | Pause menu |
 
 **The mission, step by step** (the rules and states come from `data/missions/episode-04-open-strait.json`):
@@ -174,6 +177,14 @@ Run `Content/Python/build_kharg_level.py` (editor: `Tools > Execute Python Scrip
 `Content/Python/make_kharg_heightmap.py`. Full steps and the manual fallback: `docs/kharg-level-guide.md`.
 Python scripting help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python>
 
+## Building any level on paktia-pc (GitHub Actions)
+
+Actions > **Build level** > Run workflow > pick `Kharg`, `PaktiaHighlands` or `Gardun` (`.github/workflows/build-level.yml`).
+It makes the heightmap, builds the editor, runs the level's builder headless, commits the level through Git LFS and starts the Unreal build.
+`PaktiaHighlands` runs `Content/Python/build_paktia_highlands_level.py` (heightmap: `make_paktia_heightmap.py`, sources: `Content/Maps/PaktiaHighlands/SOURCES.txt`)
+and makes `Content/Maps/PaktiaHighlands/L_PaktiaHighlands`, the Episode 01 greybox: 4 sectors from `data/maps/paktia-highlands.json`,
+player starts, the Falcon-2 crash site, a nav mesh. It is a plain level (not World Partition), so all actors stay loaded. `Gardun` has no builder yet.
+
 ## Running tests
 
 The tests in `Source/MidnightHavoc/Tests/` are Unreal Automation Tests
@@ -189,21 +200,31 @@ They read `data/missions/episode-04-open-strait.json` from `<ProjectDir>/../data
 
 The TypeScript suite (`npm test`) remains the reference behaviour.
 
-## How to play (Episode 03, greybox)
+## How to play (Episode 02, greybox)
 
-Episode 03, *Operation Broken Citadel*, plays in a greybox Gardun that the flow builds at run time (a floor, the ten sector volumes and a pillar on every objective, 3 km above the level origin so it works in any map). No Gardun level is needed yet.
+Episode 02, *Operation Silent Corridor*, is playable from **Campaign > Start Episode 02** in the same level as Episode 04. The valley is a greybox:
+`AHavocEpisode02Flow` builds a floating slab of blocks (Checkpoint Echo, Relay Kilo site, bridge, riverbed narrows, drainage mouth, South Gate)
+at `GreyboxOrigin` (3 km above the Kharg level) and box vehicles for the convoy, so no extra level is needed. Replace the blocks with the real
+Gardun level and vehicle meshes later; the rules come from `data/missions/episode-02-silent-corridor.json` and do not change.
+Controls are the same as Episode 04 (above); **1 / 2** choose the route at the bridge, and G (Falcon) is not used in this episode.
 
-- Start it with the command line `-HavocEpisode=3`, the travel option `?Episode=3`, or a map whose name contains `Gardun`. Without any of these the game starts Episode 04 as before. `-HavocSmokeStart` also starts whichever episode is loaded.
-- The rules, phases, unlocks and surprise event come from `data/missions/episode-03-broken-citadel.json` and `operation-broken-citadel.json` (`UHavocBrokenCitadelMission`; the TypeScript reference is `src/gameplay/missions/episode03/`).
-- Five phases, in order: open the city (Airfield **or** Industrial Depot), break communications (West Ridge radio and Government relay), control Old Gardun (Market Square, Medical Station, Municipal Ruins), neutralise the high ground (Mountain Fort, East Power Station), assault the Citadel (Outer Gate, Inner Courtyard, Command Hall, Operations Room).
-- To take an objective: clear its garrison, then stand in its marker for a few seconds. The Medical Station is a protected location with no garrison: just hold it.
-- Unlocks: the airfield gives Falcon air support (**G**, an abstract strike) only if Episode 02 delivered the crew; both relay sites cut enemy counterattacks to 60%; the Mountain Fort brings Aegis online (abstract); the Medical Station becomes a protected zone no support may target.
-- A surprise event, picked from the match seed, fires once when phase 3 starts and ends with it. The HUD status block names it and `surprise:event` is published on the event bus.
-- Reinforcements start at 20, +5 per surviving Nomad from Episode 02 (`UHavocMissionSubsystem::SetEpisode2Carryover`; `SetSurpriseSeed` fixes the seed). A death costs 2 and returns you to the last checkpoint; at zero the assault fails and you can restart from the last checkpoint.
-- On finishing, the outcome is passed to Episode 04 (`SetEpisode3Outcome`) for its +10 reinforcements on SUCCESS.
-- Greybox limits: no nav mesh, so garrisons hold position instead of patrolling; enemy stats come from existing `data/units` factions (`EnemyFactions` on the flow) until Gardun has faction data.
+1. **Relay Kilo.** The Raven launches from Echo. Fly it to the relay site on the valley shoulder and press **E** to drop Relay Kilo. The drop only
+   counts if the drone link still reaches the site.
+2. **Scout the corridor.** Fly on to the end of the corridor with a usable link (not lost or critical) to mark the roadblock.
+3. **Advance.** The convoy rolls down the main road (Warden-1 leads, Nomad-1 carries the Falcon-2 crew, Nomad-2 carries supplies).
+4. **Comms outage.** Every relay is jammed and the Raven cannot fly. Walk the Marine to Relay Kilo and press **E** within 25 m to restore it.
+5. **Bridge choice** (checkpoint). Press **1** for the Dry Riverbed (the whole convoy goes; an ambush hits it in the narrows, repel it and keep
+   Nomad-1 alive) or **2** for the drainage tunnel (infantry only: clear the far bank, then Warden-1 pushes the wreck off the bridge).
+6. **South Gate** (checkpoint). Clear the staging yard; the staging area is then set up.
+7. **Result.** SUCCESS if the whole convoy arrives, PARTIAL if vehicles were lost, FAILED if the crew transport (or, without crew, every Nomad)
+   is destroyed (Restart from last checkpoint on the results screen). The carryover (crew delivered, Nomads left, Warden, route, relays)
+   is `UHavocSilentCorridorMission::GetCarryover()` for Episode 03.
 
-More: playtest checklist `docs/episode-03-playtest-checklist.md`.
+Tuning (ambush size and volley damage, garrisons, convoy speed, relay and scout radii) is on `AHavocEpisode02Flow`. Smoke test:
+start with `-HavocSmokeStart -HavocEpisode=2` (see `docs/smoke-test.md`). Playtest checklist: `docs/episode-02-playtest-checklist.md`.
+Enemies are AI-only `isis` / `houthi` data units; there is no navigation mesh on the greybox slab, so they move in straight lines.
+Help: [Blockout meshes](https://dev.epicgames.com/documentation/en-us/unreal-engine/basic-scene-and-blockout-meshes),
+[Possessing pawns](https://dev.epicgames.com/documentation/en-us/unreal-engine/possessing-pawns-in-unreal-engine).
 
 ## How to play (Episode 07)
 

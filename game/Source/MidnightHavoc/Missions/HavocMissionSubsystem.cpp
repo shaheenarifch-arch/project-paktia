@@ -6,7 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "Missions/HavocMissionRunner.h"
-#include "Missions/Episode03/HavocBrokenCitadelMission.h"
+#include "Missions/Episode01/HavocMountainShieldMission.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 #include "Misc/DateTime.h"
 
@@ -33,26 +33,17 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
 
     ActiveRunner = nullptr;
     ActiveOpenStrait = nullptr;
-    ActiveBrokenCitadel = nullptr;
+    ActiveMountainShield = nullptr;
 
     FString Error;
-    if (Def.Id == TEXT("episode_03_broken_citadel"))
+    if (Def.Id == TEXT("mission_01_mountain_shield"))
     {
-        const UHavocDataSubsystem* Data = GameInstance ? GameInstance->GetSubsystem<UHavocDataSubsystem>() : nullptr;
-        FHavocMissionDef Stronghold;
-        FHavocMapDef Map;
-        if (!Data || !Data->GetMission(FName(*Def.Stronghold), Stronghold) || !Data->GetMap(FName(*Def.Map), Map))
-        {
-            UE_LOG(LogHavocMission, Error, TEXT("StartMission: Episode 03 needs the stronghold '%s' and map '%s' in data/."), *Def.Stronghold, *Def.Map);
-            return false;
-        }
-        ActiveSeed = SurpriseSeed.IsEmpty() ? FString::Printf(TEXT("match-%lld"), FDateTime::UtcNow().GetTicks()) : SurpriseSeed;
-        UHavocBrokenCitadelMission* Mission = NewObject<UHavocBrokenCitadelMission>(this);
-        if (!Mission->Initialize(Def, Stronghold, Map.SurpriseEvents, Episode2Carryover, ActiveSeed, Events, Error))
+        UHavocMountainShieldMission* Mission = NewObject<UHavocMountainShieldMission>(this);
+        if (!Mission->Initialize(Def, Events, Error))
         {
             return false;
         }
-        ActiveBrokenCitadel = Mission;
+        ActiveMountainShield = Mission;
         ActiveRunner = Mission->GetRunner();
         return true;
     }
@@ -64,6 +55,19 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
             return false;
         }
         ActiveOpenStrait = Mission;
+        ActiveRunner = Mission->GetRunner();
+        return true;
+    }
+
+    if (Def.Id == TEXT("episode_02_silent_corridor"))
+    {
+        UHavocSilentCorridorMission* Mission = NewObject<UHavocSilentCorridorMission>(this);
+        if (!Mission->Initialize(Def, bEpisode1CrewRecovered, Events, Error))
+        {
+            UE_LOG(LogHavocMission, Error, TEXT("StartMission '%s': %s"), *MissionId.ToString(), *Error);
+            return false;
+        }
+        ActiveSilentCorridor = Mission;
         ActiveRunner = Mission->GetRunner();
         return true;
     }

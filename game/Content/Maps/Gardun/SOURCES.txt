@@ -1,0 +1,21 @@
+Gardun level: sources and licences
+==================================
+Gardun is fictional (data/maps/gardun-city.json). Its terrain is borrowed from real geography: the high arid
+valley and mountain ring around Gardez, Paktia, Afghanistan. Game layout, not a survey.
+
+Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-technical-guide-in-unreal-engine
+
+Heightmap and terrain mesh (Source/gardun_heightmap_r16.png, Source/gardun_terrain.obj; NOT committed;
+produced by game/Content/Python/make_gardun_heightmap.py, which also writes Source/gardun_terrain.json with the base elevation used)
+- Dataset: Copernicus DEM GLO-30 (30 m), tile Copernicus_DSM_COG_10_N33_00_E069_00_DEM
+- Where: https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM
+  Open copy used by the script: https://copernicus-dem-30m.s3.amazonaws.com/
+- Area: 7 x 7 km centred on 33.60 N, 69.22 E; heights re-based so the median of the 2.5 km city core is Z = 0
+- Licence: Copernicus DEM free, full and open licence; attribution required:
+  "Produced using Copernicus WorldDEM-30 (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018
+  provided under COPERNICUS by the European Union and ESA; all rights reserved."
+  Check the current terms on the download page before shipping.
+- Alternative: NASA SRTM 30 m via https://earthexplorer.usgs.gov/ (public domain, credit USGS/NASA).
+
+Art
+- None. This level is greybox (engine basic shapes, plain colours). Art and audio come with issue #71.

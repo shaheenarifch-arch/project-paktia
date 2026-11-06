@@ -81,6 +81,10 @@ Other packs on the free **Personal** licence: Rock Environment Pack, Soviet Assa
 Perfect Fire VFX, Procedural Wind (and Pistol 9mm Custom above). Personal licence means personal,
 non-commercial use; check Fab's licence terms before shipping a commercial build.
 
+## Scenery (rivers, fountains, mountains)
+
+See [map-scenery-plan.md](map-scenery-plan.md) for the free asset list, licences and which items need the Epic account.
+
 ## Custom models
 
 Built from Blender scripts, not downloaded: `Vehicle.MRL.Enemy`, `Vehicle.Artillery`,
