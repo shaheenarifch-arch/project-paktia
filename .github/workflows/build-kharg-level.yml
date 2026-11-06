@@ -53,7 +53,12 @@ jobs:
       - name: Run build_kharg_level.py headless
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
-          & ./game/scripts/run-build-kharg-level.ps1 -EngineDir $env:UE_ROOT
+          # Same launch as game/scripts/run-build-kharg-level.ps1, plus -RenderOffscreen: the runner is a Windows service with
+          # no desktop, so the editor cannot open its main window (run #2 failed with DXGI_ERROR_NOT_CURRENTLY_AVAILABLE).
+          # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/command-line-arguments-in-unreal-engine
+          & (Join-Path $env:UE_ROOT 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe') (Join-Path $env:GITHUB_WORKSPACE 'game\MidnightHavoc.uproject') `
+            "-ExecutePythonScript=$(Join-Path $env:GITHUB_WORKSPACE 'game\Content\Python\build_kharg_level.py')" `
+            -unattended -nop4 -nosplash -log -RenderOffscreen
           $code = $LASTEXITCODE
           $log = Join-Path $env:GITHUB_WORKSPACE 'game\Saved\Logs\MidnightHavoc.log'
           if (Test-Path $log) {
