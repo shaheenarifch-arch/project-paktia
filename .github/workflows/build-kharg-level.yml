@@ -65,6 +65,10 @@ jobs:
             Write-Host '--- builder messages and errors ---'
             Select-String -Path $log -Pattern '\[KhargBuilder\]|Error:|Traceback|Exception' | Select-Object -Last 100 | ForEach-Object { $_.Line }
           }
+          # The .umap is saved as soon as the level is created, so also fail on any Python error (no half-built level).
+          if ((Test-Path $log) -and (Select-String -Path $log -Pattern 'Python script executed with errors' -Quiet)) {
+            Write-Error 'build_kharg_level.py raised an error (see the Traceback above). Not committing a half-built level.'; exit 1
+          }
           if (-not (Test-Path 'game\Content\Maps\Kharg\L_KhargHormuz.umap')) {
             Write-Error "L_KhargHormuz.umap was not created (editor exit code $code). See the messages above."; exit 1
           }
