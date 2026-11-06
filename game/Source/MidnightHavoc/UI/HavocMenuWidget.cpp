@@ -14,6 +14,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Missions/HavocEpisodeFlow.h"
 #include "Missions/HavocEpisodeFlowBase.h"
+#include "Missions/Episode03/HavocEpisode03Flow.h"
 #include "Input/HavocPlayInput.h"
 #include "Player/HavocPlaySettings.h"
 #include "Player/HavocPlayerController.h"
@@ -100,7 +101,7 @@ void UHavocMenuWidget::AddButton(const FString& Label, FName Handler)
     Style.Hovered.TintColor = FSlateColor(FLinearColor(0.26f, 0.34f, 0.46f, 1.f));
     Style.Pressed.TintColor = FSlateColor(FLinearColor(0.40f, 0.48f, 0.62f, 1.f));
     Button->SetStyle(Style);
-    Button->SetIsFocusable(true);
+    Button->InitIsFocusable(true); // UE 5.5: focusability is set before the button's Slate widget is built
     Button->SetClickMethod(EButtonClickMethod::MouseDown); // a click registers even if the pointer drifts
     Buttons.Add(Button); // keyboard / gamepad focus (FocusButton) needs this list
     FScriptDelegate Delegate;

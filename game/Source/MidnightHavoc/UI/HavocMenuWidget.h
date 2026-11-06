@@ -71,6 +71,8 @@ private:
     class UHavocPlaySettings* GetSettings() const;
     class IHavocEpisodeFlow* GetFlow() const;
     class UHavocCampaign* GetCampaign() const;
+    /** The Episode 03 flow when this session plays Episode 03, else null. */
+    class AHavocEpisode03Flow* GetFlow03() const;
 
     EHavocMenuMode Mode = EHavocMenuMode::Main;
     EHavocMenuMode ReturnMode = EHavocMenuMode::Main;
