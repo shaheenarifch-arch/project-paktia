@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
+#include "Player/HavocUITypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "HavocPlaySettings.generated.h"
 
@@ -42,6 +43,15 @@ public:
     UPROPERTY(Config, BlueprintReadWrite, Category = "Havoc|Settings") FKey RavenKey = EKeys::T;
     UPROPERTY(Config, BlueprintReadWrite, Category = "Havoc|Settings") FKey FalconKey = EKeys::G;
     UPROPERTY(Config, BlueprintReadWrite, Category = "Havoc|Settings") FKey ReturnKey = EKeys::Tab;
+
+    /** First-time hints already dismissed or shown (remembered between sessions). */
+    UPROPERTY(Config, BlueprintReadWrite, Category = "Havoc|Settings") bool bHintDroneSeen = false;
+    UPROPERTY(Config, BlueprintReadWrite, Category = "Havoc|Settings") bool bHintVehicleSeen = false;
+    UPROPERTY(Config, BlueprintReadWrite, Category = "Havoc|Settings") bool bHintHelicopterSeen = false;
+
+    bool IsHintSeen(EHavocHintKind Kind) const;
+    /** Marks the hint as seen and saves. */
+    void MarkHintSeen(EHavocHintKind Kind);
 
     UFUNCTION(BlueprintCallable, Category = "Havoc|Settings")
     void ApplyAndSave();

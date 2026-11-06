@@ -51,6 +51,10 @@ void UHavocPlayHUD::NativeOnInitialized()
     HintText->SetJustification(ETextJustify::Center);
     Place(Canvas, HintText, FAnchors(0.5f, 1.f), FVector2D(0.5f, 1.f), FVector2D(0.f, -95.f), FVector2D(1300.f, 70.f));
 
+    FirstHintText = MakeText(WidgetTree, TEXT(""), 22, FLinearColor(0.7f, 1.f, 0.85f));
+    FirstHintText->SetJustification(ETextJustify::Center);
+    Place(Canvas, FirstHintText, FAnchors(0.5f, 0.35f), FVector2D(0.5f, 0.f), FVector2D::ZeroVector, FVector2D(1000.f, 140.f));
+
     UVerticalBox* HealthBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
     HealthText = MakeText(WidgetTree, TEXT("HEALTH"), 20, FLinearColor::White);
     HealthBox->AddChild(HealthText);
@@ -112,6 +116,8 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : FString()));
     HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : FString()));
     ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : FString()));
+    // First-time control hint: not tied to the Subtitles setting, because it explains the controls.
+    FirstHintText->SetText(FText::FromString(PC ? PC->GetActiveHint() : FString()));
 
     // Current sector, from the minimap's sector volumes.
     FString SectorName;

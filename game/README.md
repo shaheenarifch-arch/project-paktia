@@ -113,7 +113,7 @@ Branch order in `GetChoices()` relies on `TMap` keeping JSON insertion order.
 ## How to play (Episode 04)
 
 Start the game (packaged build: `MidnightHavoc.exe`; editor: open `L_KhargHormuz` and press Play). The main menu opens first:
-**Play Episode 04**, **Settings**, **Quit**. Esc pauses (Resume, Restart from last checkpoint, Settings, Quit). The results screen
+**Campaign**, **How to play**, **Settings**, **Quit**. Esc pauses (Resume, Restart from last checkpoint, How to play, Settings, Quit). **How to play** lists every key from your current bindings. The first time you fly the Raven, drive a vehicle or fly the Falcon, a hint shows once (H or gamepad X dismisses it). The results screen
 shows the outcome, terminal integrity, tankers through/lost and supply flow.
 
 | Key | Action |
@@ -133,6 +133,7 @@ shows the outcome, terminal integrity, tankers through/lost and supply flow.
 | Space, W / A / S / D, Q / E | Falcon: collective, cyclic tilt, yaw |
 | Tab | Return to the Marine from the Raven or the Falcon |
 | F | Get into the nearest vehicle (on foot, within ~4.5 m) or out of the one you drive; see `docs/vehicles.md` |
+| H | Dismiss a first-time hint |
 | Esc or P | Pause menu |
 
 **The mission, step by step** (the rules and states come from `data/missions/episode-04-open-strait.json`):

@@ -9,7 +9,10 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
+#include "Aircraft/HavocFalconHelicopter.h"
+#include "Drones/HavocDrone.h"
 #include "Input/HavocPlayInput.h"
+#include "Player/HavocPlaySettings.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
@@ -157,6 +160,60 @@ void AHavocPlayerController::OnPossess(APawn* InPawn)
     GetWorldTimerManager().SetTimerForNextTick(this, &AHavocPlayerController::EnsureMetaContext);
 }
 
+void AHavocPlayerController::AcknowledgePossession(APawn* P)
+{
+    Super::AcknowledgePossession(P); // local player only
+    if (!IsLocalController() || !P)
+    {
+        return;
+    }
+    if (Cast<AHavocFalconHelicopter>(P))
+    {
+        ShowFirstTimeHint(EHavocHintKind::Helicopter);
+    }
+    else if (Cast<AHavocDrone>(P))
+    {
+        ShowFirstTimeHint(EHavocHintKind::Drone);
+    }
+    else if (Cast<AHavocVehicleBase>(P))
+    {
+        ShowFirstTimeHint(EHavocHintKind::Vehicle);
+    }
+}
+
+void AHavocPlayerController::ShowFirstTimeHint(EHavocHintKind Kind)
+{
+    const UGameInstance* GI = GetGameInstance();
+    UHavocPlaySettings* Settings = GI ? GI->GetSubsystem<UHavocPlaySettings>() : nullptr;
+    const UHavocPlayInput* Input = GI ? GI->GetSubsystem<UHavocPlayInput>() : nullptr;
+    if (!Settings || !Input || Settings->IsHintSeen(Kind))
+    {
+        return;
+    }
+    Settings->MarkHintSeen(Kind);
+    ActiveHint = Input->HintFor(Kind) + TEXT("\n(Press H or gamepad X to dismiss)");
+    HintSecondsLeft = 25.f;
+}
+
+void AHavocPlayerController::DismissHint()
+{
+    ActiveHint.Reset();
+    HintSecondsLeft = 0.f;
+}
+
+void AHavocPlayerController::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if (HintSecondsLeft > 0.f)
+    {
+        HintSecondsLeft -= DeltaSeconds;
+        if (HintSecondsLeft <= 0.f)
+        {
+            DismissHint();
+        }
+    }
+}
+
 void AHavocPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
@@ -176,6 +233,7 @@ void AHavocPlayerController::SetupInputComponent()
     Enhanced->BindAction(Input->CallFalconAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnCallFalcon);
     Enhanced->BindAction(Input->ReturnAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnReturn);
     Enhanced->BindAction(Input->VehicleAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnVehicle);
+    Enhanced->BindAction(Input->DismissHintAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnDismissHint);
 }
 
 IHavocEpisodeFlow* AHavocPlayerController::GetFlow()

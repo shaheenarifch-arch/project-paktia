@@ -48,6 +48,27 @@ void UHavocPlaySettings::ApplyAndSave()
     SaveConfig();
 }
 
+bool UHavocPlaySettings::IsHintSeen(EHavocHintKind Kind) const
+{
+    switch (Kind)
+    {
+    case EHavocHintKind::Drone: return bHintDroneSeen;
+    case EHavocHintKind::Vehicle: return bHintVehicleSeen;
+    default: return bHintHelicopterSeen;
+    }
+}
+
+void UHavocPlaySettings::MarkHintSeen(EHavocHintKind Kind)
+{
+    switch (Kind)
+    {
+    case EHavocHintKind::Drone: bHintDroneSeen = true; break;
+    case EHavocHintKind::Vehicle: bHintVehicleSeen = true; break;
+    default: bHintHelicopterSeen = true; break;
+    }
+    SaveConfig();
+}
+
 void UHavocPlaySettings::ResetToDefaults()
 {
     bReduceFlashes = false;
@@ -60,6 +81,7 @@ void UHavocPlaySettings::ResetToDefaults()
     RavenKey = EKeys::T;
     FalconKey = EKeys::G;
     ReturnKey = EKeys::Tab;
+    bHintDroneSeen = bHintVehicleSeen = bHintHelicopterSeen = false; // hints show again
     ApplyAndSave();
 }
 
@@ -83,7 +105,8 @@ FString UHavocPlaySettings::HelpFor(FName SettingId)
         { TEXT("sensitivity"), TEXT("How fast the camera turns with the mouse. 0.2 is slow, 3.0 is fast.") },
         { TEXT("volume"), TEXT("Master volume for all sound, 0 to 100 percent.") },
         { TEXT("bind"), TEXT("Choose a row, press Enter or A, then press the new key. Esc or B cancels. Another action using that key is swapped.") },
-        { TEXT("reset"), TEXT("Puts every setting above back to its default.") },
+        { TEXT("reset"), TEXT("Puts every setting above back to its default. First-time hints show again.") },
+        { TEXT("howtoplay"), TEXT("Every key for walking, vehicles, the Raven drone and the Falcon helicopter, read from your current key bindings.") },
     };
     const FString* Found = Help.Find(SettingId);
     return Found ? *Found : FString();
