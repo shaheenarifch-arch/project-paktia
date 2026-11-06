@@ -475,7 +475,9 @@ void AHavocEpisode04Flow::EndEpisode()
         }
     }
 
-    if (AHavocPlayerController* PC = GetPC())
+    // Outro fly-over, then the results screen (skippable).
+    TWeakObjectPtr<AHavocEpisode04Flow> Self(this);
+    PlayCutscene(false, [Self]()
     {
         if (AHavocEpisode04Flow* Flow = Self.Get())
         {

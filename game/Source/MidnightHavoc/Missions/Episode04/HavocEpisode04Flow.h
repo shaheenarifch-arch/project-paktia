@@ -147,6 +147,8 @@ private:
     void ClearWorld();
     void SetHint(const FString& Text) { Hint = Text; }
     void ShowToast(const FString& Text, float Seconds = 5.f);
+    void PlayCutscene(bool bIntro, TFunction<void()> Then);
+    TArray<FVector> CutsceneTargets(bool bIntro);
     void Publish(const TCHAR* EventName, const FString& Payload) const;
 
     // ---- enemies ----
