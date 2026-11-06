@@ -115,6 +115,12 @@ if (-not $shot) {
       $px = $bmp.GetPixel([int]($bmp.Width * (0.1 + 0.8 * $i / 39)), [int]($bmp.Height * (0.1 + 0.8 * $j / 39)))
       $lum += 0.2126 * $px.R + 0.7152 * $px.G + 0.0722 * $px.B
     } }
+    # Diagnostics in the job log (artifacts aren't readable everywhere): a coarse 16x9 luminance map of the shot.
+    Write-Host "Smoke screenshot $($bmp.Width)x$($bmp.Height), coarse luminance map (0-255):"
+    for ($y = 0; $y -lt 9; $y++) {
+      $row = for ($x = 0; $x -lt 16; $x++) { $c = $bmp.GetPixel([int]($bmp.Width * ($x + 0.5) / 16), [int]($bmp.Height * ($y + 0.5) / 9)); '{0,3}' -f [int](0.2126 * $c.R + 0.7152 * $c.G + 0.0722 * $c.B) }
+      Write-Host ($row -join ' ')
+    }
     $bmp.Dispose()
     $mean = ($lum | Measure-Object -Average).Average
     $shotSpread = [math]::Round([math]::Sqrt((($lum | ForEach-Object { ($_ - $mean) * ($_ - $mean) }) | Measure-Object -Average).Average), 1)
@@ -124,6 +130,9 @@ if (-not $shot) {
   } catch { $reasons += "Could not read the in-game screenshot: $_" }
 }
 
+Get-ChildItem -Path $OutDir -Filter '*.log' -ErrorAction SilentlyContinue | Select-String -Pattern 'HavocSmoke|LogLoad: (Game class|LoadMap)|Took .* seconds to LoadMap' -ErrorAction SilentlyContinue |
+  Select-Object -First 20 | ForEach-Object { Write-Host "smoke log: $($_.Line)" }
+Write-Host "Screenshot spread: $shotSpread"
 $pass = ($reasons.Count -eq 0)
 $fpsText = if ($null -ne $avg) { "avg **$avg** / min **$min**" } else { 'n/a' }
 $sb = New-Object System.Text.StringBuilder
