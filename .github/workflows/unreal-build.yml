@@ -31,6 +31,15 @@ jobs:
           -archivedirectory="%GITHUB_WORKSPACE%\out"
           -unattended -utf8output -nop4
 
+      - name: Check game data is in the package
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          # The packaged game reads missions/maps from MidnightHavoc/Content/HavocData (see game/README.md "Packaged builds").
+          $f = Join-Path $env:GITHUB_WORKSPACE 'out\Windows\MidnightHavoc\Content\HavocData\missions\episode-04-open-strait.json'
+          if (-not (Test-Path $f)) { Write-Host "::error::Game data missing from package: $f"; exit 1 }
+          $n = (Get-ChildItem (Split-Path (Split-Path $f)) -Recurse -Filter *.json).Count
+          Write-Host "Game data packaged: $n JSON files"
+
       - name: Automation tests (headless)
         shell: cmd
         run: >

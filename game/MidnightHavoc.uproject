@@ -10,6 +10,12 @@
       "LoadingPhase": "Default"
     }
   ],
+  "PreBuildSteps": {
+    "Win64": [
+      "if exist \"$(ProjectDir)\\Content\\HavocData\" rmdir /s /q \"$(ProjectDir)\\Content\\HavocData\"",
+      "xcopy \"$(ProjectDir)\\..\\data\" \"$(ProjectDir)\\Content\\HavocData\" /E /I /Y /Q"
+    ]
+  },
   "Plugins": [
     {
       "Name": "EnhancedInput",
