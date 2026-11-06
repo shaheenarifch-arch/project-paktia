@@ -233,7 +233,7 @@ def build_sky(eas):
     fog = spawn(eas, unreal.ExponentialHeightFog, "KhargHeightFog", (0, 0, 0))
     fc = fog.get_editor_property("component")
     fc.set_editor_property("fog_density", 0.012)  # desert haze
-    fc.set_editor_property("volumetric_fog", True)
+    fc.set_editor_property("enable_volumetric_fog", True)  # UE 5.5 name (bEnableVolumetricFog)
 
 
 def build_gameplay(eas, manifest):
