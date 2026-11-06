@@ -155,7 +155,26 @@ def open_or_create_level():
     return les
 
 
+def load_all_partition_actors():
+    """World Partition only has actors near the editor camera loaded, so get_all_level_actors() misses the rest
+    and every re-run used to stack another copy of them (duplicate fog = yellow screen, Nov 2026). Load them all.
+    Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition-in-unreal-engine"""
+    lib = getattr(unreal, "WorldPartitionBlueprintLibrary", None)
+    if lib is None:
+        warn("WorldPartitionBlueprintLibrary not available; only loaded actors will be cleared")
+        return
+    try:
+        descs = lib.get_actor_descs() or []
+        guids = [d.get_editor_property("guid") for d in descs]
+        if guids:
+            lib.load_actors(guids)
+        log("Loaded %d World Partition actors before clearing" % len(guids))
+    except Exception as e:
+        warn("Could not load all World Partition actors (%s); only loaded actors will be cleared" % e)
+
+
 def clear_previous(eas):
+    load_all_partition_actors()
     n = 0
     for a in eas.get_all_level_actors():
         if unreal.Name(TAG) in a.tags:
@@ -170,6 +189,8 @@ def spawn(eas, cls, label, loc, rot=(0, 0, 0), scale=None):
         raise RuntimeError("Could not spawn %s. Build the C++ project first (guide, Before you start)." % label)
     a.set_actor_label(label)
     a.tags = [unreal.Name(TAG)]
+    # Always loaded: the level is small enough, and gameplay/sky/fog must not depend on World Partition streaming.
+    a.set_editor_property("is_spatially_loaded", False)
     if scale:
         a.set_actor_scale3d(unreal.Vector(*scale))
     return a
