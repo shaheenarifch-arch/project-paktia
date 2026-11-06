@@ -11,6 +11,7 @@
 #include "HavocMissionSubsystem.generated.h"
 
 class UHavocMissionRunner;
+class UHavocMountainShieldMission;
 class UHavocOpenStraitMission;
 
 UCLASS()
@@ -38,6 +39,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|Missions")
     UHavocOpenStraitMission* GetOpenStrait() const { return ActiveOpenStrait; }
 
+    /** The Episode 01 mission object while it is the active mission, else null. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Missions")
+    UHavocMountainShieldMission* GetMountainShield() const { return ActiveMountainShield; }
+
     // Pass-throughs to the active runner. All are safe no-ops (empty result) without one.
     UFUNCTION(BlueprintCallable, Category = "Havoc|Missions")
     FString Advance();
@@ -63,6 +68,9 @@ private:
 
     UPROPERTY()
     TObjectPtr<UHavocOpenStraitMission> ActiveOpenStrait;
+
+    UPROPERTY()
+    TObjectPtr<UHavocMountainShieldMission> ActiveMountainShield;
 
     FString Episode3Outcome;
 };
