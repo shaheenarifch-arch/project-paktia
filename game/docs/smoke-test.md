@@ -19,7 +19,7 @@ gracefully (so the CSV is flushed; force-kill after 30 s), then:
 - copies new `Crashes/*` folders and `Saved/Logs/*.log` written during the run,
 - lists the **top 10 distinct errors** (`Error:`, `Fatal:`, ensure/assert lines, with counts),
 - computes **avg/min FPS** from the CSV `FrameTime` column,
-- passes `-HavocSmokeStart`, so the game starts Episode 04 by itself and takes a `HighResShot` 30 s in;
+- passes `-HavocSmokeStart`, so the game starts Episode 04 by itself and frames the view over Kharg (looking at the oil terminal) and takes a `HighResShot` at 30 s;
   the script measures how varied that picture is (`ingame.png` in the artifact) to check the world renders,
 - writes `summary.md` and `result.json`.
 

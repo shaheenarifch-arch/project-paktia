@@ -42,7 +42,8 @@ Folders are under `Source/MidnightHavoc/`.
 | `Input/` | `UHavocPlayInput` (Enhanced Input actions and key mappings built in C++) | – |
 | `UI/` | `UHavocPlayHUD`, `UHavocMenuWidget` (main, pause, settings, results; built in C++) | – |
 | `Game/` | `AHavocPlayableGameMode` | – |
-| `Missions/Episode04/` (flow) | `AHavocEpisode04Flow` drives the playable loop on top of `UHavocOpenStraitMission` | – |
+| `Missions/HavocEpisodeFlow.h` | `IHavocEpisodeFlow`: shared episode interface (start, pause/resume, restart from checkpoint, objective, result) used by the controller, HUD and menus; [Unreal interfaces](https://dev.epicgames.com/documentation/en-us/unreal-engine/interfaces-in-unreal-engine) | – |
+| `Missions/Episode04/` (flow) | `AHavocEpisode04Flow` implements `IHavocEpisodeFlow` and drives the playable loop on top of `UHavocOpenStraitMission` | – |
 
 ## Art and audio assets (Fab / Megascans)
 
