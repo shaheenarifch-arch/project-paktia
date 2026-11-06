@@ -53,7 +53,7 @@ TEST(strat_map_loads_and_adjacency_symmetric) {
   CHECK(m.Provinces().size() == 16);
   CHECK(m.Zones().size() == 12);
   CHECK(m.Routes().size() >= 4);
-  CHECK(m.Factions().size() == 4);
+  CHECK(m.Factions().size() == 5);  // coalition, houthi, iran, iran-resistance, isis (data/factions)
 
   for (const char* id : {"hormuz", "bab_el_mandeb", "suez"}) {
     const std::size_t z = m.FindZone(id);
