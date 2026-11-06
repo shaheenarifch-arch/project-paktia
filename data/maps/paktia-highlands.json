@@ -1,0 +1,13 @@
+{
+  "id": "paktia_highlands",
+  "name": "Paktia Highlands: Operation Mountain Shield (Episode 01)",
+  "fictional": true,
+  "setting": "fictional",
+  "note": "Invented place for play (greybox layout). Sector names come from docs/campaign.md Mission 01 and FUTURE-PLAN.md. Terrain is shaped from open elevation data; the layout is not a survey.",
+  "sectors": [
+    {"id": "checkpoint_echo", "name": "Checkpoint Echo", "role": "attacker_staging"},
+    {"id": "ridge_station", "name": "Ridge Station", "role": "ally_base"},
+    {"id": "falcon2_crash_r17", "name": "Falcon-2 crash site, grid R-17", "role": "crash_recovery"},
+    {"id": "valley_corridor", "name": "Valley corridor (Episode 02 approach)", "role": "approach_route"}
+  ]
+}
