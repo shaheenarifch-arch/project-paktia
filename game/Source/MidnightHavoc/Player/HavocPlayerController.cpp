@@ -1,6 +1,7 @@
 #include "Player/HavocPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Camera/CameraActor.h"
 #include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
 #include "Engine/GameInstance.h"
@@ -16,6 +17,38 @@
 #include "UI/HavocMenuWidget.h"
 #include "UI/HavocPlayHUD.h"
 #include "Vehicles/HavocVehicleBase.h"
+
+namespace
+{
+// Smoke test only: put the view over Kharg looking at the oil terminal. The Raven at 30 s is not a reliable
+// vantage (it hovers between the beaches and the screenshot showed only sky haze), so the picture must not depend on it.
+// The island is centred on 0,0 in the level (build_kharg_level.py); the terminal sector is at (-170000, 120000) cm.
+void FrameKhargForSmoke(AHavocPlayerController* PC)
+{
+    UWorld* World = PC->GetWorld();
+    if (!World)
+    {
+        return;
+    }
+    const FVector Centre(0.f, 0.f, 0.f);
+    const FVector Terminal(-170000.f, 120000.f, 0.f);
+    float GroundZ = 0.f;
+    FHitResult Hit;
+    if (World->LineTraceSingleByChannel(Hit, Centre + FVector(0.f, 0.f, 200000.f), Centre + FVector(0.f, 0.f, -100000.f), ECC_Visibility))
+    {
+        GroundZ = Hit.ImpactPoint.Z;
+    }
+    const FVector Eye = Centre + FVector(0.f, 0.f, FMath::Max(GroundZ, 0.f) + 10000.f); // 100 m above the ground
+    const FRotator Look(-30.f, (Terminal - Centre).Rotation().Yaw, 0.f);
+    FActorSpawnParameters Params;
+    Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    if (ACameraActor* Cam = World->SpawnActor<ACameraActor>(Eye, Look, Params))
+    {
+        PC->SetViewTargetWithBlend(Cam, 0.f);
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: view framed on Kharg (ground z %.0f, eye %s)"), GroundZ, *Eye.ToString());
+    }
+}
+}
 
 AHavocPlayerController::AHavocPlayerController()
 {
@@ -43,12 +76,17 @@ void AHavocPlayerController::StartSmokeRun()
     }
     UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 04"));
     F->StartEpisode();
-    // 30 s in: the Raven is over the beaches, so the island, sea and sky should all be in view.
+    // 30 s in: frame the island explicitly, then shoot.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
     GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
     {
-        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: taking screenshot"));
-        ConsoleCommand(TEXT("HighResShot 1280x720"));
+        FrameKhargForSmoke(this);
+        // Shoot a second later so the new view (and the fog/sky state) is rendered first.
+        GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+        {
+            UE_LOG(LogTemp, Display, TEXT("HavocSmoke: taking screenshot"));
+            ConsoleCommand(TEXT("HighResShot 1280x720"));
+        }), 1.f, false);
     }), 30.f, false);
 }
 
