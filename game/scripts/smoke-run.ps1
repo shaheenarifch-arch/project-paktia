@@ -8,6 +8,7 @@ param(
   [Parameter(Mandatory)][string]$BuildDir,   # folder containing MidnightHavoc.exe
   [Parameter(Mandatory)][string]$OutDir,
   [int]$Seconds = 180,
+  [string]$Episode = '04',                   # playable episode to start (game/scripts/playable-episodes.json)
   [string]$Map = '',                         # optional map to open, e.g. /Game/Maps/Kharg
   [string]$ExecCmds = 'stat fps',            # extra console commands for the walkthrough, ';' separated
   [double]$MinFpsFloor = 15,
@@ -28,7 +29,7 @@ if (-not $exe) {
   $args = @()
   if ($Map) { $args += $Map }
   $args += @('-log', "-abslog=$log", '-csvprofile', '-windowed', '-ResX=1280', '-ResY=720', '-RenderOffscreen',
-             '-nosplash', '-unattended', '-nosound', "-ExecCmds=$ExecCmds", '-HavocSmokeStart')
+             '-nosplash', '-unattended', '-nosound', "-ExecCmds=$ExecCmds", '-HavocSmokeStart', "-HavocSmokeEpisode=$Episode")
   $p = Start-Process -FilePath $exe.FullName -ArgumentList $args -PassThru
   $exited = $p.WaitForExit($Seconds * 1000)
   if ($exited) {
@@ -95,6 +96,23 @@ if ($csv) {
 if ($null -eq $avg) { $reasons += 'No FPS data captured (CSV missing or no FrameTime column)' }
 elseif ($avg -lt $MinFpsFloor) { $reasons += "Average FPS $avg is below floor $MinFpsFloor" }
 
+# Cutscenes: the game logs "HavocCutscene: <episode> intro|outro started|finished|skipped" (Cutscene/HavocCutscene.cpp).
+# Both must have started and ended, or the episode has no intro/outro (or it hung).
+$cutscenes = @{}
+foreach ($kind in 'intro', 'outro') {
+  $started = $false; $ended = $false; $missing = $false
+  Get-ChildItem -Path $OutDir -Filter '*.log' -ErrorAction SilentlyContinue | ForEach-Object {
+    $hits = Select-String -Path $_.FullName -SimpleMatch "HavocCutscene: $Episode $kind " -ErrorAction SilentlyContinue
+    foreach ($h in $hits) {
+      if ($h.Line -match "$Episode $kind started") { $started = $true }
+      elseif ($h.Line -match "$Episode $kind (finished|skipped)") { $ended = $true }
+      elseif ($h.Line -match "$Episode $kind missing") { $missing = $true }
+    }
+  }
+  $cutscenes[$kind] = if ($started -and $ended) { 'ok' } elseif ($missing -or -not $started) { 'missing' } else { 'did not finish' }
+  if ($cutscenes[$kind] -ne 'ok') { $reasons += "Cutscene: Episode $Episode $kind $($cutscenes[$kind])" }
+}
+
 # World visible? -HavocSmokeStart starts Episode 04 and takes a HighResShot 30 s in (HavocPlayerController).
 # A flat single-colour picture means the level loaded without its terrain (yellow/blue screen, Nov 2026).
 # Help: https://learn.microsoft.com/en-us/dotnet/api/system.drawing.bitmap
@@ -154,10 +172,11 @@ Get-ChildItem -Path $searchRoot -Recurse -Filter '*.png' -ErrorAction SilentlyCo
 $pass = ($reasons.Count -eq 0)
 $fpsText = if ($null -ne $avg) { "avg **$avg** / min **$min**" } else { 'n/a' }
 $sb = New-Object System.Text.StringBuilder
-[void]$sb.AppendLine("### Smoke test: $(if ($pass) { '✅ PASS' } else { '❌ FAIL' })")
+[void]$sb.AppendLine("### Smoke test, Episode ${Episode}: $(if ($pass) { '✅ PASS' } else { '❌ FAIL' })")
 [void]$sb.AppendLine("- Run: $exitInfo (target $Seconds s)")
 [void]$sb.AppendLine("- FPS: $fpsText")
 [void]$sb.AppendLine("- Crashes: $($crashes.Count)")
+[void]$sb.AppendLine("- Cutscenes: intro $($cutscenes['intro']), outro $($cutscenes['outro'])")
 [void]$sb.AppendLine("- World visible: $(if ($null -eq $shotSpread) { 'n/a (no screenshot)' } elseif ($shotSpread -ge $MinScreenshotSpread) { "yes (spread $shotSpread)" } else { "NO, flat colour (spread $shotSpread)" })")
 if ($reasons) { [void]$sb.AppendLine(); [void]$sb.AppendLine('**Why it failed**'); $reasons | ForEach-Object { [void]$sb.AppendLine("- $_") } }
 [void]$sb.AppendLine(); [void]$sb.AppendLine('**Top errors**')
@@ -165,6 +184,6 @@ if ($topErrors) {
   $topErrors | ForEach-Object { $t = $_.Name; if ($t.Length -gt 300) { $t = $t.Substring(0, 300) + '…' }; [void]$sb.AppendLine("- ×$($_.Count) ``$($t -replace '``', "'")``") }
 } else { [void]$sb.AppendLine('- none') }
 $sb.ToString() | Set-Content -Path (Join-Path $OutDir 'summary.md') -Encoding utf8
-@{ pass = $pass; avgFps = $avg; minFps = $min; crashes = $crashes.Count; screenshotSpread = $shotSpread; reasons = $reasons } |
+@{ pass = $pass; episode = $Episode; introCutscene = $cutscenes['intro']; outroCutscene = $cutscenes['outro']; avgFps = $avg; minFps = $min; crashes = $crashes.Count; screenshotSpread = $shotSpread; reasons = $reasons } |
   ConvertTo-Json | Set-Content -Path (Join-Path $OutDir 'result.json') -Encoding utf8
 exit 0

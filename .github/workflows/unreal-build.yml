@@ -99,7 +99,7 @@ jobs:
       issues: write
       pull-requests: write
     env:
-      SMOKE_SECONDS: '180'
+      SMOKE_SECONDS: '90'    # per playable episode (game/scripts/playable-episodes.json)
     steps:
       - uses: actions/checkout@v4
         with:
@@ -115,10 +115,10 @@ jobs:
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: Expand-Archive -Path smoke-in\MidnightHavoc-Win64.zip -DestinationPath smoke-build -Force
 
-      - name: Smoke run (3 min) and parse results
+      - name: Smoke run (each playable episode in turn) and parse results
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: >
-          ./game/scripts/smoke-run.ps1
+          ./game/scripts/smoke-episodes.ps1
           -BuildDir "$env:GITHUB_WORKSPACE\smoke-build"
           -OutDir "$env:GITHUB_WORKSPACE\smoke-out"
           -Seconds ([int]$env:SMOKE_SECONDS)
@@ -163,12 +163,12 @@ jobs:
             if (!number) { core.notice('No PR or issue to comment on for ' + branch); return; }
             await github.rest.issues.createComment({ ...context.repo, issue_number: number, body });
 
-      - name: Fail if the world is not visible
-        # Only this check fails the job (FPS and log results stay advisory). game/docs/smoke-test.md
+      - name: Fail if an episode world is not visible or a cutscene is missing
+        # Only these checks fail the job (FPS and log results stay advisory). game/docs/smoke-test.md
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           if (-not (Test-Path smoke-out\result.json)) { Write-Error 'No smoke result.json'; exit 1 }
           $r = Get-Content smoke-out\result.json -Raw | ConvertFrom-Json
-          $bad = @($r.reasons | Where-Object { $_ -match 'flat colour|No in-game screenshot|in-game screenshot' })
+          $bad = @($r.reasons | Where-Object { $_ -match 'flat colour|No in-game screenshot|in-game screenshot|Cutscene:|no result' })
           if ($bad.Count) { $bad | ForEach-Object { Write-Error $_ }; exit 1 }
-          Write-Host "World visible (screenshot spread $($r.screenshotSpread))"
+          Write-Host "Every playable episode: world visible, intro and outro played ($(@($r.episodes).Count) episode(s))"

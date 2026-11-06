@@ -163,6 +163,14 @@ without one the enemies walk in straight lines. Effects and audio use the item-3
 
 Tuning (enemy counts, hold time, tanker speed, threat timing, Falcon timing) is on `AHavocEpisode04Flow` (Details panel of a Blueprint child,
 or edit the defaults in `HavocEpisode04Flow.h`). Settings are saved to `GameUserSettings.ini`.
+**Intro and outro cutscenes.** Starting the episode plays a 15 s fly-over (north beach, oil terminal, airstrip) with subtitles before
+the briefing hands over to the Raven recon; finishing it plays a 10 s outro (oil terminal, north beach) matching the result, then the
+results screen. Press **Space**, **Enter** or the gamepad bottom button to skip. Subtitles follow the Subtitles setting. They are
+greybox, driven from code (`Cutscene/`), so they need no assets. To replace one with a hand-made Level Sequence, build it in Sequencer
+(<https://dev.epicgames.com/documentation/en-us/unreal-engine/cinematics-and-movie-making-in-unreal-engine>), play it from a Blueprint
+child of `AHavocEpisode04Flow` and call `SkipCutscene` / keep the `HavocCutscene: 04 intro|outro` log lines so CI still sees it.
+The smoke test starts each playable episode in turn and reports per episode (`docs/smoke-test.md`).
+
 More: playtest checklist `docs/episode-04-playtest-checklist.md`, HUD `docs/hud-guide.md`.
 
 Epic help: [Enhanced Input](https://dev.epicgames.com/documentation/en-us/unreal-engine/enhanced-input-in-unreal-engine),

@@ -127,7 +127,7 @@ void AHavocPlayerController::StartSmokeRun()
     F->StartEpisode();
     // 30 s in: frame the island explicitly, then shoot.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
-    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this, F]()
     {
         FrameKhargForSmoke(this);
         // Shoot a few seconds later so auto-exposure has adapted to the new view (it resets on a camera cut).
@@ -138,6 +138,9 @@ void AHavocPlayerController::StartSmokeRun()
             ConsoleCommand(TEXT("HighResShot 1280x720"));
         }), 4.f, false);
     }), 30.f, false);
+    // 35 s in (after the screenshot is written): the outro (10 s), so every episode reports both cutscenes.
+    FTimerHandle OutroTimer;
+    GetWorldTimerManager().SetTimer(OutroTimer, FTimerDelegate::CreateWeakLambda(this, [F]() { F->PlayOutro(); }), 35.f, false);
 }
 
 void AHavocPlayerController::EnsureMetaContext()

@@ -24,6 +24,7 @@
 #include "Missions/HavocEpisodeFlow.h"
 #include "HavocEpisode04Flow.generated.h"
 
+class AHavocCutscene;
 class AHavocEnemyCharacter;
 class AHavocFalconHelicopter;
 class AHavocLaneHazard;
@@ -99,6 +100,16 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void CallFalcon();
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void ReturnToMarine();
 
+    // ---- Cutscenes (skippable camera fly-over with subtitles; Cutscene/HavocCutscene.h) ----
+    /** Plays the intro; StartEpisode does this by itself. Also used by the smoke test. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayIntro();
+    /** Plays the outro for the current outcome; EndEpisode does this before the results screen. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayOutro();
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void SkipCutscene();
+    UFUNCTION(BlueprintPure, Category = "Havoc|Cutscene") bool IsCutsceneActive() const;
+    /** Current cutscene subtitle line, empty when none (the HUD shows it when the Subtitles setting is on). */
+    UFUNCTION(BlueprintPure, Category = "Havoc|Cutscene") FString GetCutsceneSubtitle() const;
+
     // ---- Queries for the HUD and menus ----
     UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual EHavocFlowPhase GetPhase() const override { return Phase; }
     UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual FString GetHint() const override { return Hint; }
@@ -169,6 +180,7 @@ private:
     FString LastState;
     FString LastCheckpointState;
 
+    UPROPERTY() TObjectPtr<AHavocCutscene> Cutscene;
     UPROPERTY() TObjectPtr<AHavocPlayerController> CachedPC;
     UPROPERTY() TObjectPtr<AHavocPlayerCharacter> CachedMarine;
     UPROPERTY() TMap<FName, TObjectPtr<AHavocSectorVolume>> Sectors;

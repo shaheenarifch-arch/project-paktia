@@ -11,6 +11,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Core/HavocEventSubsystem.h"
+#include "Cutscene/HavocCutscene.h"
 #include "Data/HavocDataSubsystem.h"
 #include "Drones/HavocDrone.h"
 #include "Engine/GameInstance.h"
@@ -318,12 +319,87 @@ void AHavocEpisode04Flow::StartEpisode()
     {
         Audio->StartAmbient();
     }
-    // Briefing -> beach recon (the runner stops there until the beaches are scouted).
-    if (UHavocOpenStraitMission* Mission = GetMission())
+    // Intro fly-over, then briefing -> beach recon (the runner stops there until the beaches are scouted).
+    // Tick pauses the state machine while the cutscene plays, so nothing happens behind it.
+    TWeakObjectPtr<AHavocEpisode04Flow> Self(this);
+    PlayCutscene(true, [Self]()
     {
-        Mission->Progress();
-    }
+        if (AHavocEpisode04Flow* Flow = Self.Get())
+        {
+            if (UHavocOpenStraitMission* Mission = Flow->GetMission())
+            {
+                Mission->Progress();
+            }
+        }
+    });
 }
+
+// ---------------------------------------------------------------- cutscenes
+
+namespace
+{
+    const TCHAR* const EpisodeLabel = TEXT("04");
+}
+
+TArray<FVector> AHavocEpisode04Flow::CutsceneTargets(bool bIntro)
+{
+    // Intro: north beach -> oil terminal -> airstrip. Outro: oil terminal -> north beach.
+    // A sector missing from the level falls back to where the Marine starts, so the cutscene still plays.
+    const TArray<FName> Ids = bIntro ? TArray<FName>{ NorthBeach, OilTerminal, Airstrip } : TArray<FName>{ OilTerminal, NorthBeach };
+    FVector Fallback = bHaveInitialTransform ? InitialMarineTransform.GetLocation() : GetActorLocation();
+    if (const AHavocPlayerCharacter* Marine = GetMarine()) { Fallback = Marine->GetActorLocation(); }
+    TArray<FVector> Targets;
+    for (const FName& Id : Ids)
+    {
+        const AHavocSectorVolume* Volume = FindSector(Id);
+        Targets.Add(Volume ? Volume->GetComponentsBoundingBox(true).GetCenter() : Fallback);
+    }
+    return Targets;
+}
+
+void AHavocEpisode04Flow::PlayCutscene(bool bIntro, TFunction<void()> Then)
+{
+    TArray<FString> Lines;
+    if (bIntro)
+    {
+        Lines = {
+            TEXT("Kharg Island, Strait of Hormuz. A hypothetical future scenario."),
+            TEXT("Take the island, then keep the oil terminal and the shipping lanes safe."),
+            TEXT("Scout both beaches with the Raven drone before you land.") };
+    }
+    else
+    {
+        const FString Result = Outcome;
+        Lines = {
+            Result == TEXT("SUCCESS") ? TEXT("The island is secure and the tankers are moving.")
+            : Result == TEXT("FAILED") ? TEXT("The operation failed. The strait stays closed.")
+            : TEXT("The island is held, but the lanes are still contested."),
+            TEXT("Operation Open Strait is over. Check your results.") };
+    }
+
+    AHavocPlayerController* PC = GetPC();
+    if (!Cutscene)
+    {
+        FActorSpawnParameters Params;
+        Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        Cutscene = GetWorld()->SpawnActor<AHavocCutscene>(AHavocCutscene::StaticClass(), GetActorTransform(), Params);
+    }
+    if (!Cutscene || !PC)
+    {
+        UE_LOG(LogHavocFlow, Warning, TEXT("Cutscene could not start (no player or camera actor)"));
+        if (Then) { Then(); }
+        return;
+    }
+    Cutscene->Begin(PC, FString::Printf(TEXT("%s %s"), EpisodeLabel, bIntro ? TEXT("intro") : TEXT("outro")),
+                    HavocCutsceneMath::BuildFlyover(CutsceneTargets(bIntro), Lines, 5.f),
+                    [Then = MoveTemp(Then)](bool) { if (Then) { Then(); } });
+}
+
+void AHavocEpisode04Flow::PlayIntro() { PlayCutscene(true, nullptr); }
+void AHavocEpisode04Flow::PlayOutro() { PlayCutscene(false, nullptr); }
+void AHavocEpisode04Flow::SkipCutscene() { if (Cutscene) { Cutscene->Skip(); } }
+bool AHavocEpisode04Flow::IsCutsceneActive() const { return Cutscene && Cutscene->IsPlaying(); }
+FString AHavocEpisode04Flow::GetCutsceneSubtitle() const { return Cutscene ? Cutscene->GetSubtitle() : FString(); }
 
 void AHavocEpisode04Flow::RestartFromCheckpoint()
 {
@@ -395,8 +471,14 @@ void AHavocEpisode04Flow::EndEpisode()
 
     if (AHavocPlayerController* PC = GetPC())
     {
-        PC->ShowMenu(EHavocMenuMode::Results);
-    }
+        if (AHavocEpisode04Flow* Flow = Self.Get())
+        {
+            if (AHavocPlayerController* PC = Flow->GetPC())
+            {
+                PC->ShowMenu(EHavocMenuMode::Results);
+            }
+        }
+    });
 }
 
 // ---------------------------------------------------------------- tick
@@ -418,7 +500,7 @@ void AHavocEpisode04Flow::Tick(float DeltaSeconds)
         }
         return;
     }
-    if (Phase != EHavocFlowPhase::Playing)
+    if (Phase != EHavocFlowPhase::Playing || IsCutsceneActive())
     {
         return;
     }
