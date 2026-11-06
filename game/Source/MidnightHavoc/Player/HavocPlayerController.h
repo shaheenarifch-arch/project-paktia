@@ -12,6 +12,7 @@
 #include "HavocPlayerController.generated.h"
 
 class AHavocEpisode04Flow;
+class IHavocEpisodeFlow;
 class UHavocMenuWidget;
 class UHavocPlayHUD;
 
@@ -45,7 +46,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|UI")
     void TogglePause();
 
-    AHavocEpisode04Flow* GetFlow();
+    /** The active episode flow through the shared interface (null if the level has none). */
+    IHavocEpisodeFlow* GetFlow();
+    /** Episode 04 only: for its specific inputs (beach choice, Raven, Falcon). */
+    AHavocEpisode04Flow* GetEpisode04Flow();
 
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }
@@ -77,6 +81,6 @@ private:
 
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;
-    UPROPERTY() TObjectPtr<AHavocEpisode04Flow> Flow;
+    UPROPERTY() TScriptInterface<IHavocEpisodeFlow> Flow;
     TWeakObjectPtr<AHavocPlayerCharacter> Marine;
 };
