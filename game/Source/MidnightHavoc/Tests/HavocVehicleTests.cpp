@@ -151,9 +151,14 @@ bool FHavocVehicleSpawnTest::RunTest(const FString& Parameters)
         { AHavocHelicopterVehicle::StaticClass(), TEXT("kestrel_scout_helicopter") },
         { AHavocDroneVehicle::StaticClass(), TEXT("wisp_recon_drone") },
     };
+    // Each vehicle gets its own spot (10 m apart) and always spawns, so they don't block each other at the origin.
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    int32 Index = 0;
     for (const FCase& Case : Cases)
     {
-        AHavocVehicleBase* Vehicle = Cast<AHavocVehicleBase>(World->SpawnActor(Case.Class, &FTransform::Identity));
+        const FTransform SpawnAt(FVector(1000.0 * Index++, 0.0, 0.0));
+        AHavocVehicleBase* Vehicle = Cast<AHavocVehicleBase>(World->SpawnActor(Case.Class, &SpawnAt, SpawnParams));
         if (!TestNotNull(FString::Printf(TEXT("%s spawned"), Case.Id), Vehicle))
         {
             continue;

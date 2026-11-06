@@ -40,9 +40,23 @@ jobs:
           -unattended -nullrhi -nosplash -log
           -ReportExportPath="%GITHUB_WORKSPACE%\out\test-report"
 
+      - name: Show test results and editor log (on failure)
+        if: failure()
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          # Prints why the headless tests failed straight into the run log (no artifact download needed).
+          # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/automation-test-framework-in-unreal-engine
+          $log = Join-Path $env:GITHUB_WORKSPACE 'game\Saved\Logs\MidnightHavoc.log'
+          if (Test-Path $log) {
+            Write-Host '--- failed tests and errors ---'
+            Select-String -Path $log -Pattern 'Result=\{(Fail|Error)\}|Error:|Fatal|Assertion failed|Unhandled' | Select-Object -Last 80 | ForEach-Object { $_.Line }
+            Write-Host '--- last 60 log lines ---'
+            Get-Content $log -Tail 60
+          } else { Write-Host "No editor log at $log" }
+
       - name: Zip the packaged build
         if: success()
-        shell: pwsh
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           Compress-Archive -Path "$env:GITHUB_WORKSPACE\out\Windows\*" `
             -DestinationPath "$env:GITHUB_WORKSPACE\MidnightHavoc-Win64.zip" -Force
@@ -89,11 +103,11 @@ jobs:
           path: smoke-in
 
       - name: Unzip build
-        shell: pwsh
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: Expand-Archive -Path smoke-in\MidnightHavoc-Win64.zip -DestinationPath smoke-build -Force
 
       - name: Smoke run (3 min) and parse results
-        shell: pwsh
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: >
           ./game/scripts/smoke-run.ps1
           -BuildDir "$env:GITHUB_WORKSPACE\smoke-build"
@@ -102,7 +116,7 @@ jobs:
 
       - name: Job summary
         if: always()
-        shell: pwsh
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           if (Test-Path smoke-out\summary.md) { Get-Content smoke-out\summary.md -Raw | Add-Content $env:GITHUB_STEP_SUMMARY }
           else { 'Smoke test produced no summary (script failed before writing).' | Add-Content $env:GITHUB_STEP_SUMMARY }
