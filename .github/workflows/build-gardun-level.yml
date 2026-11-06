@@ -1,0 +1,108 @@
+# One-off: generate the Gardun level (L_Gardun) on paktia-pc and commit it through Git LFS.
+# The packaged game starts on this map (Config/DefaultEngine.ini GameDefaultMap), so the smoke test needs it.
+# Runs when this file changes on a bhaddru/** branch, or by hand: Actions > Build Gardun level > Run workflow.
+# Q6 (#85): shared by Episodes 02 and 03. Steps: heightmap from Copernicus DEM -> build the editor -> run build_gardun_level.py headless -> commit -> start the Unreal build.
+# Help: game/Content/Python/build_gardun_level.py, game/scripts/run-build-gardun-level.ps1
+#       https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python
+#       https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-git-large-file-storage
+name: Build Gardun level
+
+on:
+  push:
+    branches: ['bhaddru/**']
+    paths: ['.github/workflows/build-gardun-level.yml', 'game/Content/Python/build_gardun_level.py', 'game/Content/Python/make_gardun_heightmap.py']
+  workflow_dispatch:
+
+concurrency:
+  group: gardun-level-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # push the level commit
+  actions: write    # start the Unreal build afterwards
+
+jobs:
+  build-level:
+    runs-on: [self-hosted, windows, unreal]
+    timeout-minutes: 120
+    env:
+      UE_ROOT: ${{ vars.UE_ROOT || 'C:\Program Files\Epic Games\UE_5.5' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Make the heightmap (Copernicus DEM GLO-30)
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          # make_gardun_heightmap.py runs in normal Python 3, not inside Unreal.
+          # Use py/python if installed; otherwise the Python 3 that ships inside UE 5.5 (paktia-pc has no system Python).
+          $py = if (Get-Command py -ErrorAction SilentlyContinue) { 'py' } elseif (Get-Command python -ErrorAction SilentlyContinue) { 'python' } else { Join-Path $env:UE_ROOT 'Engine\Binaries\ThirdParty\Python3\Win64\python.exe' }
+          Write-Host "Using Python: $py"
+          & $py -m pip install --user --quiet rasterio numpy pillow
+          if ($LASTEXITCODE) { Write-Error "pip install failed. Install Python 3 on paktia-pc: https://www.python.org/downloads/windows/"; exit 1 }
+          & $py game/Content/Python/make_gardun_heightmap.py --download
+          if ($LASTEXITCODE) { exit 1 }
+
+      - name: Build the editor (MidnightHavocEditor Win64)
+        shell: cmd
+        run: >
+          "%UE_ROOT%\Engine\Build\BatchFiles\Build.bat" MidnightHavocEditor Win64 Development
+          -Project="%GITHUB_WORKSPACE%\game\MidnightHavoc.uproject" -WaitMutex
+
+      - name: Run build_gardun_level.py headless
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          # Same launch as game/scripts/run-build-gardun-level.ps1, plus -RenderOffscreen: the runner is a Windows service with
+          # no desktop, so the editor cannot open its main window (run #2 failed with DXGI_ERROR_NOT_CURRENTLY_AVAILABLE).
+          # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/command-line-arguments-in-unreal-engine
+          & (Join-Path $env:UE_ROOT 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe') (Join-Path $env:GITHUB_WORKSPACE 'game\MidnightHavoc.uproject') `
+            "-ExecutePythonScript=$(Join-Path $env:GITHUB_WORKSPACE 'game\Content\Python\build_gardun_level.py')" `
+            -unattended -nop4 -nosplash -log -RenderOffscreen
+          $code = $LASTEXITCODE
+          $log = Join-Path $env:GITHUB_WORKSPACE 'game\Saved\Logs\MidnightHavoc.log'
+          if (Test-Path $log) {
+            Write-Host '--- builder messages and errors ---'
+            Select-String -Path $log -Pattern '\[GardunBuilder\]|Error:|Traceback|Exception' | Select-Object -Last 100 | ForEach-Object { $_.Line }
+          }
+          # The .umap is saved as soon as the level is created, so also fail on any Python error (no half-built level).
+          if ((Test-Path $log) -and (Select-String -Path $log -Pattern 'Python script executed with errors' -Quiet)) {
+            Write-Error 'build_gardun_level.py raised an error (see the Traceback above). Not committing a half-built level.'; exit 1
+          }
+          if (-not (Test-Path 'game\Content\Maps\Gardun\L_Gardun.umap')) {
+            Write-Error "L_Gardun.umap was not created (editor exit code $code). See the messages above."; exit 1
+          }
+
+      - name: Commit the level (Git LFS)
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # .umap/.uasset are LFS-tracked in .gitattributes. World Partition keeps actors in __ExternalActors__.
+          foreach ($p in 'game/Content/Maps/Gardun', 'game/Content/__ExternalActors__', 'game/Content/__ExternalObjects__', 'game/Config') {
+            if (Test-Path $p) { git add -- $p }
+          git reset -q -- game/Content/Maps/Gardun/Source   # generated heightmap/terrain mesh are not committed
+          }
+          git diff --cached --stat
+          git commit -m "Gardun level: generate L_Gardun with build_gardun_level.py (Build Gardun level workflow)"
+          if ($LASTEXITCODE) { Write-Error 'Nothing to commit'; exit 1 }
+          git push
+          if ($LASTEXITCODE) { exit 1 }
+
+      - name: Start the Unreal build for this branch
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Pushes made with GITHUB_TOKEN do not trigger other workflows, so start it explicitly.
+          $uri = "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY/actions/workflows/unreal-build.yml/dispatches"
+          $h = @{ Authorization = "Bearer $env:GH_TOKEN"; Accept = 'application/vnd.github+json' }
+          Invoke-RestMethod -Method Post -Uri $uri -Headers $h -Body (@{ ref = $env:GITHUB_REF_NAME } | ConvertTo-Json)
+
+      - name: Upload editor log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gardun-level-logs
+          path: game/Saved/Logs/**
+          if-no-files-found: warn
