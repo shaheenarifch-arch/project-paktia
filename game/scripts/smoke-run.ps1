@@ -26,7 +26,7 @@ if (-not $exe) {
 } else {
   $args = @()
   if ($Map) { $args += $Map }
-  $args += @('-log', "-abslog=$log", '-csvprofile', '-windowed', '-ResX=1280', '-ResY=720',
+  $args += @('-log', "-abslog=$log", '-csvprofile', '-windowed', '-ResX=1280', '-ResY=720', '-RenderOffscreen',
              '-nosplash', '-unattended', '-nosound', "-ExecCmds=$ExecCmds")
   $p = Start-Process -FilePath $exe.FullName -ArgumentList $args -PassThru
   $exited = $p.WaitForExit($Seconds * 1000)

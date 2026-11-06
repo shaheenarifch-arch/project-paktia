@@ -6,6 +6,7 @@
 HAVOC_FACTION("coalition")
 HAVOC_FACTION("houthi")
 HAVOC_FACTION("iran")
+HAVOC_FACTION("iran-resistance")
 HAVOC_FACTION("isis")
 
 // HAVOC_ENEMY(factionA, factionB)   (symmetric)
