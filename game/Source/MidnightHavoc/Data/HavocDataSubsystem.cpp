@@ -63,8 +63,10 @@ void UHavocDataSubsystem::LoadAll()
     {
         Candidates.Add(DataDirectory);
     }
-    Candidates.Add(FPaths::Combine(FPaths::ProjectDir(), TEXT("../data")));
-    Candidates.Add(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("HavocData")));
+    // Absolute paths: in packaged builds ProjectDir() is relative (../../../MidnightHavoc/), and the loop below would
+    // prefix it a second time.
+    Candidates.Add(FPaths::Combine(FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), TEXT("../data")));
+    Candidates.Add(FPaths::Combine(FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir()), TEXT("HavocData")));
 
     TArray<FString> Tried;
     ResolvedDataDirectory.Reset();
