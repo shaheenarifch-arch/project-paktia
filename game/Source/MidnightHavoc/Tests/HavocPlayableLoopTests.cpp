@@ -24,6 +24,7 @@
 #include "Missions/Episode04/HavocShippingLanes.h"
 #include "Missions/Episode04/HavocTankerEscort.h"
 #include "UI/HavocHudModel.h"
+#include "Input/HavocPlayInput.h"
 #include "Player/HavocPlaySettings.h"
 
 #define HAVOC_PLAY_TEST_FLAGS (EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
@@ -304,12 +305,23 @@ bool FHavocHudRunTest::RunTest(const FString& Parameters)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocSettingsHelpTest, "MidnightHavoc.Playable.SettingsHaveHelp", HAVOC_PLAY_TEST_FLAGS)
 bool FHavocSettingsHelpTest::RunTest(const FString& Parameters)
 {
-    for (const TCHAR* Id : { TEXT("quality"), TEXT("flashes"), TEXT("subtitles"), TEXT("sensitivity"), TEXT("volume"), TEXT("bind"), TEXT("reset") })
+    for (const TCHAR* Id : { TEXT("quality"), TEXT("flashes"), TEXT("subtitles"), TEXT("sensitivity"), TEXT("volume"), TEXT("bind"), TEXT("reset"), TEXT("howtoplay") })
     {
         TestTrue(FString::Printf(TEXT("help text for %s"), Id), !UHavocPlaySettings::HelpFor(Id).IsEmpty());
     }
     TestEqual(TEXT("quality 0"), FString(UHavocPlaySettings::QualityName(0)), FString(TEXT("Low")));
     TestEqual(TEXT("quality clamps high"), FString(UHavocPlaySettings::QualityName(9)), FString(TEXT("Epic")));
+    return true;
+}
+
+// How to play: key names shown on the screen are readable.
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocKeyNamesTest, "MidnightHavoc.Playable.HowToPlayKeyNames", HAVOC_PLAY_TEST_FLAGS)
+bool FHavocKeyNamesTest::RunTest(const FString& Parameters)
+{
+    TestEqual(TEXT("mouse look"), UHavocPlayInput::KeyName(EKeys::Mouse2D), FString(TEXT("Mouse")));
+    TestEqual(TEXT("pad start"), UHavocPlayInput::KeyName(EKeys::Gamepad_Special_Right), FString(TEXT("Start")));
+    TestEqual(TEXT("space"), UHavocPlayInput::KeyName(EKeys::SpaceBar), FString(TEXT("Space")));
+    TestEqual(TEXT("letter"), UHavocPlayInput::KeyName(EKeys::E), FString(TEXT("E")));
     return true;
 }
 

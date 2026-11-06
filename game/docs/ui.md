@@ -16,7 +16,7 @@ Epic references:
 | `HavocPlayHUD` | The HUD controller (extends `UHavocTacticalHUD`). Created by `AHavocPlayerController::ShowHud`. Each tick it reads the mission, flow, pawn and settings and updates the text and bars. |
 | `HavocHudModel` | Pure view-model: `HavocHudModel::Build(Mission)` returns objective, reinforcements, terminal integrity, lane hazard counts and tanker counts, plus the tracker and status text. No widgets, so it is covered by an automation test. |
 | `HavocMinimapWidget` | Top-down map drawn in `NativePaint`: every `AHavocSectorVolume` as a box (the sector holding the player is highlighted), revealed `AHavocLaneHazard` markers (red, green once cleared) and a player arrow. Scans actors at 10 Hz. |
-| `HavocMenuWidget` | Main, pause, settings and results menus. |
+| `HavocMenuWidget` | Main, campaign, pause, How to play, settings and results menus. |
 
 ## What the HUD shows
 
@@ -42,6 +42,19 @@ Menus work by keyboard and gamepad. When a menu opens, focus goes to its first b
 | Open the pause menu | Esc or P | Start / Menu |
 
 The settings page scrolls, and focus keeps scrolling the selected row into view.
+
+## How to play and first-time hints
+
+- **How to play** is a button on the main and pause menus. It lists every binding for on foot, vehicles, the Raven drone and the
+  Falcon helicopter. The keys are read from the live mapping contexts (`UHavocPlayInput::BuildControlRows`), so a rebind in
+  Settings shows there at once. Scroll with the mouse wheel, Up / Down, Page Up / Page Down or the D-pad. Esc or B goes back.
+- **First-time hints**: the first time the player takes control of the Raven drone, a vehicle (boat, ground vehicle, helicopter,
+  recon drone) or the Falcon helicopter, a short hint with the live keys shows near the screen centre. Press H or gamepad X to
+  dismiss it; it also fades after 25 s. Each hint shows once and is remembered (`bHintDroneSeen`, `bHintVehicleSeen`,
+  `bHintHelicopterSeen` in `UHavocPlaySettings`). "Reset to defaults" makes them show again. The hints ignore the Subtitles setting.
+- **Menu selection fix**: buttons were never registered for focus, so keyboard and gamepad selection did nothing. They are now,
+  and the buttons have hover / pressed colours so mouse and focus both show the chosen item.
+- Gamepad has menu input only. In-game controls are keyboard and mouse.
 
 ## Settings
 

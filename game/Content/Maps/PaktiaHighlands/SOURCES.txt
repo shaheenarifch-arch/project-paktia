@@ -1,0 +1,22 @@
+Paktia Highlands level: sources and licences
+============================================
+Greybox layout (Episode 01, data/maps/paktia-highlands.json). Terrain shape is real elevation data; the layout
+and place names are invented game content, not a survey.
+
+Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/landscape-technical-guide-in-unreal-engine
+
+Heightmap (Source/paktia_heightmap_r16.png and paktia_terrain.obj, NOT committed; made by
+game/Content/Python/make_paktia_heightmap.py)
+- Dataset: Copernicus DEM GLO-30 (30 m), tile Copernicus_DSM_COG_10_N33_00_E069_00_DEM
+- Where: https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM
+  Open copy used by the script: https://copernicus-dem-30m.s3.amazonaws.com/
+- Area: about 20 x 20 km centred on 33.60 N, 69.25 E (Paktia province highlands). Heights are shifted so the lowest point is 0.
+- Licence: Copernicus DEM free, full and open licence; attribution required:
+  "Produced using Copernicus WorldDEM-30 (c) DLR e.V. 2010-2014 and (c) Airbus Defence and Space GmbH 2014-2018
+  provided under COPERNICUS by the European Union and ESA; all rights reserved."
+  Check the current terms on the download page before shipping.
+- Alternative: NASA SRTM 30 m via https://earthexplorer.usgs.gov/ (public domain, credit USGS/NASA);
+  pass it with: make_paktia_heightmap.py --dem <file.tif>
+
+Art
+- Greybox: engine basic shapes and plain-colour materials only. No Fab or paid assets. Real art comes with issue #71.

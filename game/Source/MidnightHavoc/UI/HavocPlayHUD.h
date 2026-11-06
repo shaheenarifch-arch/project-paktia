@@ -26,6 +26,7 @@ protected:
 private:
     UPROPERTY() TObjectPtr<UTextBlock> ObjectiveText;
     UPROPERTY() TObjectPtr<UTextBlock> HintText;
+    UPROPERTY() TObjectPtr<UTextBlock> FirstHintText; // first-time control hint (dismissable)
     UPROPERTY() TObjectPtr<UTextBlock> ToastText;
     UPROPERTY() TObjectPtr<UTextBlock> HealthText;
     UPROPERTY() TObjectPtr<UProgressBar> HealthBar;
