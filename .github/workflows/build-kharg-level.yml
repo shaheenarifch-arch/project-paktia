@@ -36,7 +36,9 @@ jobs:
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: |
           # make_kharg_heightmap.py runs in normal Python 3, not inside Unreal.
-          $py = if (Get-Command py -ErrorAction SilentlyContinue) { 'py' } else { 'python' }
+          # Use py/python if installed; otherwise the Python 3 that ships inside UE 5.5 (paktia-pc has no system Python).
+          $py = if (Get-Command py -ErrorAction SilentlyContinue) { 'py' } elseif (Get-Command python -ErrorAction SilentlyContinue) { 'python' } else { Join-Path $env:UE_ROOT 'Engine\Binaries\ThirdParty\Python3\Win64\python.exe' }
+          Write-Host "Using Python: $py"
           & $py -m pip install --user --quiet rasterio numpy pillow
           if ($LASTEXITCODE) { Write-Error "pip install failed. Install Python 3 on paktia-pc: https://www.python.org/downloads/windows/"; exit 1 }
           & $py game/Content/Python/make_kharg_heightmap.py --download
