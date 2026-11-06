@@ -5,5 +5,6 @@
   "class": "light_transport",
   "seats": ["driver", "passenger"],
   "systems": ["damage", "repair", "transport"],
+  "stats": { "maxSpeed": 22, "acceleration": 6, "turnRate": 55 },
   "enabled": true
 }

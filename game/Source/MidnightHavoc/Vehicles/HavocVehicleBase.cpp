@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Core/HavocEventSubsystem.h"
 #include "Data/HavocDataSubsystem.h"
 #include "Engine/GameInstance.h"
 #include "Engine/LocalPlayer.h"
@@ -39,6 +40,61 @@ namespace HavocVehicleMath
         }
         const double SpeedFraction = FMath::Clamp(Speed / MaxSpeed, -1.0, 1.0);
         return FMath::Clamp(Steer, -1.0, 1.0) * TurnRate * SpeedFraction * Dt;
+    }
+}
+
+namespace HavocVehicleMath
+{
+    double TrackedYawDelta(double Steer, double Speed, double TurnRate, double Dt)
+    {
+        const double Direction = Speed < -KINDA_SMALL_NUMBER ? -1.0 : 1.0;
+        return FMath::Clamp(Steer, -1.0, 1.0) * TurnRate * Direction * Dt;
+    }
+
+    EHavocVehicleDamage DamageLevel(double Integrity)
+    {
+        if (Integrity <= 0.0) return EHavocVehicleDamage::Destroyed;
+        if (Integrity <= 0.15) return EHavocVehicleDamage::Disabled;
+        if (Integrity <= 0.35) return EHavocVehicleDamage::Critical;
+        if (Integrity <= 0.7) return EHavocVehicleDamage::Damaged;
+        return EHavocVehicleDamage::Operational;
+    }
+
+    double MobilityFactor(EHavocVehicleDamage Level)
+    {
+        switch (Level)
+        {
+        case EHavocVehicleDamage::Operational: return 1.0;
+        case EHavocVehicleDamage::Damaged: return 0.8;
+        case EHavocVehicleDamage::Critical: return 0.5;
+        default: return 0.0;
+        }
+    }
+
+    void FollowInput(const FVector& SelfLocation, const FVector& SelfForward, const FVector& TargetLocation, double Gap, double& OutThrottle, double& OutSteer)
+    {
+        OutThrottle = 0.0;
+        OutSteer = 0.0;
+        FVector To = TargetLocation - SelfLocation;
+        To.Z = 0.0;
+        const double Dist = To.Size();
+        FVector Fwd = SelfForward;
+        Fwd.Z = 0.0;
+        if (Dist <= KINDA_SMALL_NUMBER || !Fwd.Normalize())
+        {
+            return;
+        }
+        To /= Dist;
+        const double Cross = Fwd.X * To.Y - Fwd.Y * To.X; // > 0: target is to the right (UE yaw turns right when positive)
+        const double Dot = FVector::DotProduct(Fwd, To);
+        const double Angle = FMath::Atan2(Cross, Dot);
+        OutSteer = FMath::Clamp(Angle / (PI * 0.25), -1.0, 1.0);
+        if (Dist > Gap)
+        {
+            const double Close = FMath::Clamp((Dist - Gap) / FMath::Max(Gap, 1.0), 0.0, 1.0);
+            // Facing away: creep so wheeled vehicles can swing round; facing the target: speed up with distance.
+            OutThrottle = Dot < 0.0 ? 0.3 : FMath::Max(0.3, Close);
+        }
     }
 }
 
@@ -127,7 +183,7 @@ void AHavocVehicleBase::LoadVisual()
 
 bool AHavocVehicleBase::CanEnter(const AController* InController) const
 {
-    if (!InController || Driver)
+    if (!InController || Driver || IsDestroyed())
     {
         return false;
     }
@@ -183,6 +239,52 @@ bool AHavocVehicleBase::Exit()
         Leaving->UnPossess();
     }
     return true;
+}
+
+// ---------------------------------------------------------------- damage
+
+void AHavocVehicleBase::ApplyVehicleDamage(float Amount)
+{
+    if (!HasAuthority() || IsDestroyed() || Amount <= 0.f)
+    {
+        return;
+    }
+    Integrity = FMath::Max(0.f, FMath::RoundToFloat((Integrity - Amount) * 1000.f) / 1000.f);
+    if (IsDestroyed())
+    {
+        Throttle = Steer = Lift = 0.0;
+        Exit();
+    }
+    PublishDamage();
+}
+
+bool AHavocVehicleBase::RepairVehicle(float Amount)
+{
+    if (!HasAuthority() || IsDestroyed())
+    {
+        return false;
+    }
+    Integrity = FMath::Min(1.f, Integrity + FMath::Max(0.f, Amount));
+    PublishDamage();
+    return true;
+}
+
+void AHavocVehicleBase::PublishDamage() const
+{
+    if (ConvoyId.IsNone())
+    {
+        return;
+    }
+    if (const UGameInstance* GI = GetGameInstance())
+    {
+        if (UHavocEventSubsystem* Events = GI->GetSubsystem<UHavocEventSubsystem>())
+        {
+            const UEnum* Enum = StaticEnum<EHavocVehicleDamage>();
+            const FString Level = Enum ? Enum->GetNameStringByValue(static_cast<int64>(GetDamageLevel())) : FString();
+            Events->Publish(FName(TEXT("convoy:vehicle")),
+                FString::Printf(TEXT("{\"id\":\"%s\",\"integrity\":%.3f,\"level\":\"%s\"}"), *ConvoyId.ToString(), Integrity, *Level));
+        }
+    }
 }
 
 void AHavocVehicleBase::UnPossessed()

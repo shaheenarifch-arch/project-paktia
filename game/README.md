@@ -32,7 +32,7 @@ Folders are under `Source/MidnightHavoc/`.
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
 | `Drones/` | `AHavocDrone` (Raven, Warden, Talon subclasses), `IHavocDroneDetectable` | `src/gameplay/drones/` (DroneBase, DroneFlightController, DroneBattery, DroneSignalManager, DroneSensor, DroneCamera) |
 | `Aircraft/` | `AHavocFalconHelicopter`, `UHavocCrashSequence` | `src/gameplay/aircraft/` (HelicopterController, HelicopterDamageState, CrewState, HelicopterCrashController) |
-| `Vehicles/` | `AHavocVehicleBase`, `AHavocBoatVehicle`, `AHavocGroundVehicle`, `AHavocHelicopterVehicle`, `AHavocDroneVehicle` (see `docs/vehicles.md`) | `data/vehicles/` (stats, seats) |
+| `Vehicles/` | `AHavocVehicleBase`, `AHavocBoatVehicle`, `AHavocGroundVehicle` (Warden), `AHavocNomadVehicle`, `AHavocHelicopterVehicle`, `AHavocDroneVehicle` (see `docs/vehicles.md`) | `data/vehicles/` (stats, seats) |
 | `TacticalUI/` | `UHavocTacticalHUD` (see `docs/hud-guide.md`) | `src/gameplay/command/TacticalMap.ts` |
 | `World/` | `AHavocLevelDirector`, `AHavocSectorVolume`, `AHavocTerminalPart`, `AHavocLaneHazard`, `AHavocTankerSpline` (see `docs/kharg-level-guide.md`) | `data/maps/kharg-hormuz.json`, Episode 04 rules |
 | `AI/` | `AHavocAIController` (perception, patrol / cover / engage / search / fallback), `AHavocEnemyCharacter` (Iran, Houthi, ISIS opposing and coalition allied units; AI-only), `UHavocSquadSubsystem` + `HavocSquadLogic.h` (squad patrol / engage / fallback), `UHavocEnvQueryTest_Cover` (EQS cover); see `docs/ai.md` | `data/units/` (game-balance ratings only), `data/ai/squad-behaviour.json` (squad tuning and phase deployments) |

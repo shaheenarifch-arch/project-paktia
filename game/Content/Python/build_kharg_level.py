@@ -72,6 +72,7 @@ NAV_BOUNDS = (-60000, -100000, 0, 250000, 340000, 50000)
 VEHICLES = {  # class name -> (x, y, z, yaw); one of each playable vehicle (item 7), docs/vehicles.md. Boat sits on the sea (z = water level).
     "HavocBoatVehicle": (0, -440000, 0, 90),
     "HavocGroundVehicle": (90000, -360000, 300, 90),
+    "HavocNomadVehicle": (90000, -363500, 300, 90),  # Q9: Nomad truck beside the Warden; both drivable (F)
     "HavocHelicopterVehicle": (-90000, -360000, 300, 90),
     "HavocDroneVehicle": (0, -320000, 300, 90),
 }
