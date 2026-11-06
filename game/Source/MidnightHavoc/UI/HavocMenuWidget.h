@@ -68,7 +68,7 @@ private:
     void FocusButton(int32 Index);
 
     class UHavocPlaySettings* GetSettings() const;
-    class AHavocEpisode04Flow* GetFlow() const;
+    class IHavocEpisodeFlow* GetFlow() const;
     class UHavocCampaign* GetCampaign() const;
 
     EHavocMenuMode Mode = EHavocMenuMode::Main;
