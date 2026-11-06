@@ -16,6 +16,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Missions/HavocEpisodeFlowBase.h"
+#include "Missions/Episode02/HavocEpisode02Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Missions/HavocEpisodeFlow.h"
 #include "Player/HavocPlayerCharacter.h"
@@ -118,10 +120,10 @@ void AHavocPlayerController::StartSmokeRun()
     IHavocEpisodeFlow* F = GetFlow();
     if (!F)
     {
-        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 04 flow in this level; cannot start the episode"));
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no episode flow in this level; cannot start the episode"));
         return;
     }
-    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 04"));
+    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
     F->StartEpisode();
     // 30 s in: frame the island explicitly, then shoot.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine

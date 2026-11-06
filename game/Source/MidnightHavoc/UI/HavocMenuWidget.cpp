@@ -265,15 +265,13 @@ void UHavocMenuWidget::Rebuild()
         const IHavocEpisodeFlow* Flow = GetFlow();
         const FString Outcome = Flow ? Flow->GetOutcome() : FString();
         const bool bFailed = Outcome == TEXT("FAILED");
-        AddLabel(Outcome == TEXT("SUCCESS") ? TEXT("STRAIT OPEN - MISSION COMPLETE")
-            : Outcome == TEXT("PARTIAL") ? TEXT("STRAIT OPEN - PARTIAL SUCCESS")
-            : TEXT("OPERATION FAILED"), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
+        AddLabel(Flow ? Flow->GetResultTitle() : FString(TEXT("OPERATION FAILED")), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
         AddLabel(Flow ? Flow->GetResultSummary() : FString(), 22, FLinearColor::White);
         if (bFailed)
         {
             AddButton(TEXT("Restart from last checkpoint"), TEXT("OnRestartCheckpoint"));
         }
-        AddButton(TEXT("Play Episode 04 again"), TEXT("OnPlay"));
+        AddButton(Flow ? Flow->GetReplayLabel() : FString(TEXT("Play again")), TEXT("OnPlay"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
         break;
     }

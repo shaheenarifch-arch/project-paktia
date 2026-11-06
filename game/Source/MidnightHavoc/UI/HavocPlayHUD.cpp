@@ -112,8 +112,10 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     const bool bSubtitles = !Settings || Settings->bSubtitles;
     const FHavocHudSnapshot Snapshot = HavocHudModel::Build(Mission);
 
-    ObjectiveText->SetText(FText::FromString(Snapshot.Objective));
-    TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : FString()));
+    // Episode 04 reads the mission snapshot; other episodes (Episode 02) give their own text through the flow.
+    const bool bFlowText = !Mission && Flow;
+    ObjectiveText->SetText(FText::FromString(bFlowText ? Flow->GetObjectiveText() : Snapshot.Objective));
+    TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : bFlowText ? Flow->GetTrackerText() : FString()));
     HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : FString()));
     ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : FString()));
     // First-time control hint: not tied to the Subtitles setting, because it explains the controls.
@@ -150,6 +152,10 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         {
             Status += TEXT("\n") + Flow->GetSupportStatus();
         }
+    }
+    else if (bFlowText)
+    {
+        Status = Flow->GetStatusText();
     }
     StatusText->SetText(FText::FromString(Status));
 

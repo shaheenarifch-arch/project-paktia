@@ -57,6 +57,19 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
         return true;
     }
 
+    if (Def.Id == TEXT("episode_02_silent_corridor"))
+    {
+        UHavocSilentCorridorMission* Mission = NewObject<UHavocSilentCorridorMission>(this);
+        if (!Mission->Initialize(Def, bEpisode1CrewRecovered, Events, Error))
+        {
+            UE_LOG(LogHavocMission, Error, TEXT("StartMission '%s': %s"), *MissionId.ToString(), *Error);
+            return false;
+        }
+        ActiveSilentCorridor = Mission;
+        ActiveRunner = Mission->GetRunner();
+        return true;
+    }
+
     UHavocMissionRunner* Runner = NewObject<UHavocMissionRunner>(this);
     if (!Runner->Initialize(Def, TMap<FString, FHavocEffectHandler>(), Events, nullptr, Error))
     {

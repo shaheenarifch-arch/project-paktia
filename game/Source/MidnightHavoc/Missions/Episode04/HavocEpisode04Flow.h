@@ -134,8 +134,6 @@ private:
     void Step();
     void EndEpisode();
     void ClearWorld();
-    void SetHint(const FString& Text) { Hint = Text; }
-    void ShowToast(const FString& Text, float Seconds = 5.f);
     void Publish(const TCHAR* EventName, const FString& Payload) const;
 
     // ---- enemies ----
@@ -167,15 +165,9 @@ private:
     void EndFalconSupport();
     void TickFalcon(float Dt);
 
-    EHavocFlowPhase Phase = EHavocFlowPhase::Menu;
     bool bMenuShown = false;
     FString LastState;
     FString LastCheckpointState;
-    FString Hint;
-    FString Toast;
-    float ToastTime = 0.f;
-    FString ResultSummary;
-    FString Outcome;
 
     UPROPERTY() TObjectPtr<AHavocPlayerController> CachedPC;
     UPROPERTY() TObjectPtr<AHavocPlayerCharacter> CachedMarine;
