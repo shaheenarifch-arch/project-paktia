@@ -45,3 +45,6 @@ build/
 game/Content/ThirdParty/
 game/Content/Megascans/
 game/Content/MSPresets/
+
+# Generated copy of data/ for packaged builds (MidnightHavoc.uproject PreBuildSteps)
+game/Content/HavocData/

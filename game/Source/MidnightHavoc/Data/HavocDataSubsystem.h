@@ -62,7 +62,7 @@ protected:
      *   [/Script/MidnightHavoc.HavocDataSubsystem]
      *   DataDirectory=D:/path/to/data
      * Relative paths are resolved against the project directory.
-     * Empty means <ProjectDir>/../data.
+     * Empty means <ProjectDir>/../data, then <ProjectDir>/Content/HavocData (packaged builds).
      */
     UPROPERTY(Config)
     FString DataDirectory;

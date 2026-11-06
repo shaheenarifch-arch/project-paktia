@@ -82,10 +82,13 @@ property `FailState`; booleans such as `fictional` are read by hand in
 `HavocDataSubsystem.cpp`). Then run `npm run validate`. Look missions up with
 `UHavocDataSubsystem::GetMission` or `UHavocMissionSubsystem::GetMissionDef`.
 
-**Packaged builds.** Add `../data` under Project Settings > Packaging > **Additional
-Non-Asset Directories to Package**
+**Packaged builds.** Before every Win64 build, the `PreBuildSteps` in `MidnightHavoc.uproject`
+copy the repo's `data/` to `game/Content/HavocData/` (git-ignored; never edit it, edit `data/`).
+`Config/DefaultGame.ini` stages that folder as a non-asset directory
 (<https://dev.epicgames.com/documentation/en-us/unreal-engine/packaging-unreal-engine-projects>),
-or set `DataDirectory` to wherever the files are shipped.
+and the data subsystem falls back to it when `<ProjectDir>/../data` is missing. The log line
+`LogHavocData: Loading game data from '...'` shows which folder was used. CI fails the build if the
+package has no `HavocData`.
 
 ## Missions
 

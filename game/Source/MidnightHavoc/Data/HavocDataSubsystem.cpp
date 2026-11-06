@@ -55,19 +55,41 @@ void UHavocDataSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UHavocDataSubsystem::LoadAll()
 {
-    FString Dir = DataDirectory.IsEmpty() ? FPaths::Combine(FPaths::ProjectDir(), TEXT("../data")) : DataDirectory;
-    if (FPaths::IsRelative(Dir))
+    // Search order: the DataDirectory override; the repo's data/ folder (<ProjectDir>/../data, used in the
+    // editor); then Content/HavocData, the copy that packaged builds ship (made by the PreBuildSteps in
+    // MidnightHavoc.uproject and staged by DefaultGame.ini). See game/README.md "Packaged builds".
+    TArray<FString> Candidates;
+    if (!DataDirectory.IsEmpty())
     {
-        Dir = FPaths::Combine(FPaths::ProjectDir(), Dir);
+        Candidates.Add(DataDirectory);
     }
-    FPaths::CollapseRelativeDirectories(Dir);
-    ResolvedDataDirectory = FPaths::ConvertRelativePathToFull(Dir);
+    Candidates.Add(FPaths::Combine(FPaths::ProjectDir(), TEXT("../data")));
+    Candidates.Add(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("HavocData")));
 
-    if (!FPaths::DirectoryExists(ResolvedDataDirectory))
+    TArray<FString> Tried;
+    ResolvedDataDirectory.Reset();
+    for (FString Dir : Candidates)
     {
-        UE_LOG(LogHavocData, Warning, TEXT("Data directory '%s' does not exist. No game data loaded. Set DataDirectory under [/Script/MidnightHavoc.HavocDataSubsystem] in DefaultGame.ini, or package ../data (see game/README.md)."), *ResolvedDataDirectory);
+        if (FPaths::IsRelative(Dir))
+        {
+            Dir = FPaths::Combine(FPaths::ProjectDir(), Dir);
+        }
+        FPaths::CollapseRelativeDirectories(Dir);
+        Dir = FPaths::ConvertRelativePathToFull(Dir);
+        Tried.Add(Dir);
+        if (FPaths::DirectoryExists(Dir))
+        {
+            ResolvedDataDirectory = Dir;
+            break;
+        }
+    }
+
+    if (ResolvedDataDirectory.IsEmpty())
+    {
+        UE_LOG(LogHavocData, Error, TEXT("No game data directory found (tried: %s). No missions or maps loaded. Set DataDirectory under [/Script/MidnightHavoc.HavocDataSubsystem] in DefaultGame.ini, or see game/README.md \"Packaged builds\"."), *FString::Join(Tried, TEXT(", ")));
         return;
     }
+    UE_LOG(LogHavocData, Display, TEXT("Loading game data from '%s'."), *ResolvedDataDirectory);
 
     // Maps first: mission validation needs them.
     LoadFolder(TEXT("maps"), [this](const TSharedRef<FJsonObject>& J, const FString& F) { RegisterMap(J, F); });
