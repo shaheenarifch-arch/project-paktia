@@ -11,6 +11,7 @@
 #include "Player/HavocPlayerCharacter.h"
 #include "HavocPlayerController.generated.h"
 
+class AHavocEpisode03Flow;
 class AHavocEpisode04Flow;
 class IHavocEpisodeFlow;
 class UHavocMenuWidget;
@@ -59,6 +60,9 @@ public:
 
     /** Shows the hint for this kind of machine unless it was shown before (remembered in UHavocPlaySettings). */
     void ShowFirstTimeHint(EHavocHintKind Kind);
+
+    /** The Episode 03 flow when the session plays Episode 03 (greybox Gardun), else null. */
+    AHavocEpisode03Flow* GetFlow03();
 
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }

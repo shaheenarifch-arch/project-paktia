@@ -9,6 +9,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Data/HavocMissionDef.h"
+#include "Missions/Episode03/HavocBrokenCitadelMission.h"
 #include "HavocMissionSubsystem.generated.h"
 
 class UHavocMissionRunner;

@@ -36,6 +36,12 @@ IHavocEpisodeFlow* UHavocMenuWidget::GetFlow() const
     return PC ? PC->GetFlow() : nullptr;
 }
 
+AHavocEpisode03Flow* UHavocMenuWidget::GetFlow03() const
+{
+    AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
+    return PC ? PC->GetFlow03() : nullptr;
+}
+
 void UHavocMenuWidget::NativeOnInitialized()
 {
     Super::NativeOnInitialized();
@@ -137,8 +143,16 @@ void UHavocMenuWidget::Rebuild()
     {
     case EHavocMenuMode::Main:
         AddLabel(TEXT("OPERATION MIDNIGHT HAVOC"), 44, Gold);
-        AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
-        AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+        if (GetFlow03())
+        {
+            AddLabel(TEXT("Episode 03: Operation Broken Citadel"), 28, FLinearColor::White);
+            AddLabel(TEXT("Take Gardun in five phases: open the city, break enemy communications, hold Old Gardun, take the high ground, then assault the Citadel. (Greybox build.)"), 18, Soft);
+        }
+        else
+        {
+            AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
+            AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+        }
         AddButton(TEXT("Campaign"), TEXT("OnCampaign"));
         AddButton(TEXT("How to play"), TEXT("OnHowToPlay"));
         AddButton(TEXT("Settings"), TEXT("OnSettings"));
@@ -180,7 +194,7 @@ void UHavocMenuWidget::Rebuild()
             AddLabel(TEXT("Episodes 01-03 are not playable in Unreal yet, so this opens Episode 04 for testing. Your saved results are kept."), 15, Locked);
         }
         AddButton(TEXT("Back"), TEXT("OnMainMenu"));
-        AddLabel(TEXT("Episodes 01-03 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
+        AddLabel(TEXT("Episodes 01-02 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
         break;
     }
 
@@ -408,6 +422,10 @@ void UHavocMenuWidget::OnPlay()
     {
         Flow->StartEpisode();
     }
+    else if (AHavocEpisode03Flow* Flow03 = GetFlow03())
+    {
+        Flow03->StartEpisode();
+    }
 }
 
 void UHavocMenuWidget::OnUnlockAll()
@@ -435,6 +453,10 @@ void UHavocMenuWidget::OnRestartCheckpoint()
     if (IHavocEpisodeFlow* Flow = GetFlow())
     {
         Flow->RestartFromCheckpoint();
+    }
+    else if (AHavocEpisode03Flow* Flow03 = GetFlow03())
+    {
+        Flow03->RestartFromCheckpoint();
     }
 }
 

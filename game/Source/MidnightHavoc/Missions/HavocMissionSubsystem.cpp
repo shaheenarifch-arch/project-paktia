@@ -2,11 +2,13 @@
 
 #include "Core/HavocEventSubsystem.h"
 #include "Data/HavocDataSubsystem.h"
+#include "Data/HavocMapDef.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "Missions/HavocMissionRunner.h"
 #include "Missions/Episode01/HavocMountainShieldMission.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
+#include "Misc/DateTime.h"
 
 bool UHavocMissionSubsystem::GetMissionDef(FName Id, FHavocMissionDef& OutMission) const
 {
