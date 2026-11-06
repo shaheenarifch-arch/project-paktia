@@ -35,7 +35,9 @@ void UHavocPlayHUD::NativeOnInitialized()
 
     ObjectiveText = MakeText(WidgetTree, TEXT(""), 24, FLinearColor(1.f, 0.95f, 0.75f));
     ObjectiveText->SetJustification(ETextJustify::Center);
-    Place(Canvas, ObjectiveText, FAnchors(0.5f, 0.f), FVector2D(0.5f, 0.f), FVector2D(0.f, 18.f), FVector2D(1200.f, 90.f));
+    // 600 px and wrapping so it stays between the objective tracker (top left) and the minimap (top right).
+    ObjectiveText->SetAutoWrapText(true);
+    Place(Canvas, ObjectiveText, FAnchors(0.5f, 0.f), FVector2D(0.5f, 0.f), FVector2D(0.f, 18.f), FVector2D(600.f, 110.f));
 
     ToastText = MakeText(WidgetTree, TEXT(""), 26, FLinearColor(1.f, 0.85f, 0.3f));
     ToastText->SetJustification(ETextJustify::Center);

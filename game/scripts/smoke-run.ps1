@@ -10,7 +10,8 @@ param(
   [int]$Seconds = 180,
   [string]$Map = '',                         # optional map to open, e.g. /Game/Maps/Kharg
   [string]$ExecCmds = 'stat fps',            # extra console commands for the walkthrough, ';' separated
-  [double]$MinFpsFloor = 15
+  [double]$MinFpsFloor = 15,
+  [double]$MinScreenshotSpread = 8           # luminance std dev (0-255); below this the in-game view is one flat colour
 )
 $ErrorActionPreference = 'Continue'
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
@@ -27,7 +28,7 @@ if (-not $exe) {
   $args = @()
   if ($Map) { $args += $Map }
   $args += @('-log', "-abslog=$log", '-csvprofile', '-windowed', '-ResX=1280', '-ResY=720', '-RenderOffscreen',
-             '-nosplash', '-unattended', '-nosound', "-ExecCmds=$ExecCmds")
+             '-nosplash', '-unattended', '-nosound', "-ExecCmds=$ExecCmds", '-HavocSmokeStart')
   $p = Start-Process -FilePath $exe.FullName -ArgumentList $args -PassThru
   $exited = $p.WaitForExit($Seconds * 1000)
   if ($exited) {
@@ -94,6 +95,35 @@ if ($csv) {
 if ($null -eq $avg) { $reasons += 'No FPS data captured (CSV missing or no FrameTime column)' }
 elseif ($avg -lt $MinFpsFloor) { $reasons += "Average FPS $avg is below floor $MinFpsFloor" }
 
+# World visible? -HavocSmokeStart starts Episode 04 and takes a HighResShot 30 s in (HavocPlayerController).
+# A flat single-colour picture means the level loaded without its terrain (yellow/blue screen, Nov 2026).
+# Help: https://learn.microsoft.com/en-us/dotnet/api/system.drawing.bitmap
+$shotSpread = $null
+$shot = Get-ChildItem -Path $searchRoot -Recurse -Filter '*.png' -ErrorAction SilentlyContinue |
+  Where-Object { $_.FullName -match '\\Screenshots\\' -and $_.LastWriteTime -ge $startedAt.AddMinutes(-1) } |
+  Sort-Object LastWriteTime -Descending | Select-Object -First 1
+if (-not $shot) {
+  $reasons += 'No in-game screenshot was taken (the episode did not start or HighResShot failed)'
+} else {
+  Copy-Item -Path $shot.FullName -Destination (Join-Path $OutDir 'ingame.png') -Force
+  try {
+    Add-Type -AssemblyName System.Drawing
+    $bmp = [System.Drawing.Bitmap]::FromFile($shot.FullName)
+    $lum = @()
+    # 40 x 40 grid over the middle 80% of the picture (skips most of the HUD text at the edges).
+    for ($i = 0; $i -lt 40; $i++) { for ($j = 0; $j -lt 40; $j++) {
+      $px = $bmp.GetPixel([int]($bmp.Width * (0.1 + 0.8 * $i / 39)), [int]($bmp.Height * (0.1 + 0.8 * $j / 39)))
+      $lum += 0.2126 * $px.R + 0.7152 * $px.G + 0.0722 * $px.B
+    } }
+    $bmp.Dispose()
+    $mean = ($lum | Measure-Object -Average).Average
+    $shotSpread = [math]::Round([math]::Sqrt((($lum | ForEach-Object { ($_ - $mean) * ($_ - $mean) }) | Measure-Object -Average).Average), 1)
+    if ($shotSpread -lt $MinScreenshotSpread) {
+      $reasons += "In-game view is one flat colour (spread $shotSpread < $MinScreenshotSpread): the world is not rendering. See ingame.png"
+    }
+  } catch { $reasons += "Could not read the in-game screenshot: $_" }
+}
+
 $pass = ($reasons.Count -eq 0)
 $fpsText = if ($null -ne $avg) { "avg **$avg** / min **$min**" } else { 'n/a' }
 $sb = New-Object System.Text.StringBuilder
@@ -101,12 +131,13 @@ $sb = New-Object System.Text.StringBuilder
 [void]$sb.AppendLine("- Run: $exitInfo (target $Seconds s)")
 [void]$sb.AppendLine("- FPS: $fpsText")
 [void]$sb.AppendLine("- Crashes: $($crashes.Count)")
+[void]$sb.AppendLine("- World visible: $(if ($null -eq $shotSpread) { 'n/a (no screenshot)' } elseif ($shotSpread -ge $MinScreenshotSpread) { "yes (spread $shotSpread)" } else { "NO, flat colour (spread $shotSpread)" })")
 if ($reasons) { [void]$sb.AppendLine(); [void]$sb.AppendLine('**Why it failed**'); $reasons | ForEach-Object { [void]$sb.AppendLine("- $_") } }
 [void]$sb.AppendLine(); [void]$sb.AppendLine('**Top errors**')
 if ($topErrors) {
   $topErrors | ForEach-Object { $t = $_.Name; if ($t.Length -gt 300) { $t = $t.Substring(0, 300) + '…' }; [void]$sb.AppendLine("- ×$($_.Count) ``$($t -replace '``', "'")``") }
 } else { [void]$sb.AppendLine('- none') }
 $sb.ToString() | Set-Content -Path (Join-Path $OutDir 'summary.md') -Encoding utf8
-@{ pass = $pass; avgFps = $avg; minFps = $min; crashes = $crashes.Count; reasons = $reasons } |
+@{ pass = $pass; avgFps = $avg; minFps = $min; crashes = $crashes.Count; screenshotSpread = $shotSpread; reasons = $reasons } |
   ConvertTo-Json | Set-Content -Path (Join-Path $OutDir 'result.json') -Encoding utf8
 exit 0

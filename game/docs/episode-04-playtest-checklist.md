@@ -12,7 +12,7 @@ Help: [Packaging](https://dev.epicgames.com/documentation/en-us/unreal-engine/pa
 - [ ] The build contains the level `Content/Maps/Kharg/L_KhargHormuz` (built by `game/Content/Python/build_kharg_level.py`) and `data/` beside the game folder.
 
 ## Menus
-- [ ] Main menu opens: Play Episode 04, Settings, Quit. Settings toggles and sliders change and persist after restart.
+- [ ] Main menu opens: Campaign, Settings, Quit. Campaign lists Episodes 01-03 as locked and Episode 04 with Start. Settings toggles and sliders change and persist after restart.
 - [ ] Esc during play opens the pause menu (Resume, Restart from last checkpoint, Settings, Quit); the game is paused behind it.
 
 ## The loop

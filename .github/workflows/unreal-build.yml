@@ -162,3 +162,13 @@ jobs:
             }
             if (!number) { core.notice('No PR or issue to comment on for ' + branch); return; }
             await github.rest.issues.createComment({ ...context.repo, issue_number: number, body });
+
+      - name: Fail if the world is not visible
+        # Only this check fails the job (FPS and log results stay advisory). game/docs/smoke-test.md
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          if (-not (Test-Path smoke-out\result.json)) { Write-Error 'No smoke result.json'; exit 1 }
+          $r = Get-Content smoke-out\result.json -Raw | ConvertFrom-Json
+          $bad = @($r.reasons | Where-Object { $_ -match 'flat colour|No in-game screenshot|in-game screenshot' })
+          if ($bad.Count) { $bad | ForEach-Object { Write-Error $_ }; exit 1 }
+          Write-Host "World visible (screenshot spread $($r.screenshotSpread))"

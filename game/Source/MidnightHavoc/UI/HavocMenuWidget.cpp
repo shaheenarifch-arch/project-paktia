@@ -120,11 +120,29 @@ void UHavocMenuWidget::Rebuild()
         AddLabel(TEXT("OPERATION MIDNIGHT HAVOC"), 44, Gold);
         AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
         AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
-        AddButton(TEXT("Play Episode 04"), TEXT("OnPlay"));
+        AddButton(TEXT("Campaign"), TEXT("OnCampaign"));
         AddButton(TEXT("Settings"), TEXT("OnSettings"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
         AddLabel(TEXT("Move W/A/S/D   Look mouse   Shift sprint   C crouch   Right mouse aim   Left mouse fire   R reload   E interact\nT Raven drone   G Falcon support   Tab back to Marine   1 / 2 choose beach   Esc pause"), 16, Soft);
         break;
+
+    case EHavocMenuMode::Campaign:
+    {
+        // Episodes 01-03 are playable in the browser prototype (play/, docs/campaign.md); their Unreal maps are
+        // not built yet, so they show as locked. Episode 04 is playable here.
+        const FLinearColor Locked(0.55f, 0.58f, 0.64f);
+        AddLabel(TEXT("CAMPAIGN"), 40, Gold);
+        AddLabel(TEXT("Choose an episode, then press Start."), 18, Soft);
+        AddLabel(TEXT("Episode 01: Operation Mountain Shield  -  locked (Unreal version in progress)"), 20, Locked);
+        AddLabel(TEXT("Episode 02: Operation Silent Corridor  -  locked (Unreal version in progress)"), 20, Locked);
+        AddLabel(TEXT("Episode 03: Operation Broken Citadel  -  locked (Unreal version in progress)"), 20, Locked);
+        AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
+        AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
+        AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+        AddButton(TEXT("Back"), TEXT("OnMainMenu"));
+        AddLabel(TEXT("Episodes 01-03 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
+        break;
+    }
 
     case EHavocMenuMode::Pause:
         AddLabel(TEXT("PAUSED"), 40, Gold);
@@ -294,6 +312,11 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
             OnBack();
             return FReply::Handled();
         }
+        if (Mode == EHavocMenuMode::Campaign)
+        {
+            OnMainMenu();
+            return FReply::Handled();
+        }
     }
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
@@ -305,6 +328,9 @@ void UHavocMenuWidget::OnPlay()
         Flow->StartEpisode();
     }
 }
+
+void UHavocMenuWidget::OnCampaign() { SetMode(EHavocMenuMode::Campaign); }
+void UHavocMenuWidget::OnMainMenu() { SetMode(EHavocMenuMode::Main); }
 
 void UHavocMenuWidget::OnResume()
 {

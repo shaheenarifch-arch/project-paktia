@@ -19,7 +19,7 @@ Official docs home: <https://dev.epicgames.com/documentation/en-us/unreal-engine
 5. **Re-running is safe.** Everything the script spawns is tagged `HavocKhargBuilder` and is deleted and rebuilt on each run. Actors you placed by hand are kept.
 6. Read the Output Log for `[KhargBuilder]` lines. Warnings tell you what to finish by hand. Then go to Step 9 and press Play.
 
-Known limit: Unreal's Python API cannot create a Landscape in every 5.5 build (not verified on this repo's CI, which cannot run Unreal). If the log says "Landscape not created by script", do Step 3 by hand using the heightmap from step 2 above (Scale XY about 992, Z 100). The rest of the level is still built. Steps 1 to 8 below describe what the script does and are the manual fallback.
+Terrain: UE 5.5 Python cannot create a Landscape, so `make_kharg_heightmap.py` also writes `Source/kharg_terrain.obj` (401 x 401 grid, 50 m spacing, centred on 0,0 to match the sector layout) and the builder imports it as the `KhargTerrain` static mesh with walkable collision. It also removes the Open World template's own landscape, sun, sky and fog, snaps player starts and vehicles to the ground, and uses plain-colour stand-ins (sand terrain, grey terminal blocks, orange lane buoys) until the Fab art is imported. A hand-made Landscape (Step 3) can still replace the mesh later. Steps 1 to 8 below describe what the script does and are the manual fallback.
 
 ## Before you start
 

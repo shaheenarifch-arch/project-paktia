@@ -19,6 +19,8 @@ gracefully (so the CSV is flushed; force-kill after 30 s), then:
 - copies new `Crashes/*` folders and `Saved/Logs/*.log` written during the run,
 - lists the **top 10 distinct errors** (`Error:`, `Fatal:`, ensure/assert lines, with counts),
 - computes **avg/min FPS** from the CSV `FrameTime` column,
+- passes `-HavocSmokeStart`, so the game starts Episode 04 by itself and takes a `HighResShot` 30 s in;
+  the script measures how varied that picture is (`ingame.png` in the artifact) to check the world renders,
 - writes `summary.md` and `result.json`.
 
 Outputs: the `smoke-test` artifact (logs, crashes, CSV), the Actions job summary, and a comment on the
@@ -27,7 +29,9 @@ triggering PR (open PR for the branch) or, if none, on the issue number in a `bh
 ## Pass / fail rules
 
 Fail if any of: exe not found, game exits before the 3 minutes end, a crash report appears, a `Fatal`
-log line appears, no FPS data is captured, or avg FPS is below 15 (`-MinFpsFloor`).
+log line appears, no FPS data is captured, or avg FPS is below 15 (`-MinFpsFloor`), or the in-game screenshot is missing or one flat colour
+(luminance spread below 8, `-MinScreenshotSpread`). Only the screenshot check fails the Actions job
+("Fail if the world is not visible"); the other rules show in the summary and PR comment.
 A failing comment lists the reasons first, then the top errors.
 
 ## Customising the walkthrough

@@ -1,6 +1,6 @@
 #pragma once
 
-// Main menu (Play Episode 04, Settings, Quit), pause menu (Resume, Restart from checkpoint, Settings,
+// Main menu (Campaign, Settings, Quit), campaign select (Episodes 01-04, Start), pause menu (Resume, Restart from checkpoint, Settings,
 // Quit) and results screen (outcome, stats, Restart / Play again, Quit), all built in C++.
 // Settings: graphics quality, subtitles, reduce flashes and camera shake (docs/vfx-plan.md
 // accessibility), look sensitivity, master volume and key bindings, each with a help line, saved by
@@ -36,6 +36,8 @@ protected:
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
     UFUNCTION() void OnPlay();
+    UFUNCTION() void OnCampaign();
+    UFUNCTION() void OnMainMenu();
     UFUNCTION() void OnResume();
     UFUNCTION() void OnRestartCheckpoint();
     UFUNCTION() void OnSettings();

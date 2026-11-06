@@ -60,6 +60,12 @@ PLAYER_STARTS = {  # north and west beaches
     "west_beach_1": (-225000, -30000, 300, 0), "west_beach_2": (-225000, 30000, 300, 0),
 }
 DIRECTOR_POS = (0, -330000, 300)
+# Stand-in shapes (engine basic shape, scale) for terminal parts whose Fab mesh is not imported yet.
+# Basic shapes are 100 cm, so scale 20 = 20 m.
+PLACEHOLDER_PARTS = {
+    "east_jetty": ("Cube", (60, 8, 3)), "sea_island_jetty": ("Cube", (60, 8, 3)),
+    "tank_farm": ("Cylinder", (30, 30, 15)), "pump_station": ("Cube", (20, 15, 8)),
+}
 # NavMesh bounds (centre x, y, z, half-extent x, y, z) in cm: covers every island sector in LAYOUT
 # (beaches, airstrip, oil terminal, town). Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/basic-navigation-in-unreal-engine
 NAV_BOUNDS = (-60000, -100000, 0, 250000, 340000, 50000)
@@ -176,40 +182,124 @@ def havoc(name):
     return cls
 
 
+TERRAIN_OBJ = os.path.join(GAME_DIR, "Content", "Maps", "Kharg", "Source", "kharg_terrain.obj")
+TERRAIN_PATH = LEVEL_DIR + "/Terrain"
+PLACEHOLDER_DIR = LEVEL_DIR + "/Placeholder"
+# Template actors from the Open World template that would double up with ours or hide the island.
+TEMPLATE_CLASSES = ("Landscape", "LandscapeStreamingProxy", "DirectionalLight", "SkyAtmosphere", "SkyLight",
+                    "ExponentialHeightFog", "VolumetricCloud")
+
+
+def placeholder_material(name, rgb, roughness=0.9):
+    """Plain-colour material used until the Fab art is imported (Fab assets replace it on the next run).
+    Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python"""
+    path = PLACEHOLDER_DIR + "/" + name
+    if unreal.EditorAssetLibrary.does_asset_exist(path):
+        return unreal.EditorAssetLibrary.load_asset(path)
+    unreal.EditorAssetLibrary.make_directory(PLACEHOLDER_DIR)
+    mel = unreal.MaterialEditingLibrary
+    mat = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        name, PLACEHOLDER_DIR, unreal.Material, unreal.MaterialFactoryNew())
+    col = mel.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -300, 0)
+    col.set_editor_property("constant", unreal.LinearColor(rgb[0], rgb[1], rgb[2], 1.0))
+    mel.connect_material_property(col, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    rough = mel.create_material_expression(mat, unreal.MaterialExpressionConstant, -300, 200)
+    rough.set_editor_property("r", roughness)
+    mel.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    mel.recompile_material(mat)
+    unreal.EditorAssetLibrary.save_loaded_asset(mat)
+    return mat
+
+
+def placeholder_mesh(shape):
+    """Engine basic shape (Cube, Cylinder, Sphere) for a slot whose Fab mesh is not imported yet."""
+    return unreal.EditorAssetLibrary.load_asset("/Engine/BasicShapes/%s.%s" % (shape, shape))
+
+
+_HEIGHTS = None
+
+
+def ground_z(x, y, above=300.0):
+    """Terrain height (cm) at x, y from kharg_terrain.obj plus `above`, never below sea level (0).
+    Keeps player starts and vehicles on the island instead of inside it or under it."""
+    global _HEIGHTS
+    if _HEIGHTS is None:
+        _HEIGHTS = []
+        if os.path.isfile(TERRAIN_OBJ):
+            with open(TERRAIN_OBJ) as f:
+                for line in f:
+                    if line.startswith("v "):
+                        _HEIGHTS.append(float(line.split()[3]))
+    if not _HEIGHTS:
+        return above
+    n = int(round(len(_HEIGHTS) ** 0.5))
+    half = 1000000.0
+    c = min(n - 1, max(0, int(round((x + half) / (2 * half) * (n - 1)))))
+    r = min(n - 1, max(0, int(round((half - y) / (2 * half) * (n - 1)))))
+    h = _HEIGHTS[r * n + c]
+    if h <= 0:
+        warn("(%d, %d) is over water in the terrain; spawning at sea level" % (x, y))
+    return max(h, 0.0) + above
+
+
+def remove_template_actors(eas):
+    """The level was made from the Open World template, which brings its own small landscape, sun, sky and
+    fog. Remove them so the Kharg terrain and our single sky/fog are what the player sees."""
+    n = 0
+    for a in eas.get_all_level_actors():
+        if unreal.Name(TAG) in a.tags:
+            continue
+        if a.get_class().get_name() in TEMPLATE_CLASSES:
+            eas.destroy_actor(a)
+            n += 1
+    log("Removed %d Open World template actors (landscape, sun, sky, fog, clouds)" % n)
+
+
 def build_landscape(eas, manifest):
-    """Best effort. Python cannot create a Landscape in every 5.5 build; if it fails, do guide Step 3 by hand."""
-    if not os.path.isfile(HEIGHTMAP):
-        warn("Heightmap missing: %s. Run: python game/Content/Python/make_kharg_heightmap.py --download "
-             "(see guide Step 3). Landscape skipped." % HEIGHTMAP)
+    """Kharg Island terrain as a centred static mesh from make_kharg_heightmap.py (kharg_terrain.obj).
+
+    UE 5.5 Python has no Landscape-import call, so the old landscape step never ran. The mesh is centred on
+    (0, 0) to match LAYOUT, uses complex collision so the Marine can walk on it, and gets the Fab
+    landscape material when it is imported (a plain sand placeholder until then)."""
+    if not os.path.isfile(TERRAIN_OBJ):
+        warn("Terrain mesh missing: %s. Run: python game/Content/Python/make_kharg_heightmap.py --download. "
+             "Terrain skipped." % TERRAIN_OBJ)
         return None
-    try:
-        task = unreal.AssetImportTask()
-        task.set_editor_property("filename", HEIGHTMAP)
-        task.set_editor_property("destination_path", LEVEL_DIR + "/Heightmap")
-        task.set_editor_property("automated", True)
-        task.set_editor_property("replace_existing", True)
-        task.set_editor_property("save", True)
-        unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
-        tex_path = LEVEL_DIR + "/Heightmap/kharg_heightmap_r16"
-        tex = unreal.EditorAssetLibrary.load_asset(tex_path)
-        if tex is None:
-            raise RuntimeError("heightmap texture import failed")
-        # Landscape creation from a texture is exposed through the editor utility class when present.
-        util = unreal.LandscapeEditorUtils if hasattr(unreal, "LandscapeEditorUtils") else None
-        if util is None or not hasattr(util, "create_landscape_from_heightmap"):
-            raise RuntimeError("no Python landscape-import API in this build")
-        land = util.create_landscape_from_heightmap(
-            tex, unreal.Vector(0, 0, 0), unreal.Vector(LAND_SCALE_XY, LAND_SCALE_XY, LAND_SCALE_Z), LAND_RES)
-        land.set_actor_label("KhargLandscape")
-        land.tags = [unreal.Name(TAG)]
-        mat = get_asset(manifest, "landscape_material")
-        if mat:
-            land.set_editor_property("landscape_material", mat)
-        return land
-    except Exception as e:
-        warn("Landscape not created by script (%s). Heightmap texture is imported; finish with guide Step 3 "
-             "(Landscape Mode > Import from File, Scale XY %.0f, Z %.0f)." % (e, LAND_SCALE_XY, LAND_SCALE_Z))
-        return None
+    task = unreal.AssetImportTask()
+    task.set_editor_property("filename", TERRAIN_OBJ)
+    task.set_editor_property("destination_path", TERRAIN_PATH)
+    task.set_editor_property("automated", True)
+    task.set_editor_property("replace_existing", True)
+    task.set_editor_property("save", True)
+    unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
+    mesh = None
+    for p in task.get_editor_property("imported_object_paths") or []:
+        a = unreal.EditorAssetLibrary.load_asset(p)
+        if isinstance(a, unreal.StaticMesh):
+            mesh = a
+    if mesh is None:
+        raise RuntimeError("Kharg terrain mesh import failed (%s)" % TERRAIN_OBJ)
+    body = mesh.get_editor_property("body_setup")
+    if body:
+        body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
+    mat = get_asset(manifest, "landscape_material") or placeholder_material("M_KhargSand", (0.55, 0.45, 0.30))
+    mesh.set_material(0, mat)
+    unreal.EditorAssetLibrary.save_loaded_asset(mesh)
+    land = spawn(eas, unreal.StaticMeshActor, "KhargTerrain", (0, 0, 0))
+    land.static_mesh_component.set_static_mesh(mesh)
+    # The OBJ importer may treat the file as Y-up and stand the 20 km grid on its side. Lay it flat:
+    # pick the rotation whose vertical extent is the smallest.
+    best = None
+    for rot in ((0, 0, 0), (90, 0, 0), (-90, 0, 0), (0, 90, 0), (0, -90, 0)):
+        land.set_actor_rotation(unreal.Rotator(roll=rot[0], pitch=rot[1], yaw=rot[2]), False)
+        _, ext = land.get_actor_bounds(False)
+        if best is None or ext.z < best[1]:
+            best = (rot, ext.z)
+    land.set_actor_rotation(unreal.Rotator(roll=best[0][0], pitch=best[0][1], yaw=best[0][2]), False)
+    if best[0] != (0, 0, 0):
+        warn("Terrain mesh imported on its side; rotated by roll/pitch/yaw %s. Check north is +Y in the viewport." % (best[0],))
+    log("Placed KhargTerrain (20 km, centred on 0,0, half height %.0f cm)" % best[1])
+    return land
 
 
 def build_water(eas):
@@ -232,7 +322,10 @@ def build_sky(eas):
     spawn(eas, unreal.VolumetricCloud, "KhargClouds", (0, 0, 0))
     fog = spawn(eas, unreal.ExponentialHeightFog, "KhargHeightFog", (0, 0, 0))
     fc = fog.get_editor_property("component")
-    fc.set_editor_property("fog_density", 0.012)  # desert haze
+    # Light desert haze. 0.012 at sea level filled the whole screen with sunlit fog (yellow screen).
+    # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/exponential-height-fog-in-unreal-engine
+    fc.set_editor_property("fog_density", 0.002)
+    fc.set_editor_property("fog_height_falloff", 0.4)
     fc.set_editor_property("enable_volumetric_fog", True)  # UE 5.5 name (bEnableVolumetricFog)
 
 
@@ -244,15 +337,20 @@ def build_gameplay(eas, manifest):
 
     part_cls = havoc("HavocTerminalPart")
     mesh_cls = unreal.StaticMeshActor
-    for pid, pos in TERMINAL_PARTS.items():
+    for pid, (px, py, pz) in TERMINAL_PARTS.items():
+        pos = (px, py, ground_z(px, py, pz))
         p = spawn(eas, part_cls, "terminal_" + pid, pos)
         p.set_editor_property("part_id", pid)
         mesh = get_asset(manifest, "mesh_" + pid)
+        shape, size = PLACEHOLDER_PARTS[pid]
+        m = spawn(eas, mesh_cls, "terminal_%s_mesh" % pid, pos, scale=None if mesh else size)
         if mesh:
-            m = spawn(eas, mesh_cls, "terminal_%s_mesh" % pid, pos)
             m.static_mesh_component.set_static_mesh(mesh)
-            m.attach_to_actor(p, "", unreal.AttachmentRule.KEEP_WORLD, unreal.AttachmentRule.KEEP_WORLD,
-                              unreal.AttachmentRule.KEEP_WORLD, False)
+        else:  # visible stand-in until the Fab mesh is imported
+            m.static_mesh_component.set_static_mesh(placeholder_mesh(shape))
+            m.static_mesh_component.set_material(0, placeholder_material("M_KhargStructure", (0.35, 0.36, 0.38), 0.6))
+        m.attach_to_actor(p, "", unreal.AttachmentRule.KEEP_WORLD, unreal.AttachmentRule.KEEP_WORLD,
+                          unreal.AttachmentRule.KEEP_WORLD, False)
 
     haz_cls = havoc("HavocLaneHazard")
     spl_cls = havoc("HavocTankerSpline")
@@ -273,16 +371,22 @@ def build_gameplay(eas, manifest):
             h = spawn(eas, haz_cls, "hazard_%s_%d" % (lane, i + 1), pos)
             h.set_editor_property("lane_id", lane)
             h.set_editor_property("hazard_id", "%s_%d" % (lane, i + 1))
+            m = spawn(eas, mesh_cls, "hazard_%s_%d_marker" % (lane, i + 1), pos, scale=None if marker else (4, 4, 4))
             if marker:
-                m = spawn(eas, mesh_cls, "hazard_%s_%d_marker" % (lane, i + 1), pos)
                 m.static_mesh_component.set_static_mesh(marker)
-                m.attach_to_actor(h, "", unreal.AttachmentRule.KEEP_WORLD, unreal.AttachmentRule.KEEP_WORLD,
-                                  unreal.AttachmentRule.KEEP_WORLD, False)
+            else:  # bright buoy stand-in until the Fab marker is imported
+                m.static_mesh_component.set_static_mesh(placeholder_mesh("Sphere"))
+                m.static_mesh_component.set_material(0, placeholder_material("M_KhargHazard", (0.9, 0.25, 0.05), 0.5))
+            m.attach_to_actor(h, "", unreal.AttachmentRule.KEEP_WORLD, unreal.AttachmentRule.KEEP_WORLD,
+                              unreal.AttachmentRule.KEEP_WORLD, False)
 
     for name, (x, y, z, yaw) in PLAYER_STARTS.items():
-        spawn(eas, unreal.PlayerStart, "PlayerStart_" + name, (x, y, z), (0, 0, yaw))
-    spawn(eas, havoc("HavocLevelDirector"), "HavocLevelDirector", DIRECTOR_POS)
+        spawn(eas, unreal.PlayerStart, "PlayerStart_" + name, (x, y, ground_z(x, y, z)), (0, 0, yaw))
+    dx, dy, dz = DIRECTOR_POS
+    spawn(eas, havoc("HavocLevelDirector"), "HavocLevelDirector", (dx, dy, ground_z(dx, dy, dz)))
     for cls_name, (x, y, z, yaw) in VEHICLES.items():
+        if cls_name != "HavocBoatVehicle":  # the boat stays on the sea surface
+            z = ground_z(x, y, z)
         spawn(eas, havoc(cls_name), cls_name, (x, y, z), (0, 0, yaw))
     build_navmesh(eas)
 
@@ -305,6 +409,7 @@ def main():
     les = open_or_create_level()
     eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     clear_previous(eas)
+    remove_template_actors(eas)
     build_landscape(eas, manifest)
     build_water(eas)
     build_sky(eas)

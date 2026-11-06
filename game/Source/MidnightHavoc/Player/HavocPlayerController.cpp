@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "Input/HavocPlayInput.h"
 #include "Kismet/GameplayStatics.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Player/HavocPlayerCharacter.h"
 #include "TimerManager.h"
@@ -24,6 +26,29 @@ void AHavocPlayerController::BeginPlay()
 {
     Super::BeginPlay();
     EnsureMetaContext();
+    if (IsLocalController() && FParse::Param(FCommandLine::Get(), TEXT("HavocSmokeStart")))
+    {
+        GetWorldTimerManager().SetTimer(SmokeStartTimer, this, &AHavocPlayerController::StartSmokeRun, 3.f, false);
+    }
+}
+
+void AHavocPlayerController::StartSmokeRun()
+{
+    AHavocEpisode04Flow* F = GetFlow();
+    if (!F)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 04 flow in this level; cannot start the episode"));
+        return;
+    }
+    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 04"));
+    F->StartEpisode();
+    // 30 s in: the Raven is over the beaches, so the island, sea and sky should all be in view.
+    // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
+    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+    {
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: taking screenshot"));
+        ConsoleCommand(TEXT("HighResShot 1280x720"));
+    }), 30.f, false);
 }
 
 void AHavocPlayerController::EnsureMetaContext()
