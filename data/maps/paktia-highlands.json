@@ -1,13 +1,14 @@
 {
   "id": "paktia_highlands",
-  "name": "Paktia Highlands: Operation Mountain Shield (Episode 01)",
+  "name": "Paktia Highlands: Checkpoint Echo, Ridge Station and the Falcon-2 crash grid",
   "fictional": true,
   "setting": "fictional",
-  "note": "Invented place for play (greybox layout). Sector names come from docs/campaign.md Mission 01 and FUTURE-PLAN.md. Terrain is shaped from open elevation data; the layout is not a survey.",
+  "note": "Invented mountain country for play (Episode 01). Not a survey and not a real place. Shares the fictional Gardun setting.",
   "sectors": [
-    {"id": "checkpoint_echo", "name": "Checkpoint Echo", "role": "attacker_staging"},
-    {"id": "ridge_station", "name": "Ridge Station", "role": "ally_base"},
-    {"id": "falcon2_crash_r17", "name": "Falcon-2 crash site, grid R-17", "role": "crash_recovery"},
-    {"id": "valley_corridor", "name": "Valley corridor (Episode 02 approach)", "role": "approach_route"}
-  ]
+    { "id": "highlands_staging", "name": "Marine drop-off and Raven launch area", "role": "attacker_staging" },
+    { "id": "checkpoint_echo", "name": "Checkpoint Echo (hold it)", "role": "defend_point" },
+    { "id": "ridge_station", "name": "Ridge Station (set up the relay and Aegis)", "role": "objective" },
+    { "id": "crash_grid_r17", "name": "Falcon-2 crash grid R-17", "role": "recovery_site" }
+  ],
+  "surpriseEvents": ["sandstorm", "nightfall"]
 }
