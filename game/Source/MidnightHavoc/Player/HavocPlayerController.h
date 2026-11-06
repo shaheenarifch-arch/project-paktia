@@ -47,6 +47,15 @@ public:
 
     AHavocEpisode04Flow* GetFlow();
 
+    /** The first-time hint on screen now (empty if none). Shown by the HUD until dismissed or it times out. */
+    const FString& GetActiveHint() const { return ActiveHint; }
+
+    /** Dismisses the first-time hint (H or gamepad X). */
+    void DismissHint();
+
+    /** Shows the hint for this kind of machine unless it was shown before (remembered in UHavocPlaySettings). */
+    void ShowFirstTimeHint(EHavocHintKind Kind);
+
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }
 
@@ -54,6 +63,8 @@ protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
     virtual void OnPossess(APawn* InPawn) override;
+    virtual void AcknowledgePossession(APawn* P) override;
+    virtual void Tick(float DeltaSeconds) override;
 
 private:
     void OnChooseNorth();
@@ -63,6 +74,7 @@ private:
     void OnCallFalcon();
     void OnReturn();
     void OnVehicle();
+    void OnDismissHint() { DismissHint(); }
     void EnsureMetaContext();
 
     /** Smoke test only (-HavocSmokeStart): start Episode 04 without the menu, then take a screenshot for
@@ -74,6 +86,9 @@ private:
     /** F on foot enters the nearest vehicle in range, F in a vehicle exits (state changes are server only). */
     UFUNCTION(Server, Reliable)
     void ServerToggleVehicle();
+
+    FString ActiveHint;
+    float HintSecondsLeft = 0.f;
 
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;

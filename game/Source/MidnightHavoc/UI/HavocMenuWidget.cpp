@@ -7,10 +7,12 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Styling/SlateTypes.h"
 #include "Engine/GameInstance.h"
 #include "Input/Events.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Input/HavocPlayInput.h"
 #include "Player/HavocPlaySettings.h"
 #include "Player/HavocPlayerController.h"
 #include "UI/HavocUIHelpers.h"
@@ -43,7 +45,7 @@ void UHavocMenuWidget::NativeOnInitialized()
 
     List = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("List"));
     // A scroll box so the long settings page fits small screens; focus moves scroll it into view.
-    UScrollBox* Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("Scroll"));
+    Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("Scroll"));
     Scroll->AddChild(List);
     Backdrop->SetContent(Scroll);
     Rebuild();
@@ -51,7 +53,8 @@ void UHavocMenuWidget::NativeOnInitialized()
 
 void UHavocMenuWidget::SetMode(EHavocMenuMode NewMode)
 {
-    if (NewMode == EHavocMenuMode::Settings && Mode != EHavocMenuMode::Settings)
+    const auto IsSub = [](EHavocMenuMode M) { return M == EHavocMenuMode::Settings || M == EHavocMenuMode::HowToPlay; };
+    if (IsSub(NewMode) && !IsSub(Mode))
     {
         ReturnMode = Mode;
     }
@@ -77,6 +80,15 @@ void UHavocMenuWidget::AddButton(const FString& Label, FName Handler)
     UTextBlock* Text = HavocUI::MakeText(WidgetTree, Label, 24, FLinearColor::White);
     Text->SetJustification(ETextJustify::Center);
     Button->AddChild(Text);
+    // A visible resting / hover / pressed colour so the mouse and the keyboard focus both show which item is chosen.
+    FButtonStyle Style = Button->GetStyle();
+    Style.Normal.TintColor = FSlateColor(FLinearColor(0.10f, 0.13f, 0.18f, 0.95f));
+    Style.Hovered.TintColor = FSlateColor(FLinearColor(0.26f, 0.34f, 0.46f, 1.f));
+    Style.Pressed.TintColor = FSlateColor(FLinearColor(0.40f, 0.48f, 0.62f, 1.f));
+    Button->SetStyle(Style);
+    Button->SetIsFocusable(true);
+    Button->SetClickMethod(EButtonClickMethod::MouseDown); // a click registers even if the pointer drifts
+    Buttons.Add(Button); // keyboard / gamepad focus (FocusButton) needs this list
     FScriptDelegate Delegate;
     Delegate.BindUFunction(this, Handler);
     Button->OnClicked.Add(Delegate);
@@ -121,9 +133,10 @@ void UHavocMenuWidget::Rebuild()
         AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
         AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
         AddButton(TEXT("Campaign"), TEXT("OnCampaign"));
+        AddButton(TEXT("How to play"), TEXT("OnHowToPlay"));
         AddButton(TEXT("Settings"), TEXT("OnSettings"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
-        AddLabel(TEXT("Move W/A/S/D   Look mouse   Shift sprint   C crouch   Right mouse aim   Left mouse fire   R reload   E interact\nT Raven drone   G Falcon support   Tab back to Marine   1 / 2 choose beach   Esc pause"), 16, Soft);
+        AddLabel(TEXT("Choose with the mouse, Up / Down and Enter, or a gamepad (D-pad, A). How to play lists every key."), 16, Soft);
         break;
 
     case EHavocMenuMode::Campaign:
@@ -148,9 +161,37 @@ void UHavocMenuWidget::Rebuild()
         AddLabel(TEXT("PAUSED"), 40, Gold);
         AddButton(TEXT("Resume"), TEXT("OnResume"));
         AddButton(TEXT("Restart from last checkpoint"), TEXT("OnRestartCheckpoint"));
+        AddButton(TEXT("How to play"), TEXT("OnHowToPlay"));
         AddButton(TEXT("Settings"), TEXT("OnSettings"));
         AddButton(TEXT("Quit to desktop"), TEXT("OnQuit"));
         break;
+
+    case EHavocMenuMode::HowToPlay:
+    {
+        // Read from the live mapping contexts, so a rebind in Settings shows here at once.
+        const UGameInstance* GI = GetGameInstance();
+        const UHavocPlayInput* Input = GI ? GI->GetSubsystem<UHavocPlayInput>() : nullptr;
+        AddLabel(TEXT("HOW TO PLAY"), 40, Gold);
+        AddButton(TEXT("Back"), TEXT("OnBack"));
+        AddLabel(UHavocPlaySettings::HelpFor(TEXT("howtoplay")), 15, Soft);
+        FString LastSection;
+        if (Input)
+        {
+            for (const FHavocControlRow& Row : Input->BuildControlRows())
+            {
+                if (Row.Section != LastSection)
+                {
+                    LastSection = Row.Section;
+                    AddLabel(Row.Section, 24, Gold);
+                }
+                AddLabel(FString::Printf(TEXT("%s:  %s"), *Row.Action, *Row.Keys), 18, FLinearColor::White);
+            }
+        }
+        AddLabel(TEXT("Gamepad: menus only for now (D-pad or stick, A to choose, B back, Start pause). Flying and driving use keyboard and mouse. Change keys in Settings."), 15, Soft);
+        AddLabel(TEXT("Scroll with the mouse wheel, Up / Down, Page Up / Page Down or the D-pad."), 15, Soft);
+        AddButton(TEXT("Back"), TEXT("OnBack"));
+        break;
+    }
 
     case EHavocMenuMode::Settings:
     {
@@ -255,7 +296,7 @@ void UHavocMenuWidget::FinishRebind(const FKey& Key)
         return;
     }
     static const TArray<FKey> Reserved = { EKeys::Escape, EKeys::P, EKeys::One, EKeys::Two, EKeys::W, EKeys::A, EKeys::S, EKeys::D,
-        EKeys::SpaceBar, EKeys::LeftShift, EKeys::LeftControl, EKeys::C, EKeys::Q };
+        EKeys::SpaceBar, EKeys::LeftShift, EKeys::LeftControl, EKeys::C, EKeys::Q, EKeys::F, EKeys::H };
     if (Reserved.Contains(Key))
     {
         RebindMessage = FString::Printf(TEXT("%s is used for movement, pause or beach choice. Pick another key."), *Key.GetDisplayName().ToString());
@@ -307,7 +348,7 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
             OnResume();
             return FReply::Handled();
         }
-        if (Mode == EHavocMenuMode::Settings)
+        if (Mode == EHavocMenuMode::Settings || Mode == EHavocMenuMode::HowToPlay)
         {
             OnBack();
             return FReply::Handled();
@@ -315,6 +356,21 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
         if (Mode == EHavocMenuMode::Campaign)
         {
             OnMainMenu();
+            return FReply::Handled();
+        }
+    }
+    if (Mode == EHavocMenuMode::HowToPlay && Scroll)
+    {
+        // Few buttons on this page, so keys scroll the list (the mouse wheel works too).
+        const FKey Key = InKeyEvent.GetKey();
+        float Delta = 0.f;
+        if (Key == EKeys::Down || Key == EKeys::Gamepad_DPad_Down || Key == EKeys::Gamepad_LeftStick_Down) { Delta = 120.f; }
+        else if (Key == EKeys::Up || Key == EKeys::Gamepad_DPad_Up || Key == EKeys::Gamepad_LeftStick_Up) { Delta = -120.f; }
+        else if (Key == EKeys::PageDown) { Delta = 600.f; }
+        else if (Key == EKeys::PageUp) { Delta = -600.f; }
+        if (Delta != 0.f)
+        {
+            Scroll->SetScrollOffset(FMath::Clamp(Scroll->GetScrollOffset() + Delta, 0.f, Scroll->GetScrollOffsetOfEnd()));
             return FReply::Handled();
         }
     }
@@ -348,6 +404,7 @@ void UHavocMenuWidget::OnRestartCheckpoint()
     }
 }
 
+void UHavocMenuWidget::OnHowToPlay() { RebindMessage.Reset(); SetMode(EHavocMenuMode::HowToPlay); }
 void UHavocMenuWidget::OnSettings() { RebindMessage.Reset(); SetMode(EHavocMenuMode::Settings); }
 void UHavocMenuWidget::OnBack() { RebindingAction = NAME_None; RebindMessage.Reset(); SetMode(ReturnMode); }
 
