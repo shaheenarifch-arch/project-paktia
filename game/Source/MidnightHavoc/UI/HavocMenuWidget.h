@@ -37,6 +37,7 @@ protected:
 
     UFUNCTION() void OnPlay();
     UFUNCTION() void OnCampaign();
+    UFUNCTION() void OnUnlockAll();
     UFUNCTION() void OnMainMenu();
     UFUNCTION() void OnResume();
     UFUNCTION() void OnRestartCheckpoint();
@@ -68,6 +69,7 @@ private:
 
     class UHavocPlaySettings* GetSettings() const;
     class AHavocEpisode04Flow* GetFlow() const;
+    class UHavocCampaign* GetCampaign() const;
 
     EHavocMenuMode Mode = EHavocMenuMode::Main;
     EHavocMenuMode ReturnMode = EHavocMenuMode::Main;

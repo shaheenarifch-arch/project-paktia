@@ -9,6 +9,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Engine/GameInstance.h"
 #include "Input/Events.h"
+#include "Campaign/HavocCampaign.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Player/HavocPlaySettings.h"
@@ -19,6 +20,12 @@ UHavocPlaySettings* UHavocMenuWidget::GetSettings() const
 {
     const UGameInstance* GI = GetGameInstance();
     return GI ? GI->GetSubsystem<UHavocPlaySettings>() : nullptr;
+}
+
+UHavocCampaign* UHavocMenuWidget::GetCampaign() const
+{
+    const UGameInstance* GI = GetGameInstance();
+    return GI ? GI->GetSubsystem<UHavocCampaign>() : nullptr;
 }
 
 AHavocEpisode04Flow* UHavocMenuWidget::GetFlow() const
@@ -128,17 +135,37 @@ void UHavocMenuWidget::Rebuild()
 
     case EHavocMenuMode::Campaign:
     {
-        // Episodes 01-03 are playable in the browser prototype (play/, docs/campaign.md); their Unreal maps are
-        // not built yet, so they show as locked. Episode 04 is playable here.
+        // Lock state comes from the saved campaign (UHavocCampaign): an episode unlocks when the one before it
+        // ended in SUCCESS or PARTIAL. Episodes 01-03 are playable in the browser prototype (docs/campaign.md);
+        // their Unreal maps are not built yet. Episode 04 is playable here.
         const FLinearColor Locked(0.55f, 0.58f, 0.64f);
+        const UHavocCampaign* Campaign = GetCampaign();
         AddLabel(TEXT("CAMPAIGN"), 40, Gold);
-        AddLabel(TEXT("Choose an episode, then press Start."), 18, Soft);
-        AddLabel(TEXT("Episode 01: Operation Mountain Shield  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 02: Operation Silent Corridor  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 03: Operation Broken Citadel  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
-        AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
-        AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+        AddLabel(TEXT("Episodes unlock in order: finish one with SUCCESS or PARTIAL to open the next."), 18, Soft);
+        for (int32 Episode = UHavocCampaign::FirstEpisode; Episode <= UHavocCampaign::LastEpisode; ++Episode)
+        {
+            const bool bOpen = !Campaign || Campaign->IsUnlocked(Episode);
+            const FString Status = Campaign ? Campaign->StatusText(Episode) : FString(TEXT("Unlocked"));
+            const TCHAR* Where = Episode == 4 ? TEXT("") : TEXT(" (Unreal version in progress)");
+            AddLabel(FString::Printf(TEXT("Episode %02d: %s  -  %s%s"), Episode, *UHavocCampaign::EpisodeName(Episode), *Status, Where),
+                Episode == 4 ? 24 : 20, bOpen ? FLinearColor::White : Locked);
+        }
+        AddLabel(TEXT("Episode 04: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait. A hypothetical scenario."), 18, Soft);
+        if (!Campaign || Campaign->IsUnlocked(4))
+        {
+            const bool bBonus = Campaign && Campaign->GetEpisode3Outcome() == TEXT("SUCCESS");
+            AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+            if (bBonus)
+            {
+                AddLabel(TEXT("Episode 03 success: +10 reinforcements."), 15, Gold);
+            }
+        }
+        else
+        {
+            AddLabel(TEXT("Episode 04 is locked: finish Episode 03 first."), 18, Gold);
+            AddButton(TEXT("Unlock all episodes (testing)"), TEXT("OnUnlockAll"));
+            AddLabel(TEXT("Episodes 01-03 are not playable in Unreal yet, so this opens Episode 04 for testing. Your saved results are kept."), 15, Locked);
+        }
         AddButton(TEXT("Back"), TEXT("OnMainMenu"));
         AddLabel(TEXT("Episodes 01-03 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
         break;
@@ -327,6 +354,15 @@ void UHavocMenuWidget::OnPlay()
     {
         Flow->StartEpisode();
     }
+}
+
+void UHavocMenuWidget::OnUnlockAll()
+{
+    if (UHavocCampaign* Campaign = GetCampaign())
+    {
+        Campaign->SetUnlockAll(true);
+    }
+    Rebuild();
 }
 
 void UHavocMenuWidget::OnCampaign() { SetMode(EHavocMenuMode::Campaign); }

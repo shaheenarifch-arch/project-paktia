@@ -14,6 +14,8 @@ Episode 4 is a declared real-world hypothetical (see `README.md`, Safety boundar
 the previous one ended in SUCCESS or PARTIAL, never lets a worse replay
 overwrite a better result, and saves/loads as plain JSON.
 
+The Unreal port is `game/Source/MidnightHavoc/Campaign/HavocCampaign.*` (`UHavocCampaign`): same rules, saved with `USaveGame` to the `HavocCampaign` slot (<https://dev.epicgames.com/documentation/en-us/unreal-engine/saving-and-loading-your-game-in-unreal-engine>). The campaign menu shows each episode as Locked, Unlocked or Completed. Until Episodes 01-03 exist in Unreal, the menu offers "Unlock all episodes (testing)" so Episode 04 can be played. Tests: `MidnightHavoc.Campaign.*`.
+
 ## Mission framework
 
 `src/gameplay/missions/framework/` runs any mission described as data:
