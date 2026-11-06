@@ -164,6 +164,10 @@ def spawn(eas, cls, label, loc, rot=(0, 0, 0), scale=None):
         raise RuntimeError("Could not spawn %s. Build the C++ project first (guide, Before you start)." % label)
     a.set_actor_label(label)
     a.tags = [unreal.Name(TAG)]
+    # World Partition streams spatially loaded actors by distance; gameplay actors (sectors, lanes, director,
+    # vehicles) must exist from the start so mission checks find them.
+    # Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/world-partition-in-unreal-engine
+    a.set_editor_property("is_spatially_loaded", False)
     if scale:
         a.set_actor_scale3d(unreal.Vector(*scale))
     return a
