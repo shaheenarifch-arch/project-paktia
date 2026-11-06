@@ -1,0 +1,14 @@
+{
+  "id": "paktia_highlands",
+  "name": "Paktia Highlands: Checkpoint Echo, Ridge Station and the Falcon-2 crash grid",
+  "fictional": true,
+  "setting": "fictional",
+  "note": "Invented mountain country for play (Episode 01). Not a survey and not a real place. Shares the fictional Gardun setting.",
+  "sectors": [
+    { "id": "highlands_staging", "name": "Marine drop-off and Raven launch area", "role": "attacker_staging" },
+    { "id": "checkpoint_echo", "name": "Checkpoint Echo (hold it)", "role": "defend_point" },
+    { "id": "ridge_station", "name": "Ridge Station (set up the relay and Aegis)", "role": "objective" },
+    { "id": "crash_grid_r17", "name": "Falcon-2 crash grid R-17", "role": "recovery_site" }
+  ],
+  "surpriseEvents": ["sandstorm", "nightfall"]
+}

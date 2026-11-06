@@ -24,9 +24,11 @@ Folders are under `Source/MidnightHavoc/`.
 | Folder | Class | TypeScript / data source |
 | --- | --- | --- |
 | `Core/` | `UHavocEventSubsystem` | `src/core/EventBus.ts` |
+| `Campaign/` | `UHavocCampaign` (GameInstance subsystem: unlock order, best-result rule, carryover, `USaveGame` slot `HavocCampaign`) | `src/gameplay/campaign/Campaign.ts` |
 | `Missions/` | `UHavocMissionSubsystem`, `UHavocMissionRunner`, `IHavocMissionSystems` | `src/gameplay/missions/framework/MissionRunner.ts` |
+| `Missions/Episode01/` | `FHavocMountainShield` (state machine, drone tutorial, Ridge Station, counterattack, Falcon-2 crash chain; Aegis is a flag for now) | `src/gameplay/missions/mission01/` |
 | `Missions/Episode04/` | `UHavocOpenStraitMission`, `UHavocOilTerminal`, `UHavocShippingLanes`, `UHavocTankerEscort` | `src/gameplay/missions/episode04/` (OpenStrait, OilTerminal, ShippingLanes, TankerEscort) |
-| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
+| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Campaign.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
 | `Drones/` | `AHavocDrone` (Raven, Warden, Talon subclasses), `IHavocDroneDetectable` | `src/gameplay/drones/` (DroneBase, DroneFlightController, DroneBattery, DroneSignalManager, DroneSensor, DroneCamera) |
 | `Aircraft/` | `AHavocFalconHelicopter`, `UHavocCrashSequence` | `src/gameplay/aircraft/` (HelicopterController, HelicopterDamageState, CrewState, HelicopterCrashController) |
@@ -111,7 +113,7 @@ Branch order in `GetChoices()` relies on `TMap` keeping JSON insertion order.
 ## How to play (Episode 04)
 
 Start the game (packaged build: `MidnightHavoc.exe`; editor: open `L_KhargHormuz` and press Play). The main menu opens first:
-**Play Episode 04**, **Settings**, **Quit**. Esc pauses (Resume, Restart from last checkpoint, Settings, Quit). The results screen
+**Campaign**, **How to play**, **Settings**, **Quit**. Esc pauses (Resume, Restart from last checkpoint, How to play, Settings, Quit). **How to play** lists every key from your current bindings. The first time you fly the Raven, drive a vehicle or fly the Falcon, a hint shows once (H or gamepad X dismisses it). The results screen
 shows the outcome, terminal integrity, tankers through/lost and supply flow.
 
 | Key | Action |
@@ -131,6 +133,7 @@ shows the outcome, terminal integrity, tankers through/lost and supply flow.
 | Space, W / A / S / D, Q / E | Falcon: collective, cyclic tilt, yaw |
 | Tab | Return to the Marine from the Raven or the Falcon |
 | F | Get into the nearest vehicle (on foot, within ~4.5 m) or out of the one you drive; see `docs/vehicles.md` |
+| H | Dismiss a first-time hint |
 | Esc or P | Pause menu |
 
 **The mission, step by step** (the rules and states come from `data/missions/episode-04-open-strait.json`):
@@ -173,6 +176,14 @@ Run `Content/Python/build_kharg_level.py` (editor: `Tools > Execute Python Scrip
 `scripts/run-build-kharg-level.ps1`) to build `Content/Maps/Kharg/L_KhargHormuz`. Make the heightmap first with
 `Content/Python/make_kharg_heightmap.py`. Full steps and the manual fallback: `docs/kharg-level-guide.md`.
 Python scripting help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python>
+
+## Building any level on paktia-pc (GitHub Actions)
+
+Actions > **Build level** > Run workflow > pick `Kharg`, `PaktiaHighlands` or `Gardun` (`.github/workflows/build-level.yml`).
+It makes the heightmap, builds the editor, runs the level's builder headless, commits the level through Git LFS and starts the Unreal build.
+`PaktiaHighlands` runs `Content/Python/build_paktia_highlands_level.py` (heightmap: `make_paktia_heightmap.py`, sources: `Content/Maps/PaktiaHighlands/SOURCES.txt`)
+and makes `Content/Maps/PaktiaHighlands/L_PaktiaHighlands`, the Episode 01 greybox: 4 sectors from `data/maps/paktia-highlands.json`,
+player starts, the Falcon-2 crash site, a nav mesh. It is a plain level (not World Partition), so all actors stay loaded. `Gardun` has no builder yet.
 
 ## Running tests
 

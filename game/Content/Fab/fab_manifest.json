@@ -1,0 +1,10 @@
+{
+  "_readme": "Slots read by Content/Python/build_kharg_level.py. Paths mirror Config/HavocAssets.ini and are the EXPECTED names; after 'Add to Project' from Fab, fix the exact asset names here and in the ini (Copy Reference). Missing assets are skipped with a warning, never replaced by placeholders. Help: https://dev.epicgames.com/documentation/en-us/fab/using-fab-in-unreal-engine",
+  "assets": {
+    "landscape_material": { "path": "/Game/ThirdParty/Megascans/Surfaces/Sand/MI_Sand.MI_Sand", "pack": "Megascans desert sand surfaces" },
+    "mesh_east_jetty": { "path": "/Game/ThirdParty/Industrial/Pier/SM_Pier.SM_Pier", "pack": "Pier / jetty / dock (free Fab listing)" },
+    "mesh_sea_island_jetty": { "path": "/Game/ThirdParty/Industrial/Pier/SM_Pier.SM_Pier", "pack": "Pier / jetty / dock (free Fab listing)" },
+    "mesh_tank_farm": { "path": "/Game/ThirdParty/Industrial/Tanks/SM_Tank.SM_Tank", "pack": "Oil storage tanks (free Fab listing)" },
+    "mesh_pump_station": { "path": "/Game/ThirdParty/Industrial/Pipes/SM_Pipes.SM_Pipes", "pack": "Industrial pipes (free Fab listing)" }
+  }
+}
