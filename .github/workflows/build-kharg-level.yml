@@ -1,6 +1,6 @@
 # One-off: generate the Kharg Island level (L_KhargHormuz) on paktia-pc and commit it through Git LFS.
 # The packaged game starts on this map (Config/DefaultEngine.ini GameDefaultMap), so the smoke test needs it.
-# Runs when this file changes on a bhaddru/** branch, or by hand: Actions > Build Kharg level > Run workflow.
+# Runs when this file or the builder script changes on a bhaddru/** branch, or by hand: Actions > Build Kharg level > Run workflow.
 # Steps: heightmap from Copernicus DEM -> build the editor -> run build_kharg_level.py headless -> commit -> start the Unreal build.
 # Help: game/Content/Python/build_kharg_level.py, game/scripts/run-build-kharg-level.ps1
 #       https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python
@@ -10,7 +10,7 @@ name: Build Kharg level
 on:
   push:
     branches: ['bhaddru/**']
-    paths: ['.github/workflows/build-kharg-level.yml']
+    paths: ['.github/workflows/build-kharg-level.yml', 'game/Content/Python/build_kharg_level.py']
   workflow_dispatch:
 
 concurrency:
