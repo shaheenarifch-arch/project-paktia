@@ -231,6 +231,25 @@ void AHavocEpisode04Flow::Publish(const TCHAR* EventName, const FString& Payload
     }
 }
 
+void AHavocEpisode04Flow::PauseEpisode()
+{
+    if (Phase == EHavocFlowPhase::Playing)
+    {
+        UGameplayStatics::SetGamePaused(this, true);
+    }
+}
+
+void AHavocEpisode04Flow::ResumeEpisode()
+{
+    UGameplayStatics::SetGamePaused(this, false);
+}
+
+FString AHavocEpisode04Flow::GetCurrentObjective() const
+{
+    const UHavocOpenStraitMission* Mission = GetMission();
+    return Phase == EHavocFlowPhase::Playing && Mission && Mission->GetRunner() ? Mission->GetRunner()->GetObjective() : FString();
+}
+
 FString AHavocEpisode04Flow::GetSupportStatus() const
 {
     const UHavocOpenStraitMission* Mission = GetMission();
