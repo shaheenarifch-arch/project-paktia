@@ -21,6 +21,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Missions/HavocEpisodeFlow.h"
 #include "HavocEpisode04Flow.generated.h"
 
 class AHavocEnemyCharacter;
@@ -33,14 +34,6 @@ class AHavocSectorVolume;
 class AHavocTankerSpline;
 class UHavocOpenStraitMission;
 class USkeletalMeshComponent;
-
-UENUM(BlueprintType)
-enum class EHavocFlowPhase : uint8
-{
-    Menu,
-    Playing,
-    Results
-};
 
 /** A tanker moving along its lane spline. Visual from the Vessel.Tanker role. */
 UCLASS()
@@ -65,7 +58,7 @@ private:
 };
 
 UCLASS()
-class MIDNIGHTHAVOC_API AHavocEpisode04Flow : public AActor
+class MIDNIGHTHAVOC_API AHavocEpisode04Flow : public AActor, public IHavocEpisodeFlow
 {
     GENERATED_BODY()
 
@@ -96,21 +89,24 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Havoc|Flow") int32 ResupplyCharges = 3;
 
     // ---- Player actions (called by AHavocPlayerController) ----
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void StartEpisode();
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void RestartFromCheckpoint();
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") virtual void StartEpisode() override;
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") virtual void RestartFromCheckpoint() override;
+    virtual void PauseEpisode() override;
+    virtual void ResumeEpisode() override;
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void ChooseBeach(bool bNorth);
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void HandleInteract();
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") virtual void HandleInteract() override;
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void DeployRaven();
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void CallFalcon();
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void ReturnToMarine();
 
     // ---- Queries for the HUD and menus ----
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") EHavocFlowPhase GetPhase() const { return Phase; }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetHint() const { return Hint; }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetToast() const { return ToastTime > 0.f ? Toast : FString(); }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetSupportStatus() const;
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetResultSummary() const { return ResultSummary; }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetOutcome() const { return Outcome; }
+    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual EHavocFlowPhase GetPhase() const override { return Phase; }
+    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual FString GetHint() const override { return Hint; }
+    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual FString GetToast() const override { return ToastTime > 0.f ? Toast : FString(); }
+    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual FString GetSupportStatus() const override;
+    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual FString GetResultSummary() const override { return ResultSummary; }
+    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") virtual FString GetOutcome() const override { return Outcome; }
+    virtual FString GetCurrentObjective() const override;
     UFUNCTION(BlueprintPure, Category = "Havoc|Flow") bool IsPiloting() const;
 
     /** Pure helper (tested): garrison size for a state-independent sector id, 0 for unknown sectors. */

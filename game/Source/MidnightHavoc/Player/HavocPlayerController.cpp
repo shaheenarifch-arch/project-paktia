@@ -10,6 +10,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Missions/HavocEpisodeFlow.h"
 #include "Player/HavocPlayerCharacter.h"
 #include "TimerManager.h"
 #include "UI/HavocMenuWidget.h"
@@ -34,7 +35,7 @@ void AHavocPlayerController::BeginPlay()
 
 void AHavocPlayerController::StartSmokeRun()
 {
-    AHavocEpisode04Flow* F = GetFlow();
+    IHavocEpisodeFlow* F = GetFlow();
     if (!F)
     {
         UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 04 flow in this level; cannot start the episode"));
@@ -94,25 +95,34 @@ void AHavocPlayerController::SetupInputComponent()
     Enhanced->BindAction(Input->VehicleAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnVehicle);
 }
 
-AHavocEpisode04Flow* AHavocPlayerController::GetFlow()
+IHavocEpisodeFlow* AHavocPlayerController::GetFlow()
 {
-    if (!Flow)
+    if (!Flow.GetObject())
     {
-        for (TActorIterator<AHavocEpisode04Flow> It(GetWorld()); It; ++It)
+        for (TActorIterator<AActor> It(GetWorld()); It; ++It)
         {
-            Flow = *It;
-            break;
+            if (It->Implements<UHavocEpisodeFlow>())
+            {
+                Flow = *It;
+                break;
+            }
         }
     }
-    return Flow;
+    return Flow.GetInterface();
 }
 
-void AHavocPlayerController::OnChooseNorth() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ChooseBeach(true); } }
-void AHavocPlayerController::OnChooseWest() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ChooseBeach(false); } }
-void AHavocPlayerController::OnInteract() { if (AHavocEpisode04Flow* F = GetFlow()) { F->HandleInteract(); } }
-void AHavocPlayerController::OnDeployRaven() { if (AHavocEpisode04Flow* F = GetFlow()) { F->DeployRaven(); } }
-void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisode04Flow* F = GetFlow()) { F->CallFalcon(); } }
-void AHavocPlayerController::OnReturn() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ReturnToMarine(); } }
+AHavocEpisode04Flow* AHavocPlayerController::GetEpisode04Flow()
+{
+    GetFlow();
+    return Cast<AHavocEpisode04Flow>(Flow.GetObject());
+}
+
+void AHavocPlayerController::OnChooseNorth() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ChooseBeach(true); } }
+void AHavocPlayerController::OnChooseWest() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ChooseBeach(false); } }
+void AHavocPlayerController::OnInteract() { if (IHavocEpisodeFlow* F = GetFlow()) { F->HandleInteract(); } }
+void AHavocPlayerController::OnDeployRaven() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->DeployRaven(); } }
+void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->CallFalcon(); } }
+void AHavocPlayerController::OnReturn() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ReturnToMarine(); } }
 
 void AHavocPlayerController::OnVehicle() { ServerToggleVehicle(); }
 
@@ -194,7 +204,7 @@ void AHavocPlayerController::ShowHud()
 
 void AHavocPlayerController::TogglePause()
 {
-    AHavocEpisode04Flow* F = GetFlow();
+    IHavocEpisodeFlow* F = GetFlow();
     if (!F || F->GetPhase() != EHavocFlowPhase::Playing)
     {
         return;
