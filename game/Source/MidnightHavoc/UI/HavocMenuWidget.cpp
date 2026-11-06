@@ -10,6 +10,8 @@
 #include "Engine/GameInstance.h"
 #include "Input/Events.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Missions/HavocEpisodeFlowBase.h"
+#include "Missions/Episode02/HavocEpisode02Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Player/HavocPlaySettings.h"
 #include "Player/HavocPlayerController.h"
@@ -21,7 +23,7 @@ UHavocPlaySettings* UHavocMenuWidget::GetSettings() const
     return GI ? GI->GetSubsystem<UHavocPlaySettings>() : nullptr;
 }
 
-AHavocEpisode04Flow* UHavocMenuWidget::GetFlow() const
+AHavocEpisodeFlowBase* UHavocMenuWidget::GetFlow() const
 {
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
     return PC ? PC->GetFlow() : nullptr;
@@ -129,16 +131,18 @@ void UHavocMenuWidget::Rebuild()
     case EHavocMenuMode::Campaign:
     {
         // Episodes 01-03 are playable in the browser prototype (play/, docs/campaign.md); their Unreal maps are
-        // not built yet, so they show as locked. Episode 04 is playable here.
+        // not built yet, so they show as locked (Episode 01 and 03 here). Episode 02 (greybox) and Episode 04 are playable here.
         const FLinearColor Locked(0.55f, 0.58f, 0.64f);
         AddLabel(TEXT("CAMPAIGN"), 40, Gold);
         AddLabel(TEXT("Choose an episode, then press Start."), 18, Soft);
         AddLabel(TEXT("Episode 01: Operation Mountain Shield  -  locked (Unreal version in progress)"), 20, Locked);
-        AddLabel(TEXT("Episode 02: Operation Silent Corridor  -  locked (Unreal version in progress)"), 20, Locked);
         AddLabel(TEXT("Episode 03: Operation Broken Citadel  -  locked (Unreal version in progress)"), 20, Locked);
+        AddLabel(TEXT("Episode 02: Operation Silent Corridor"), 28, FLinearColor::White);
+        AddLabel(TEXT("Greybox: escort the convoy down the valley. Place Relay Kilo with the Raven, scout the corridor, restore the relay after the comms outage, choose the riverbed or the drainage tunnel at the blocked bridge, then clear South Gate and set up staging."), 18, Soft);
+        AddButton(TEXT("Start Episode 02"), TEXT("OnPlayEpisode02"));
         AddLabel(TEXT("Episode 04: Operation Open Strait"), 28, FLinearColor::White);
         AddLabel(TEXT("A hypothetical scenario: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait."), 18, Soft);
-        AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
+        AddButton(TEXT("Start Episode 04"), TEXT("OnPlayEpisode04"));
         AddButton(TEXT("Back"), TEXT("OnMainMenu"));
         AddLabel(TEXT("Episodes 01-03 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
         break;
@@ -194,18 +198,16 @@ void UHavocMenuWidget::Rebuild()
 
     case EHavocMenuMode::Results:
     {
-        const AHavocEpisode04Flow* Flow = GetFlow();
+        const AHavocEpisodeFlowBase* Flow = GetFlow();
         const FString Outcome = Flow ? Flow->GetOutcome() : FString();
         const bool bFailed = Outcome == TEXT("FAILED");
-        AddLabel(Outcome == TEXT("SUCCESS") ? TEXT("STRAIT OPEN - MISSION COMPLETE")
-            : Outcome == TEXT("PARTIAL") ? TEXT("STRAIT OPEN - PARTIAL SUCCESS")
-            : TEXT("OPERATION FAILED"), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
+        AddLabel(Flow ? Flow->GetResultTitle() : FString(TEXT("OPERATION FAILED")), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
         AddLabel(Flow ? Flow->GetResultSummary() : FString(), 22, FLinearColor::White);
         if (bFailed)
         {
             AddButton(TEXT("Restart from last checkpoint"), TEXT("OnRestartCheckpoint"));
         }
-        AddButton(TEXT("Play Episode 04 again"), TEXT("OnPlay"));
+        AddButton(Flow ? Flow->GetReplayLabel() : FString(TEXT("Play again")), TEXT("OnPlay"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
         break;
     }
@@ -323,9 +325,31 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
 
 void UHavocMenuWidget::OnPlay()
 {
-    if (AHavocEpisode04Flow* Flow = GetFlow())
+    if (AHavocEpisodeFlowBase* Flow = GetFlow())
     {
         Flow->StartEpisode();
+    }
+}
+
+void UHavocMenuWidget::OnPlayEpisode02()
+{
+    if (AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer()))
+    {
+        if (AHavocEpisodeFlowBase* Flow = PC->SelectFlow(AHavocEpisode02Flow::StaticClass()))
+        {
+            Flow->StartEpisode();
+        }
+    }
+}
+
+void UHavocMenuWidget::OnPlayEpisode04()
+{
+    if (AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer()))
+    {
+        if (AHavocEpisodeFlowBase* Flow = PC->SelectFlow(AHavocEpisode04Flow::StaticClass()))
+        {
+            Flow->StartEpisode();
+        }
     }
 }
 
@@ -342,7 +366,7 @@ void UHavocMenuWidget::OnResume()
 
 void UHavocMenuWidget::OnRestartCheckpoint()
 {
-    if (AHavocEpisode04Flow* Flow = GetFlow())
+    if (AHavocEpisodeFlowBase* Flow = GetFlow())
     {
         Flow->RestartFromCheckpoint();
     }

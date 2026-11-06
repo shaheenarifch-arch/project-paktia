@@ -25,8 +25,11 @@ Folders are under `Source/MidnightHavoc/`.
 | --- | --- | --- |
 | `Core/` | `UHavocEventSubsystem` | `src/core/EventBus.ts` |
 | `Missions/` | `UHavocMissionSubsystem`, `UHavocMissionRunner`, `IHavocMissionSystems` | `src/gameplay/missions/framework/MissionRunner.ts` |
+| `Missions/` (flow base) | `AHavocEpisodeFlowBase`: what the controller, HUD and menus use from whichever episode flow is active | – |
+| `Missions/Episode02/` | `UHavocSilentCorridorMission`, `UHavocConvoyEscort`, `UHavocRelayNetwork` | `src/gameplay/missions/episode02/` (SilentCorridor, ConvoyEscort, RelayNetwork), `data/missions/episode-02-silent-corridor.json` |
+| `Missions/Episode02/` (flow) | `AHavocEpisode02Flow` drives the greybox playable loop on top of `UHavocSilentCorridorMission` | – |
 | `Missions/Episode04/` | `UHavocOpenStraitMission`, `UHavocOilTerminal`, `UHavocShippingLanes`, `UHavocTankerEscort` | `src/gameplay/missions/episode04/` (OpenStrait, OilTerminal, ShippingLanes, TankerEscort) |
-| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
+| `Tests/` | Automation tests (`MidnightHavoc.Missions.*` (Episode 02: `MidnightHavoc.Missions.Episode02.*`), `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts` (Episode 02 cases in `Tests/HavocEpisode02Tests.cpp`), `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
 | `Drones/` | `AHavocDrone` (Raven, Warden, Talon subclasses), `IHavocDroneDetectable` | `src/gameplay/drones/` (DroneBase, DroneFlightController, DroneBattery, DroneSignalManager, DroneSensor, DroneCamera) |
 | `Aircraft/` | `AHavocFalconHelicopter`, `UHavocCrashSequence` | `src/gameplay/aircraft/` (HelicopterController, HelicopterDamageState, CrewState, HelicopterCrashController) |
@@ -187,6 +190,32 @@ They read `data/missions/episode-04-open-strait.json` from `<ProjectDir>/../data
   (see <https://dev.epicgames.com/documentation/en-us/unreal-engine/run-automation-tests-in-unreal-engine>).
 
 The TypeScript suite (`npm test`) remains the reference behaviour.
+
+## How to play (Episode 02, greybox)
+
+Episode 02, *Operation Silent Corridor*, is playable from **Campaign > Start Episode 02** in the same level as Episode 04. The valley is a greybox:
+`AHavocEpisode02Flow` builds a floating slab of blocks (Checkpoint Echo, Relay Kilo site, bridge, riverbed narrows, drainage mouth, South Gate)
+at `GreyboxOrigin` (3 km above the Kharg level) and box vehicles for the convoy, so no extra level is needed. Replace the blocks with the real
+Gardun level and vehicle meshes later; the rules come from `data/missions/episode-02-silent-corridor.json` and do not change.
+Controls are the same as Episode 04 (above); **1 / 2** choose the route at the bridge, and G (Falcon) is not used in this episode.
+
+1. **Relay Kilo.** The Raven launches from Echo. Fly it to the relay site on the valley shoulder and press **E** to drop Relay Kilo. The drop only
+   counts if the drone link still reaches the site.
+2. **Scout the corridor.** Fly on to the end of the corridor with a usable link (not lost or critical) to mark the roadblock.
+3. **Advance.** The convoy rolls down the main road (Warden-1 leads, Nomad-1 carries the Falcon-2 crew, Nomad-2 carries supplies).
+4. **Comms outage.** Every relay is jammed and the Raven cannot fly. Walk the Marine to Relay Kilo and press **E** within 25 m to restore it.
+5. **Bridge choice** (checkpoint). Press **1** for the Dry Riverbed (the whole convoy goes; an ambush hits it in the narrows, repel it and keep
+   Nomad-1 alive) or **2** for the drainage tunnel (infantry only: clear the far bank, then Warden-1 pushes the wreck off the bridge).
+6. **South Gate** (checkpoint). Clear the staging yard; the staging area is then set up.
+7. **Result.** SUCCESS if the whole convoy arrives, PARTIAL if vehicles were lost, FAILED if the crew transport (or, without crew, every Nomad)
+   is destroyed (Restart from last checkpoint on the results screen). The carryover (crew delivered, Nomads left, Warden, route, relays)
+   is `UHavocSilentCorridorMission::GetCarryover()` for Episode 03.
+
+Tuning (ambush size and volley damage, garrisons, convoy speed, relay and scout radii) is on `AHavocEpisode02Flow`. Smoke test:
+start with `-HavocSmokeStart -HavocEpisode=2` (see `docs/smoke-test.md`). Playtest checklist: `docs/episode-02-playtest-checklist.md`.
+Enemies are AI-only `isis` / `houthi` data units; there is no navigation mesh on the greybox slab, so they move in straight lines.
+Help: [Blockout meshes](https://dev.epicgames.com/documentation/en-us/unreal-engine/basic-scene-and-blockout-meshes),
+[Possessing pawns](https://dev.epicgames.com/documentation/en-us/unreal-engine/possessing-pawns-in-unreal-engine).
 
 ## How to play (Episode 07)
 

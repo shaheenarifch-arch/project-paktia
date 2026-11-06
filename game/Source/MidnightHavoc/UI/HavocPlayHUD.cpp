@@ -10,7 +10,7 @@
 #include "Components/VerticalBox.h"
 #include "Drones/HavocDrone.h"
 #include "Aircraft/HavocFalconHelicopter.h"
-#include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Missions/HavocEpisodeFlowBase.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 #include "Missions/HavocMissionRunner.h"
 #include "Missions/HavocMissionSubsystem.h"
@@ -98,7 +98,7 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     Super::NativeTick(MyGeometry, InDeltaTime);
 
     AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer());
-    AHavocEpisode04Flow* Flow = PC ? PC->GetFlow() : nullptr;
+    AHavocEpisodeFlowBase* Flow = PC ? PC->GetFlow() : nullptr;
     const UHavocMissionSubsystem* Missions = GetWorld() ? GetWorld()->GetSubsystem<UHavocMissionSubsystem>() : nullptr;
     UHavocOpenStraitMission* Mission = Missions ? Missions->GetOpenStrait() : nullptr;
 
@@ -108,8 +108,10 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
     const bool bSubtitles = !Settings || Settings->bSubtitles;
     const FHavocHudSnapshot Snapshot = HavocHudModel::Build(Mission);
 
-    ObjectiveText->SetText(FText::FromString(Snapshot.Objective));
-    TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : FString()));
+    // Episode 04 reads the mission snapshot; other episodes (Episode 02) give their own text through the flow.
+    const bool bFlowText = !Mission && Flow;
+    ObjectiveText->SetText(FText::FromString(bFlowText ? Flow->GetObjectiveText() : Snapshot.Objective));
+    TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : bFlowText ? Flow->GetTrackerText() : FString()));
     HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : FString()));
     ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : FString()));
 
@@ -144,6 +146,10 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
         {
             Status += TEXT("\n") + Flow->GetSupportStatus();
         }
+    }
+    else if (bFlowText)
+    {
+        Status = Flow->GetStatusText();
     }
     StatusText->SetText(FText::FromString(Status));
 

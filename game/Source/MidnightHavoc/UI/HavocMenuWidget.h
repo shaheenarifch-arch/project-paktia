@@ -37,6 +37,8 @@ protected:
 
     UFUNCTION() void OnPlay();
     UFUNCTION() void OnCampaign();
+    UFUNCTION() void OnPlayEpisode02();
+    UFUNCTION() void OnPlayEpisode04();
     UFUNCTION() void OnMainMenu();
     UFUNCTION() void OnResume();
     UFUNCTION() void OnRestartCheckpoint();
@@ -67,7 +69,7 @@ private:
     void FocusButton(int32 Index);
 
     class UHavocPlaySettings* GetSettings() const;
-    class AHavocEpisode04Flow* GetFlow() const;
+    class AHavocEpisodeFlowBase* GetFlow() const;
 
     EHavocMenuMode Mode = EHavocMenuMode::Main;
     EHavocMenuMode ReturnMode = EHavocMenuMode::Main;

@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Missions/HavocEpisodeFlowBase.h"
+#include "Missions/Episode02/HavocEpisode02Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Player/HavocPlayerCharacter.h"
 #include "TimerManager.h"
@@ -34,13 +36,16 @@ void AHavocPlayerController::BeginPlay()
 
 void AHavocPlayerController::StartSmokeRun()
 {
-    AHavocEpisode04Flow* F = GetFlow();
+    // -HavocEpisode=2 smoke-tests the Episode 02 greybox instead.
+    int32 EpisodeNumber = 4;
+    FParse::Value(FCommandLine::Get(), TEXT("HavocEpisode="), EpisodeNumber);
+    AHavocEpisodeFlowBase* F = EpisodeNumber == 2 ? SelectFlow(AHavocEpisode02Flow::StaticClass()) : GetFlow();
     if (!F)
     {
-        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 04 flow in this level; cannot start the episode"));
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no episode flow in this level; cannot start the episode"));
         return;
     }
-    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 04"));
+    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
     F->StartEpisode();
     // 30 s in: the Raven is over the beaches, so the island, sea and sky should all be in view.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
@@ -94,7 +99,7 @@ void AHavocPlayerController::SetupInputComponent()
     Enhanced->BindAction(Input->VehicleAction, ETriggerEvent::Started, this, &AHavocPlayerController::OnVehicle);
 }
 
-AHavocEpisode04Flow* AHavocPlayerController::GetFlow()
+AHavocEpisodeFlowBase* AHavocPlayerController::GetFlow()
 {
     if (!Flow)
     {
@@ -107,12 +112,43 @@ AHavocEpisode04Flow* AHavocPlayerController::GetFlow()
     return Flow;
 }
 
-void AHavocPlayerController::OnChooseNorth() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ChooseBeach(true); } }
-void AHavocPlayerController::OnChooseWest() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ChooseBeach(false); } }
-void AHavocPlayerController::OnInteract() { if (AHavocEpisode04Flow* F = GetFlow()) { F->HandleInteract(); } }
-void AHavocPlayerController::OnDeployRaven() { if (AHavocEpisode04Flow* F = GetFlow()) { F->DeployRaven(); } }
-void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisode04Flow* F = GetFlow()) { F->CallFalcon(); } }
-void AHavocPlayerController::OnReturn() { if (AHavocEpisode04Flow* F = GetFlow()) { F->ReturnToMarine(); } }
+AHavocEpisodeFlowBase* AHavocPlayerController::SelectFlow(TSubclassOf<AHavocEpisodeFlowBase> FlowClass)
+{
+    UWorld* World = GetWorld();
+    if (!World || !FlowClass)
+    {
+        return nullptr;
+    }
+    if (Flow && Flow->IsA(FlowClass))
+    {
+        return Flow;
+    }
+    AHavocEpisodeFlowBase* Found = nullptr;
+    for (TActorIterator<AHavocEpisodeFlowBase> It(World); It; ++It)
+    {
+        if (It->IsA(FlowClass))
+        {
+            Found = *It;
+            break;
+        }
+    }
+    if (!Found)
+    {
+        Found = World->SpawnActor<AHavocEpisodeFlowBase>(FlowClass, FTransform::Identity);
+    }
+    if (Found)
+    {
+        Flow = Found;
+    }
+    return Found;
+}
+
+void AHavocPlayerController::OnChooseNorth() { if (AHavocEpisodeFlowBase* F = GetFlow()) { F->ChooseBranch(true); } }
+void AHavocPlayerController::OnChooseWest() { if (AHavocEpisodeFlowBase* F = GetFlow()) { F->ChooseBranch(false); } }
+void AHavocPlayerController::OnInteract() { if (AHavocEpisodeFlowBase* F = GetFlow()) { F->HandleInteract(); } }
+void AHavocPlayerController::OnDeployRaven() { if (AHavocEpisodeFlowBase* F = GetFlow()) { F->DeployRaven(); } }
+void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisodeFlowBase* F = GetFlow()) { F->CallFalcon(); } }
+void AHavocPlayerController::OnReturn() { if (AHavocEpisodeFlowBase* F = GetFlow()) { F->ReturnToMarine(); } }
 
 void AHavocPlayerController::OnVehicle() { ServerToggleVehicle(); }
 
@@ -194,7 +230,7 @@ void AHavocPlayerController::ShowHud()
 
 void AHavocPlayerController::TogglePause()
 {
-    AHavocEpisode04Flow* F = GetFlow();
+    AHavocEpisodeFlowBase* F = GetFlow();
     if (!F || F->GetPhase() != EHavocFlowPhase::Playing)
     {
         return;

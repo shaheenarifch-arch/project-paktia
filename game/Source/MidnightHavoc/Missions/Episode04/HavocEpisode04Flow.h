@@ -20,7 +20,7 @@
 //   https://dev.epicgames.com/documentation/en-us/unreal-engine/possessing-pawns-in-unreal-engine
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "Missions/HavocEpisodeFlowBase.h"
 #include "HavocEpisode04Flow.generated.h"
 
 class AHavocEnemyCharacter;
@@ -33,14 +33,6 @@ class AHavocSectorVolume;
 class AHavocTankerSpline;
 class UHavocOpenStraitMission;
 class USkeletalMeshComponent;
-
-UENUM(BlueprintType)
-enum class EHavocFlowPhase : uint8
-{
-    Menu,
-    Playing,
-    Results
-};
 
 /** A tanker moving along its lane spline. Visual from the Vessel.Tanker role. */
 UCLASS()
@@ -65,7 +57,7 @@ private:
 };
 
 UCLASS()
-class MIDNIGHTHAVOC_API AHavocEpisode04Flow : public AActor
+class MIDNIGHTHAVOC_API AHavocEpisode04Flow : public AHavocEpisodeFlowBase
 {
     GENERATED_BODY()
 
@@ -96,22 +88,20 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Havoc|Flow") int32 ResupplyCharges = 3;
 
     // ---- Player actions (called by AHavocPlayerController) ----
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void StartEpisode();
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void RestartFromCheckpoint();
+    virtual void StartEpisode() override;
+    virtual void RestartFromCheckpoint() override;
+    virtual void HandleInteract() override;
+    virtual void DeployRaven() override;
+    virtual void CallFalcon() override;
+    virtual void ReturnToMarine() override;
+    virtual void ChooseBranch(bool bFirst) override { ChooseBeach(bFirst); }
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void ChooseBeach(bool bNorth);
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void HandleInteract();
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void DeployRaven();
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void CallFalcon();
-    UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void ReturnToMarine();
 
     // ---- Queries for the HUD and menus ----
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") EHavocFlowPhase GetPhase() const { return Phase; }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetHint() const { return Hint; }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetToast() const { return ToastTime > 0.f ? Toast : FString(); }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetSupportStatus() const;
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetResultSummary() const { return ResultSummary; }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetOutcome() const { return Outcome; }
-    UFUNCTION(BlueprintPure, Category = "Havoc|Flow") bool IsPiloting() const;
+    virtual FString GetSupportStatus() const override;
+    virtual bool IsPiloting() const override;
+    virtual FString GetResultTitle() const override;
+    virtual FString GetReplayLabel() const override { return TEXT("Play Episode 04 again"); }
 
     /** Pure helper (tested): garrison size for a state-independent sector id, 0 for unknown sectors. */
     int32 GetGarrisonFor(FName SectorId) const;
@@ -138,8 +128,6 @@ private:
     void Step();
     void EndEpisode();
     void ClearWorld();
-    void SetHint(const FString& Text) { Hint = Text; }
-    void ShowToast(const FString& Text, float Seconds = 5.f);
     void Publish(const TCHAR* EventName, const FString& Payload) const;
 
     // ---- enemies ----
@@ -171,15 +159,9 @@ private:
     void EndFalconSupport();
     void TickFalcon(float Dt);
 
-    EHavocFlowPhase Phase = EHavocFlowPhase::Menu;
     bool bMenuShown = false;
     FString LastState;
     FString LastCheckpointState;
-    FString Hint;
-    FString Toast;
-    float ToastTime = 0.f;
-    FString ResultSummary;
-    FString Outcome;
 
     UPROPERTY() TObjectPtr<AHavocPlayerController> CachedPC;
     UPROPERTY() TObjectPtr<AHavocPlayerCharacter> CachedMarine;

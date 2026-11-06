@@ -11,7 +11,7 @@
 #include "Player/HavocPlayerCharacter.h"
 #include "HavocPlayerController.generated.h"
 
-class AHavocEpisode04Flow;
+class AHavocEpisodeFlowBase;
 class UHavocMenuWidget;
 class UHavocPlayHUD;
 
@@ -45,7 +45,11 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|UI")
     void TogglePause();
 
-    AHavocEpisode04Flow* GetFlow();
+    /** The active episode flow (Episode 04 until the Campaign menu picks another). Null if none exists in the level. */
+    AHavocEpisodeFlowBase* GetFlow();
+
+    /** Makes the flow of this class the active one, spawning it if the level has none. Returns it. */
+    AHavocEpisodeFlowBase* SelectFlow(TSubclassOf<AHavocEpisodeFlowBase> FlowClass);
 
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }
@@ -77,6 +81,6 @@ private:
 
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;
-    UPROPERTY() TObjectPtr<AHavocEpisode04Flow> Flow;
+    UPROPERTY() TObjectPtr<AHavocEpisodeFlowBase> Flow;
     TWeakObjectPtr<AHavocPlayerCharacter> Marine;
 };
