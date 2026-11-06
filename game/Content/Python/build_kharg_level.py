@@ -298,6 +298,16 @@ def build_landscape(eas, manifest):
     land.set_actor_rotation(unreal.Rotator(roll=best[0][0], pitch=best[0][1], yaw=best[0][2]), False)
     if best[0] != (0, 0, 0):
         warn("Terrain mesh imported on its side; rotated by roll/pitch/yaw %s. Check north is +Y in the viewport." % (best[0],))
+    # The level is World Partition (Open World template). A 20 km actor is spatially loaded by default, so in a
+    # packaged build it only streams in near a streaming source and the island is missing (no hit, white view).
+    # Keep it always loaded.
+    try:
+        land.set_editor_property("is_spatially_loaded", False)
+    except Exception as e:
+        warn("Could not set KhargTerrain to always loaded (%s). Untick Is Spatially Loaded in Details." % e)
+    land.static_mesh_component.set_editor_property("mobility", unreal.ComponentMobility.STATIC)
+    land.static_mesh_component.set_collision_enabled(unreal.CollisionEnabled.QUERY_AND_PHYSICS)
+    land.static_mesh_component.set_collision_object_type(unreal.CollisionChannel.ECC_WORLD_STATIC)
     log("Placed KhargTerrain (20 km, centred on 0,0, half height %.0f cm)" % best[1])
     return land
 

@@ -4,7 +4,10 @@
 #include "Camera/CameraActor.h"
 #include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/GameInstance.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
 #include "Input/HavocPlayInput.h"
 #include "Kismet/GameplayStatics.h"
@@ -30,13 +33,52 @@ void FrameKhargForSmoke(AHavocPlayerController* PC)
     {
         return;
     }
-    const FVector Centre(0.f, 0.f, 0.f);
+    // 1. Find the terrain actor(s) and log everything that could explain "nothing at (0,0)".
+    bool bFound = false;
+    FBox TerrainBox(ForceInit);
+    for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
+    {
+        AStaticMeshActor* A = *It;
+        if (!A->GetName().Contains(TEXT("KhargTerrain")))
+        {
+            continue;
+        }
+        const UStaticMeshComponent* Comp = A->GetStaticMeshComponent();
+        FVector Origin, Extent;
+        A->GetActorBounds(false, Origin, Extent);
+        const UStaticMesh* Mesh = Comp ? Comp->GetStaticMesh() : nullptr;
+        const UEnum* CollEnum = StaticEnum<ECollisionEnabled::Type>();
+        const ECollisionEnabled::Type Coll = Comp ? Comp->GetCollisionEnabled() : ECollisionEnabled::NoCollision;
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: terrain actor %s loc %s rot %s bounds origin %s extent %s mesh %s collision %s hidden %d"),
+            *A->GetName(), *A->GetActorLocation().ToString(), *A->GetActorRotation().ToString(), *Origin.ToString(), *Extent.ToString(),
+            Mesh ? *Mesh->GetPathName() : TEXT("(none)"), CollEnum ? *CollEnum->GetNameStringByValue(Coll) : TEXT("?"), A->IsHidden() ? 1 : 0);
+        TerrainBox += FBox(Origin - Extent, Origin + Extent);
+        bFound = true;
+    }
+    if (!bFound)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no AStaticMeshActor named *KhargTerrain* in this world (missing or not streamed in)"));
+    }
+
+    // 2. Frame on the real terrain centre (0,0 only if nothing was found).
+    const FVector Centre = bFound ? FVector(TerrainBox.GetCenter().X, TerrainBox.GetCenter().Y, 0.f) : FVector::ZeroVector;
     const FVector Terminal(-170000.f, 120000.f, 0.f);
     float GroundZ = 0.f;
+    FCollisionQueryParams QParams(SCENE_QUERY_STAT(HavocSmokeTrace), /*bTraceComplex*/ true);
     FHitResult Hit;
-    if (World->LineTraceSingleByChannel(Hit, Centre + FVector(0.f, 0.f, 200000.f), Centre + FVector(0.f, 0.f, -100000.f), ECC_Visibility))
+    if (World->LineTraceSingleByChannel(Hit, Centre + FVector(0.f, 0.f, 100000.f), Centre + FVector(0.f, 0.f, -100000.f), ECC_WorldStatic, QParams))
     {
         GroundZ = Hit.ImpactPoint.Z;
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: down-trace at %s hit %s at z %.0f"), *Centre.ToString(),
+            Hit.GetActor() ? *Hit.GetActor()->GetName() : TEXT("(no actor)"), GroundZ);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: down-trace at %s hit nothing"), *Centre.ToString());
+        if (bFound)
+        {
+            GroundZ = TerrainBox.Max.Z;
+        }
     }
     const FVector Eye = Centre + FVector(0.f, 0.f, FMath::Max(GroundZ, 0.f) + 10000.f); // 100 m above the ground
     const FRotator Look(-30.f, (Terminal - Centre).Rotation().Yaw, 0.f);
