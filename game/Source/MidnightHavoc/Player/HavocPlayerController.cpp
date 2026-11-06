@@ -123,12 +123,13 @@ void AHavocPlayerController::StartSmokeRun()
     GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
     {
         FrameKhargForSmoke(this);
-        // Shoot a second later so the new view (and the fog/sky state) is rendered first.
+        // Shoot a few seconds later so auto-exposure has adapted to the new view (it resets on a camera cut).
         GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
         {
-            UE_LOG(LogTemp, Display, TEXT("HavocSmoke: taking screenshot"));
+            const AActor* Target = GetViewTarget();
+            UE_LOG(LogTemp, Display, TEXT("HavocSmoke: taking screenshot (view target %s)"), Target ? *Target->GetName() : TEXT("none"));
             ConsoleCommand(TEXT("HighResShot 1280x720"));
-        }), 1.f, false);
+        }), 4.f, false);
     }), 30.f, false);
 }
 

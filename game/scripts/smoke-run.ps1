@@ -121,6 +121,12 @@ if (-not $shot) {
       $row = for ($x = 0; $x -lt 16; $x++) { $c = $bmp.GetPixel([int]($bmp.Width * ($x + 0.5) / 16), [int]($bmp.Height * ($y + 0.5) / 9)); '{0,3}' -f [int](0.2126 * $c.R + 0.7152 * $c.G + 0.0722 * $c.B) }
       Write-Host ($row -join ' ')
     }
+    # Small JPEG of the shot as base64 in the job log, so it can be viewed without downloading artifacts.
+    $thumb = New-Object System.Drawing.Bitmap($bmp, 240, 135)
+    $ms = New-Object System.IO.MemoryStream
+    $thumb.Save($ms, [System.Drawing.Imaging.ImageFormat]::Jpeg)
+    Write-Host "SMOKE_THUMB_B64 $([Convert]::ToBase64String($ms.ToArray()))"
+    $thumb.Dispose(); $ms.Dispose()
     $bmp.Dispose()
     $mean = ($lum | Measure-Object -Average).Average
     $shotSpread = [math]::Round([math]::Sqrt((($lum | ForEach-Object { ($_ - $mean) * ($_ - $mean) }) | Measure-Object -Average).Average), 1)
