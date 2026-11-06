@@ -110,8 +110,12 @@ void UHavocPlayHUD::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
     ObjectiveText->SetText(FText::FromString(Snapshot.Objective));
     TrackerText->SetText(FText::FromString(Mission ? Snapshot.TrackerText() : FString()));
-    HintText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetHint() : FString()));
-    ToastText->SetText(FText::FromString(bSubtitles && Flow ? Flow->GetToast() : FString()));
+    // During an intro/outro fly-over the subtitle line replaces the toast, and the hint says how to skip.
+    const bool bCutscene = Flow && Flow->IsCutsceneActive();
+    HintText->SetText(FText::FromString(bCutscene ? FString(TEXT("Press Space or Enter to skip"))
+                                                  : (bSubtitles && Flow ? Flow->GetHint() : FString())));
+    ToastText->SetText(FText::FromString(!bSubtitles || !Flow ? FString()
+                                                              : (bCutscene ? Flow->GetCutsceneSubtitle() : Flow->GetToast())));
 
     // Current sector, from the minimap's sector volumes.
     FString SectorName;

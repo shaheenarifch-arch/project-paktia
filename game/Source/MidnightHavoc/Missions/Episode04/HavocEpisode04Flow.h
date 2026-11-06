@@ -23,6 +23,7 @@
 #include "GameFramework/Actor.h"
 #include "HavocEpisode04Flow.generated.h"
 
+class AHavocCutscene;
 class AHavocEnemyCharacter;
 class AHavocFalconHelicopter;
 class AHavocLaneHazard;
@@ -104,6 +105,16 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void CallFalcon();
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void ReturnToMarine();
 
+    // ---- Cutscenes (skippable camera fly-over with subtitles; Cutscene/HavocCutscene.h) ----
+    /** Plays the intro; StartEpisode does this by itself. Also used by the smoke test. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayIntro();
+    /** Plays the outro for the current outcome; EndEpisode does this before the results screen. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayOutro();
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void SkipCutscene();
+    UFUNCTION(BlueprintPure, Category = "Havoc|Cutscene") bool IsCutsceneActive() const;
+    /** Current cutscene subtitle line, empty when none (the HUD shows it when the Subtitles setting is on). */
+    UFUNCTION(BlueprintPure, Category = "Havoc|Cutscene") FString GetCutsceneSubtitle() const;
+
     // ---- Queries for the HUD and menus ----
     UFUNCTION(BlueprintPure, Category = "Havoc|Flow") EHavocFlowPhase GetPhase() const { return Phase; }
     UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetHint() const { return Hint; }
@@ -140,6 +151,8 @@ private:
     void ClearWorld();
     void SetHint(const FString& Text) { Hint = Text; }
     void ShowToast(const FString& Text, float Seconds = 5.f);
+    void PlayCutscene(bool bIntro, TFunction<void()> Then);
+    TArray<FVector> CutsceneTargets(bool bIntro);
     void Publish(const TCHAR* EventName, const FString& Payload) const;
 
     // ---- enemies ----
@@ -181,6 +194,7 @@ private:
     FString ResultSummary;
     FString Outcome;
 
+    UPROPERTY() TObjectPtr<AHavocCutscene> Cutscene;
     UPROPERTY() TObjectPtr<AHavocPlayerController> CachedPC;
     UPROPERTY() TObjectPtr<AHavocPlayerCharacter> CachedMarine;
     UPROPERTY() TMap<FName, TObjectPtr<AHavocSectorVolume>> Sectors;

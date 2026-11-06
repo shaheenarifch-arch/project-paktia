@@ -26,7 +26,7 @@ Folders are under `Source/MidnightHavoc/`.
 | `Core/` | `UHavocEventSubsystem` | `src/core/EventBus.ts` |
 | `Missions/` | `UHavocMissionSubsystem`, `UHavocMissionRunner`, `IHavocMissionSystems` | `src/gameplay/missions/framework/MissionRunner.ts` |
 | `Missions/Episode04/` | `UHavocOpenStraitMission`, `UHavocOilTerminal`, `UHavocShippingLanes`, `UHavocTankerEscort` | `src/gameplay/missions/episode04/` (OpenStrait, OilTerminal, ShippingLanes, TankerEscort) |
-| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
+| `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Cutscene.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
 | `Drones/` | `AHavocDrone` (Raven, Warden, Talon subclasses), `IHavocDroneDetectable` | `src/gameplay/drones/` (DroneBase, DroneFlightController, DroneBattery, DroneSignalManager, DroneSensor, DroneCamera) |
 | `Aircraft/` | `AHavocFalconHelicopter`, `UHavocCrashSequence` | `src/gameplay/aircraft/` (HelicopterController, HelicopterDamageState, CrewState, HelicopterCrashController) |
@@ -42,6 +42,7 @@ Folders are under `Source/MidnightHavoc/`.
 | `Input/` | `UHavocPlayInput` (Enhanced Input actions and key mappings built in C++) | – |
 | `UI/` | `UHavocPlayHUD`, `UHavocMenuWidget` (main, pause, settings, results; built in C++) | – |
 | `Game/` | `AHavocPlayableGameMode` | – |
+| `Cutscene/` | `AHavocCutscene` (skippable camera fly-over with subtitles), `HavocCutsceneMath.h` (shots, tested) | – |
 | `Missions/Episode04/` (flow) | `AHavocEpisode04Flow` drives the playable loop on top of `UHavocOpenStraitMission` | – |
 
 ## Art and audio assets (Fab / Megascans)
@@ -159,6 +160,14 @@ without one the enemies walk in straight lines. Effects and audio use the item-3
 
 Tuning (enemy counts, hold time, tanker speed, threat timing, Falcon timing) is on `AHavocEpisode04Flow` (Details panel of a Blueprint child,
 or edit the defaults in `HavocEpisode04Flow.h`). Settings are saved to `GameUserSettings.ini`.
+**Intro and outro cutscenes.** Starting the episode plays a 15 s fly-over (north beach, oil terminal, airstrip) with subtitles before
+the briefing hands over to the Raven recon; finishing it plays a 10 s outro (oil terminal, north beach) matching the result, then the
+results screen. Press **Space**, **Enter** or the gamepad bottom button to skip. Subtitles follow the Subtitles setting. They are
+greybox, driven from code (`Cutscene/`), so they need no assets. To replace one with a hand-made Level Sequence, build it in Sequencer
+(<https://dev.epicgames.com/documentation/en-us/unreal-engine/cinematics-and-movie-making-in-unreal-engine>), play it from a Blueprint
+child of `AHavocEpisode04Flow` and call `SkipCutscene` / keep the `HavocCutscene: 04 intro|outro` log lines so CI still sees it.
+The smoke test starts each playable episode in turn and reports per episode (`docs/smoke-test.md`).
+
 More: playtest checklist `docs/episode-04-playtest-checklist.md`, HUD `docs/hud-guide.md`.
 
 Epic help: [Enhanced Input](https://dev.epicgames.com/documentation/en-us/unreal-engine/enhanced-input-in-unreal-engine),

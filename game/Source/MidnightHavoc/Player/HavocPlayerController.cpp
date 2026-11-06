@@ -34,21 +34,29 @@ void AHavocPlayerController::BeginPlay()
 
 void AHavocPlayerController::StartSmokeRun()
 {
-    AHavocEpisode04Flow* F = GetFlow();
+    // -HavocSmokeEpisode=<id> names the episode being smoke-tested (game/scripts/smoke-episodes.ps1);
+    // plain -HavocSmokeStart means Episode 04.
+    FString Episode = TEXT("04");
+    FParse::Value(FCommandLine::Get(), TEXT("HavocSmokeEpisode="), Episode);
+    AHavocEpisode04Flow* F = Episode == TEXT("04") ? GetFlow() : nullptr;
     if (!F)
     {
-        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 04 flow in this level; cannot start the episode"));
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no playable flow for episode %s in this level; cannot start the episode"), *Episode);
         return;
     }
-    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 04"));
+    // StartEpisode plays the intro fly-over first (logs "HavocCutscene: 04 intro started/finished").
+    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %s"), *Episode);
     F->StartEpisode();
-    // 30 s in: the Raven is over the beaches, so the island, sea and sky should all be in view.
+    // 30 s in: the intro (15 s) is over and the Raven is over the beaches, so island, sea and sky are in view.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
-    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this, F]()
     {
         UE_LOG(LogTemp, Display, TEXT("HavocSmoke: taking screenshot"));
         ConsoleCommand(TEXT("HighResShot 1280x720"));
     }), 30.f, false);
+    // 35 s in (after the screenshot is written): the outro (10 s), so every episode reports both cutscenes.
+    FTimerHandle OutroTimer;
+    GetWorldTimerManager().SetTimer(OutroTimer, FTimerDelegate::CreateWeakLambda(this, [F]() { F->PlayOutro(); }), 35.f, false);
 }
 
 void AHavocPlayerController::EnsureMetaContext()

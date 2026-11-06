@@ -1,0 +1,6 @@
+{
+  "_note": "Playable episodes the CI smoke test starts in turn (scripts/smoke-episodes.ps1). Add an episode here when it becomes playable in the Unreal build; it needs an intro and an outro cutscene (Source/MidnightHavoc/Cutscene) or its smoke result fails. See game/docs/smoke-test.md.",
+  "episodes": [
+    { "id": "04", "name": "Operation Open Strait", "map": "" }
+  ]
+}
