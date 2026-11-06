@@ -13,8 +13,9 @@ Help links:
 ## What it does
 
 `game/scripts/smoke-run.ps1` launches the exe with `-log -abslog=... -csvprofile -ExecCmds="..."`
-(windowed 1280x720, `-unattended -nosound`), waits `SMOKE_SECONDS` (default 180), closes the window
-gracefully (so the CSV is flushed; force-kill after 30 s), then:
+(windowed 1280x720, `-unattended -nosound`), passes `-HavocSmokeSeconds=SMOKE_SECONDS` (default 180) so the game exits by itself
+(`UHavocSmokeExitSubsystem`, which flushes the CSV and log; force-kill only if it has not exited
+120 s later), then:
 
 - copies new `Crashes/*` folders and `Saved/Logs/*.log` written during the run,
 - lists the **top 10 distinct errors** (`Error:`, `Fatal:`, ensure/assert lines, with counts),
@@ -46,4 +47,4 @@ A failing comment lists the reasons first, then the top errors.
 ## Known limits
 
 Assumptions that need confirming on the runner (first run): packaged `Saved/` location, CSV output
-path under `Profiling`, and that `CloseMainWindow` quits the game cleanly. See the PR description.
+path under `Profiling`, and that `-HavocSmokeSeconds` quits the game cleanly (closing the window cannot work with `-RenderOffscreen`). See the PR description.

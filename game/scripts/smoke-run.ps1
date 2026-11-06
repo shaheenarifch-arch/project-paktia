@@ -27,17 +27,24 @@ if (-not $exe) {
   $args = @()
   if ($Map) { $args += $Map }
   $args += @('-log', "-abslog=$log", '-csvprofile', '-windowed', '-ResX=1280', '-ResY=720', '-RenderOffscreen',
-             '-nosplash', '-unattended', '-nosound', "-ExecCmds=$ExecCmds")
+             '-nosplash', '-unattended', '-nosound', "-ExecCmds=$ExecCmds",
+             # The game exits by itself after $Seconds s (UHavocSmokeExitSubsystem) so the CSV and log are flushed;
+             # -RenderOffscreen has no window, so closing the window from here cannot work.
+             "-HavocSmokeSeconds=$Seconds")
   $p = Start-Process -FilePath $exe.FullName -ArgumentList $args -PassThru
-  $exited = $p.WaitForExit($Seconds * 1000)
-  if ($exited) {
-    $exitInfo = "exited early with code $($p.ExitCode) after $([int]((Get-Date) - $startedAt).TotalSeconds)s"
+  # Allow time for startup and shutdown on top of the play time.
+  $exited = $p.WaitForExit(($Seconds + 120) * 1000)
+  $elapsed = [int]((Get-Date) - $startedAt).TotalSeconds
+  if (-not $exited) {
+    $p.Kill(); $p.WaitForExit()
+    $reasons += "Game did not exit by itself within $($Seconds + 120) s (killed); CSV may be missing"
+    $exitInfo = "ran $elapsed s, killed"
+  } elseif ($elapsed -lt $Seconds) {
+    $exitInfo = "exited early with code $($p.ExitCode) after $elapsed s"
     $reasons += "Game exited before the $Seconds s run finished ($exitInfo)"
   } else {
-    # Graceful close so the CSV profile gets flushed; force-kill as fallback.
-    [void]$p.CloseMainWindow()
-    if (-not $p.WaitForExit(30000)) { $p.Kill(); $p.WaitForExit(); $reasons += 'Game did not close gracefully (killed); CSV may be missing' }
-    $exitInfo = "ran $Seconds s, closed"
+    $exitInfo = "ran $elapsed s, exited with code $($p.ExitCode)"
+    if ($p.ExitCode -ne 0) { $reasons += "Game exited with code $($p.ExitCode)" }
   }
 }
 
@@ -109,4 +116,10 @@ if ($topErrors) {
 $sb.ToString() | Set-Content -Path (Join-Path $OutDir 'summary.md') -Encoding utf8
 @{ pass = $pass; avgFps = $avg; minFps = $min; crashes = $crashes.Count; reasons = $reasons } |
   ConvertTo-Json | Set-Content -Path (Join-Path $OutDir 'result.json') -Encoding utf8
+# Also print the result and key game log lines into the run log (readable without downloading artifacts).
+Write-Host $sb.ToString()
+Get-ChildItem -Path $OutDir -Filter '*.log' -ErrorAction SilentlyContinue | ForEach-Object {
+  Select-String -Path $_.FullName -Pattern 'LogHavocData|LogHavocSmoke|LogHavocMission|LogHavocWorld' -ErrorAction SilentlyContinue |
+    Select-Object -First 40 | ForEach-Object { Write-Host $_.Line }
+}
 exit 0
