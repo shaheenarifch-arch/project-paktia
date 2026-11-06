@@ -18,6 +18,7 @@
 #include "Misc/Parse.h"
 #include "Missions/HavocEpisodeFlowBase.h"
 #include "Missions/Episode02/HavocEpisode02Flow.h"
+#include "Missions/Episode03/HavocEpisode03Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Missions/HavocEpisodeFlow.h"
 #include "Player/HavocPlayerCharacter.h"
@@ -117,17 +118,46 @@ void AHavocPlayerController::BeginPlay()
 
 void AHavocPlayerController::StartSmokeRun()
 {
-    IHavocEpisodeFlow* F = GetFlow();
-    if (!F)
+    // Which episode to smoke-test: -HavocEpisode=<n> or -HavocSmokeEpisode=<nn> (game/scripts/smoke-episodes.ps1).
+    // Plain -HavocSmokeStart means Episode 04. See game/docs/smoke-test.md.
+    int32 EpisodeNumber = 4;
+    FParse::Value(FCommandLine::Get(), TEXT("HavocEpisode="), EpisodeNumber);
+    FString EpisodeId;
+    if (FParse::Value(FCommandLine::Get(), TEXT("HavocSmokeEpisode="), EpisodeId) && EpisodeId.IsNumeric())
     {
-        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no episode flow in this level; cannot start the episode"));
-        return;
+        EpisodeNumber = FCString::Atoi(*EpisodeId);
     }
-    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
-    F->StartEpisode();
+    if (EpisodeNumber == 3)
+    {
+        if (AHavocEpisode03Flow* F3 = GetFlow03())
+        {
+            UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 03"));
+            F3->StartEpisode();
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 03 flow in this level; cannot start the episode"));
+            return;
+        }
+    }
+    else
+    {
+        if (EpisodeNumber == 2)
+        {
+            SelectFlow(AHavocEpisode02Flow::StaticClass());
+        }
+        IHavocEpisodeFlow* F = GetFlow();
+        if (!F)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no episode flow in this level; cannot start the episode"));
+            return;
+        }
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
+        F->StartEpisode();
+    }
     // 30 s in: frame the island explicitly, then shoot.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
-    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this, F]()
+    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
     {
         FrameKhargForSmoke(this);
         // Shoot a few seconds later so auto-exposure has adapted to the new view (it resets on a camera cut).
@@ -140,7 +170,14 @@ void AHavocPlayerController::StartSmokeRun()
     }), 30.f, false);
     // 35 s in (after the screenshot is written): the outro (10 s), so every episode reports both cutscenes.
     FTimerHandle OutroTimer;
-    GetWorldTimerManager().SetTimer(OutroTimer, FTimerDelegate::CreateWeakLambda(this, [F]() { F->PlayOutro(); }), 35.f, false);
+    GetWorldTimerManager().SetTimer(OutroTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+    {
+        // The outro cutscene is Episode 04 only for now (not part of IHavocEpisodeFlow).
+        if (AHavocEpisode04Flow* E04 = GetEpisode04Flow())
+        {
+            E04->PlayOutro();
+        }
+    }), 35.f, false);
 }
 
 void AHavocPlayerController::EnsureMetaContext()
@@ -263,12 +300,80 @@ AHavocEpisode04Flow* AHavocPlayerController::GetEpisode04Flow()
     return Cast<AHavocEpisode04Flow>(Flow.GetObject());
 }
 
-void AHavocPlayerController::OnChooseNorth() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ChooseBeach(true); } }
-void AHavocPlayerController::OnChooseWest() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ChooseBeach(false); } }
-void AHavocPlayerController::OnInteract() { if (IHavocEpisodeFlow* F = GetFlow()) { F->HandleInteract(); } }
-void AHavocPlayerController::OnDeployRaven() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->DeployRaven(); } }
-void AHavocPlayerController::OnCallFalcon() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->CallFalcon(); } }
-void AHavocPlayerController::OnReturn() { if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ReturnToMarine(); } }
+AHavocEpisode03Flow* AHavocPlayerController::GetFlow03()
+{
+    if (!Flow03)
+    {
+        for (TActorIterator<AHavocEpisode03Flow> It(GetWorld()); It; ++It)
+        {
+            Flow03 = *It;
+            break;
+        }
+    }
+    return Flow03;
+}
+
+AActor* AHavocPlayerController::SelectFlow(TSubclassOf<AActor> FlowClass)
+{
+    UWorld* World = GetWorld();
+    if (!World || !FlowClass)
+    {
+        return nullptr;
+    }
+    if (Flow.GetObject() && Flow.GetObject()->IsA(FlowClass))
+    {
+        return Cast<AActor>(Flow.GetObject());
+    }
+    AActor* Found = nullptr;
+    for (TActorIterator<AActor> It(World, FlowClass); It; ++It)
+    {
+        Found = *It;
+        break;
+    }
+    if (!Found)
+    {
+        Found = World->SpawnActor<AActor>(FlowClass, FTransform::Identity);
+    }
+    if (Found && Found->Implements<UHavocEpisodeFlow>())
+    {
+        Flow = Found;
+    }
+    return Found;
+}
+
+// Episode-specific keys: Episode 04 (beach choice, Raven, Falcon), the AHavocEpisodeFlowBase episodes
+// (Episode 02: route choice, Raven, Falcon) and Episode 03 (Falcon, interact).
+void AHavocPlayerController::OnChooseNorth()
+{
+    if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ChooseBeach(true); }
+    else if (AHavocEpisodeFlowBase* B = Cast<AHavocEpisodeFlowBase>(Flow.GetObject())) { B->ChooseBranch(true); }
+}
+void AHavocPlayerController::OnChooseWest()
+{
+    if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ChooseBeach(false); }
+    else if (AHavocEpisodeFlowBase* B = Cast<AHavocEpisodeFlowBase>(Flow.GetObject())) { B->ChooseBranch(false); }
+}
+void AHavocPlayerController::OnInteract()
+{
+    if (IHavocEpisodeFlow* F = GetFlow()) { F->HandleInteract(); }
+    else if (AHavocEpisode03Flow* F3 = GetFlow03()) { F3->HandleInteract(); }
+}
+void AHavocPlayerController::OnDeployRaven()
+{
+    if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->DeployRaven(); }
+    else if (AHavocEpisodeFlowBase* B = Cast<AHavocEpisodeFlowBase>(Flow.GetObject())) { B->DeployRaven(); }
+}
+void AHavocPlayerController::OnCallFalcon()
+{
+    if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->CallFalcon(); }
+    else if (AHavocEpisodeFlowBase* B = Cast<AHavocEpisodeFlowBase>(Flow.GetObject())) { B->CallFalcon(); }
+    else if (AHavocEpisode03Flow* F3 = GetFlow03()) { F3->CallFalcon(); }
+}
+void AHavocPlayerController::OnReturn()
+{
+    if (AHavocEpisode04Flow* F = GetEpisode04Flow()) { F->ReturnToMarine(); }
+    else if (AHavocEpisodeFlowBase* B = Cast<AHavocEpisodeFlowBase>(Flow.GetObject())) { B->ReturnToMarine(); }
+}
 
 void AHavocPlayerController::OnVehicle() { ServerToggleVehicle(); }
 
@@ -351,7 +456,9 @@ void AHavocPlayerController::ShowHud()
 void AHavocPlayerController::TogglePause()
 {
     IHavocEpisodeFlow* F = GetFlow();
-    if (!F || F->GetPhase() != EHavocFlowPhase::Playing)
+    AHavocEpisode03Flow* F3 = F ? nullptr : GetFlow03();
+    const EHavocFlowPhase FlowPhase = F ? F->GetPhase() : (F3 ? F3->GetPhase() : EHavocFlowPhase::Menu);
+    if (FlowPhase != EHavocFlowPhase::Playing)
     {
         return;
     }

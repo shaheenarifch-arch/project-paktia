@@ -13,26 +13,14 @@
 #include "UObject/Object.h"
 #include "Data/HavocMissionDef.h"
 #include "Missions/HavocMissionSystems.h"
+#include "Missions/Episode02/HavocSilentCorridorMission.h"
 #include "Missions/Episode03/HavocSurpriseEventDirector.h"
 #include "HavocBrokenCitadelMission.generated.h"
 
 class UHavocEventSubsystem;
 class UHavocMissionRunner;
 
-/** What Episode 03 needs from Episode 02 (ports E02Carryover; only the fields Episode 03 reads). */
-USTRUCT(BlueprintType)
-struct MIDNIGHTHAVOC_API FHavocEpisode02Carryover
-{
-    GENERATED_BODY()
-
-    /** The Falcon crew Episode 02 delivered. Falcon air support needs it. */
-    UPROPERTY(BlueprintReadWrite, Category = "Havoc|Episode03")
-    bool bCrewDelivered = false;
-
-    /** Each surviving Nomad adds reinforcements. */
-    UPROPERTY(BlueprintReadWrite, Category = "Havoc|Episode03")
-    int32 NomadsRemaining = 0;
-};
+// FHavocEpisode02Carryover (crew delivered, Nomads remaining) comes from Episode 02's mission header.
 
 /** Outcome and what Episode 04 (and the campaign) read afterwards. */
 USTRUCT(BlueprintType)

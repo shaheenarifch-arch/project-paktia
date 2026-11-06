@@ -13,6 +13,7 @@
 #include "Campaign/HavocCampaign.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Missions/HavocEpisodeFlow.h"
+#include "Missions/HavocEpisodeFlowBase.h"
 #include "Input/HavocPlayInput.h"
 #include "Player/HavocPlaySettings.h"
 #include "Player/HavocPlayerController.h"
@@ -277,15 +278,21 @@ void UHavocMenuWidget::Rebuild()
     case EHavocMenuMode::Results:
     {
         const IHavocEpisodeFlow* Flow = GetFlow();
+        // Episodes built on AHavocEpisodeFlowBase (Episode 02) word their own results title and replay button.
+        const AHavocEpisodeFlowBase* FlowBase = Flow ? Cast<AHavocEpisodeFlowBase>(Flow->_getUObject()) : nullptr;
         const FString Outcome = Flow ? Flow->GetOutcome() : FString();
         const bool bFailed = Outcome == TEXT("FAILED");
-        AddLabel(Flow ? Flow->GetResultTitle() : FString(TEXT("OPERATION FAILED")), 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
+        const FString Title = FlowBase ? FlowBase->GetResultTitle()
+            : Outcome == TEXT("SUCCESS") ? FString(TEXT("MISSION COMPLETE"))
+            : Outcome == TEXT("PARTIAL") ? FString(TEXT("PARTIAL SUCCESS"))
+            : FString(TEXT("OPERATION FAILED"));
+        AddLabel(Title, 40, bFailed ? FLinearColor(1.f, 0.4f, 0.35f) : Gold);
         AddLabel(Flow ? Flow->GetResultSummary() : FString(), 22, FLinearColor::White);
         if (bFailed)
         {
             AddButton(TEXT("Restart from last checkpoint"), TEXT("OnRestartCheckpoint"));
         }
-        AddButton(Flow ? Flow->GetReplayLabel() : FString(TEXT("Play again")), TEXT("OnPlay"));
+        AddButton(FlowBase ? FlowBase->GetReplayLabel() : FString(TEXT("Play again")), TEXT("OnPlay"));
         AddButton(TEXT("Quit"), TEXT("OnQuit"));
         break;
     }
