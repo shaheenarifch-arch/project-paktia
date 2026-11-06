@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "Missions/HavocMissionRunner.h"
 #include "Missions/Episode01/HavocMountainShieldMission.h"
+#include "Missions/Episode02/HavocSilentCorridorMission.h"
+#include "Missions/Episode03/HavocBrokenCitadelMission.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 #include "Misc/DateTime.h"
 
@@ -34,8 +36,30 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
     ActiveRunner = nullptr;
     ActiveOpenStrait = nullptr;
     ActiveMountainShield = nullptr;
+    ActiveSilentCorridor = nullptr;
+    ActiveBrokenCitadel = nullptr;
 
     FString Error;
+    if (Def.Id == TEXT("episode_03_broken_citadel"))
+    {
+        const UHavocDataSubsystem* Data = GameInstance ? GameInstance->GetSubsystem<UHavocDataSubsystem>() : nullptr;
+        FHavocMissionDef Stronghold;
+        FHavocMapDef Map;
+        if (!Data || !Data->GetMission(FName(*Def.Stronghold), Stronghold) || !Data->GetMap(FName(*Def.Map), Map))
+        {
+            UE_LOG(LogHavocMission, Error, TEXT("StartMission: Episode 03 needs the stronghold '%s' and map '%s' in data/."), *Def.Stronghold, *Def.Map);
+            return false;
+        }
+        ActiveSeed = SurpriseSeed.IsEmpty() ? FString::Printf(TEXT("match-%lld"), FDateTime::UtcNow().GetTicks()) : SurpriseSeed;
+        UHavocBrokenCitadelMission* Mission = NewObject<UHavocBrokenCitadelMission>(this);
+        if (!Mission->Initialize(Def, Stronghold, Map.SurpriseEvents, Episode2Carryover, ActiveSeed, Events, Error))
+        {
+            return false;
+        }
+        ActiveBrokenCitadel = Mission;
+        ActiveRunner = Mission->GetRunner();
+        return true;
+    }
     if (Def.Id == TEXT("mission_01_mountain_shield"))
     {
         UHavocMountainShieldMission* Mission = NewObject<UHavocMountainShieldMission>(this);

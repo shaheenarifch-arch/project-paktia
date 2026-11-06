@@ -216,6 +216,12 @@ bool AHavocEpisode04Flow::IsPiloting() const
     return Pawn && (Pawn == Raven.Get() || Pawn == Falcon.Get());
 }
 
+void AHavocEpisode04Flow::ShowToast(const FString& Text, float Seconds)
+{
+    Toast = Text;
+    ToastTime = Seconds;
+}
+
 void AHavocEpisode04Flow::Publish(const TCHAR* EventName, const FString& Payload) const
 {
     if (const UGameInstance* GI = GetGameInstance())

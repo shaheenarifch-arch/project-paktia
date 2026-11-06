@@ -87,7 +87,7 @@ public:
     /** Greybox layout: sector centre in game-space metres (x east, z north), NAME_None-safe (zero for unknown). */
     static FVector2D GetGreyboxSectorCentre(FName SectorId);
     /** Garrison size for an objective in a phase (0 for the protected medical station). */
-    int32 GetGarrisonFor(const FString& ObjectiveId, int32 Phase) const;
+    int32 GetGarrisonFor(const FString& ObjectiveId, int32 AssaultPhase) const;
 
 protected:
     virtual void BeginPlay() override;
