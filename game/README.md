@@ -26,6 +26,7 @@ Folders are under `Source/MidnightHavoc/`.
 | `Core/` | `UHavocEventSubsystem` | `src/core/EventBus.ts` |
 | `Campaign/` | `UHavocCampaign` (GameInstance subsystem: unlock order, best-result rule, carryover, `USaveGame` slot `HavocCampaign`) | `src/gameplay/campaign/Campaign.ts` |
 | `Missions/` | `UHavocMissionSubsystem`, `UHavocMissionRunner`, `IHavocMissionSystems` | `src/gameplay/missions/framework/MissionRunner.ts` |
+| `Missions/Episode01/` | `FHavocMountainShield` (state machine, drone tutorial, Ridge Station, counterattack, Falcon-2 crash chain; Aegis is a flag for now) | `src/gameplay/missions/mission01/` |
 | `Missions/Episode04/` | `UHavocOpenStraitMission`, `UHavocOilTerminal`, `UHavocShippingLanes`, `UHavocTankerEscort` | `src/gameplay/missions/episode04/` (OpenStrait, OilTerminal, ShippingLanes, TankerEscort) |
 | `Tests/` | Automation tests (`MidnightHavoc.Missions.*`, `MidnightHavoc.Aircraft.*`, `MidnightHavoc.Drones.*`, `MidnightHavoc.Playable.*`, `MidnightHavoc.Campaign.*`, `MidnightHavoc.Vehicles.*`) | `src/tests/episode04.test.ts`, `src/tests/episodes.test.ts`, `src/tests/system.test.ts`, `src/tests/helicopter-crash.test.ts` |
 | `Data/` | `UHavocDataSubsystem`, `FHavoc*Def` structs | `data/` (missions, maps, aircraft, vehicles, weapons) |
@@ -174,6 +175,14 @@ Run `Content/Python/build_kharg_level.py` (editor: `Tools > Execute Python Scrip
 `scripts/run-build-kharg-level.ps1`) to build `Content/Maps/Kharg/L_KhargHormuz`. Make the heightmap first with
 `Content/Python/make_kharg_heightmap.py`. Full steps and the manual fallback: `docs/kharg-level-guide.md`.
 Python scripting help: <https://dev.epicgames.com/documentation/en-us/unreal-engine/scripting-the-unreal-editor-using-python>
+
+## Building any level on paktia-pc (GitHub Actions)
+
+Actions > **Build level** > Run workflow > pick `Kharg`, `PaktiaHighlands` or `Gardun` (`.github/workflows/build-level.yml`).
+It makes the heightmap, builds the editor, runs the level's builder headless, commits the level through Git LFS and starts the Unreal build.
+`PaktiaHighlands` runs `Content/Python/build_paktia_highlands_level.py` (heightmap: `make_paktia_heightmap.py`, sources: `Content/Maps/PaktiaHighlands/SOURCES.txt`)
+and makes `Content/Maps/PaktiaHighlands/L_PaktiaHighlands`, the Episode 01 greybox: 4 sectors from `data/maps/paktia-highlands.json`,
+player starts, the Falcon-2 crash site, a nav mesh. It is a plain level (not World Partition), so all actors stay loaded. `Gardun` has no builder yet.
 
 ## Running tests
 
