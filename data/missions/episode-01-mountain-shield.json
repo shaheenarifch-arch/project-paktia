@@ -1,0 +1,28 @@
+{
+  "id": "mission_01_mountain_shield",
+  "episode": 1,
+  "name": "Operation Mountain Shield",
+  "fictional": true,
+  "setting": "fictional",
+  "map": "paktia_highlands",
+  "summary": "Learn the controls, hold Checkpoint Echo, set up Ridge Station, then Falcon-2 is shot down: recover the crew or abandon them, and survive the counterattack.",
+  "sectors": ["highlands_staging", "checkpoint_echo", "ridge_station", "crash_grid_r17"],
+  "start": "M01_BRIEFING",
+  "failState": "M01_OPERATION_FAILED",
+  "crewSize": 3,
+  "states": [
+    { "id": "M01_BRIEFING", "objective": "Briefing: hold Checkpoint Echo and set up Ridge Station in the Paktia Highlands.", "next": "M01_DRONE_TUTORIAL" },
+    { "id": "M01_DRONE_TUTORIAL", "objective": "Tutorial: move, aim, launch the Raven drone, then switch back to the Marine.", "requires": ["tutorial_complete"], "checkpoint": true, "next": "M01_HOLD_ECHO" },
+    { "id": "M01_HOLD_ECHO", "objective": "Hold Checkpoint Echo until the timer runs out.", "requires": ["echo_held"], "checkpoint": true, "next": "M01_RIDGE_STATION" },
+    { "id": "M01_RIDGE_STATION", "objective": "Move to Ridge Station and set up the relay (Aegis comes online).", "effects": ["ridge.discover"], "requires": ["ridge_station_set"], "checkpoint": true, "next": "M01_FALCON_DOWN" },
+    { "id": "M01_FALCON_DOWN", "objective": "Falcon-2 is under fire. Watch it go down.", "effects": ["crash.begin"], "requires": ["crash_seen"], "next": "M01_CRASH_DECISION" },
+    { "id": "M01_CRASH_DECISION", "objective": "Falcon-2 crashed at grid R-17. Recover the crew (risky) or abandon them and hold Ridge Station.", "branches": { "recover_crew": "M01_CREW_RECOVERY", "abandon_crew": "M01_ABANDONED" } },
+    { "id": "M01_CREW_RECOVERY", "objective": "Secure grid R-17 and carry all three crew to the evacuation point.", "effects": ["crew.locate"], "requires": ["crew_evacuated"], "checkpoint": true, "next": "M01_COUNTERATTACK" },
+    { "id": "M01_ABANDONED", "objective": "The crew is left behind. Return to Ridge Station.", "effects": ["crew.abandon"], "next": "M01_COUNTERATTACK" },
+    { "id": "M01_COUNTERATTACK", "objective": "Survive the counterattack and keep Ridge Station.", "effects": ["counterattack.begin"], "requires": ["counterattack_repelled"], "next": "M01_DEBRIEF" },
+    { "id": "M01_DEBRIEF", "objective": "Debrief.", "branches": { "crew_recovered": "M01_COMPLETE", "crew_abandoned": "M01_COMPLETE_PARTIAL" } },
+    { "id": "M01_COMPLETE", "objective": "Mountain Shield holds and the Falcon-2 crew is home.", "terminal": true, "outcome": "SUCCESS" },
+    { "id": "M01_COMPLETE_PARTIAL", "objective": "Mountain Shield holds, but the Falcon-2 crew was left behind.", "terminal": true, "outcome": "PARTIAL" },
+    { "id": "M01_OPERATION_FAILED", "objective": "Checkpoint Echo or Ridge Station was lost. Restart from the last checkpoint.", "terminal": true, "outcome": "FAILED" }
+  ]
+}

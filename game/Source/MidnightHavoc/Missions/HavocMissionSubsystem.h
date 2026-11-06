@@ -12,6 +12,7 @@
 #include "HavocMissionSubsystem.generated.h"
 
 class UHavocMissionRunner;
+class UHavocMountainShieldMission;
 class UHavocOpenStraitMission;
 class UHavocSilentCorridorMission;
 
@@ -44,9 +45,9 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|Missions")
     UHavocOpenStraitMission* GetOpenStrait() const { return ActiveOpenStrait; }
 
-    /** The Episode 02 mission object while it is the active mission (for world-driven calls), else null. */
+    /** The Episode 01 mission object while it is the active mission, else null. */
     UFUNCTION(BlueprintCallable, Category = "Havoc|Missions")
-    UHavocSilentCorridorMission* GetSilentCorridor() const { return ActiveSilentCorridor; }
+    UHavocMountainShieldMission* GetMountainShield() const { return ActiveMountainShield; }
 
     // Pass-throughs to the active runner. All are safe no-ops (empty result) without one.
     UFUNCTION(BlueprintCallable, Category = "Havoc|Missions")
@@ -75,7 +76,7 @@ private:
     TObjectPtr<UHavocOpenStraitMission> ActiveOpenStrait;
 
     UPROPERTY()
-    TObjectPtr<UHavocSilentCorridorMission> ActiveSilentCorridor;
+    TObjectPtr<UHavocMountainShieldMission> ActiveMountainShield;
 
     FString Episode3Outcome;
     bool bEpisode1CrewRecovered = true;

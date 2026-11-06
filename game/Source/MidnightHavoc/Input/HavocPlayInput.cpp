@@ -70,6 +70,7 @@ void UHavocPlayInput::Initialize(FSubsystemCollectionBase& Collection)
     CallFalconAction = MakeAction(TEXT("IA_CallFalcon"), 0);
     ReturnAction = MakeAction(TEXT("IA_Return"), 0);
     VehicleAction = MakeAction(TEXT("IA_Vehicle"), 0);
+    DismissHintAction = MakeAction(TEXT("IA_DismissHint"), 0);
 
     MoveAction = MakeAction(TEXT("IA_Move"), 2);
     LookAction = MakeAction(TEXT("IA_Look"), 2);
@@ -140,6 +141,8 @@ void UHavocPlayInput::BuildContexts()
     MetaContext->MapKey(CallFalconAction, EKeys::G);
     MetaContext->MapKey(ReturnAction, EKeys::Tab);
     MetaContext->MapKey(VehicleAction, EKeys::F);
+    MetaContext->MapKey(DismissHintAction, EKeys::H);
+    MetaContext->MapKey(DismissHintAction, EKeys::Gamepad_FaceButton_Left); // X
 
     FootContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Foot"));
     MapWasd(FootContext, MoveAction, EKeys::W, EKeys::S, EKeys::A, EKeys::D);
@@ -198,5 +201,117 @@ void UHavocPlayInput::EnsureMeta(APlayerController* Controller) const
     if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer ? LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>() : nullptr)
     {
         Subsystem->AddMappingContext(MetaContext, 0);
+    }
+}
+
+FString UHavocPlayInput::KeyName(const FKey& Key)
+{
+    if (Key == EKeys::Mouse2D) { return TEXT("Mouse"); }
+    if (Key == EKeys::Gamepad_Special_Right) { return TEXT("Start"); }
+    if (Key == EKeys::Gamepad_FaceButton_Left) { return TEXT("Gamepad X"); }
+    if (Key == EKeys::LeftControl) { return TEXT("Left Ctrl"); }
+    if (Key == EKeys::LeftShift) { return TEXT("Left Shift"); }
+    if (Key == EKeys::SpaceBar) { return TEXT("Space"); }
+    if (Key == EKeys::Escape) { return TEXT("Esc"); }
+    return Key.GetDisplayName().ToString();
+}
+
+namespace
+{
+    /** The keys mapped to an action, in mapping order, joined with " / ". Empty if nothing is mapped. */
+    TArray<FString> MappedKeys(const UInputMappingContext* Context, const UInputAction* Action)
+    {
+        TArray<FString> Out;
+        if (Context && Action)
+        {
+            for (const FEnhancedActionKeyMapping& Mapping : Context->GetMappings())
+            {
+                if (Mapping.Action == Action)
+                {
+                    Out.AddUnique(UHavocPlayInput::KeyName(Mapping.Key));
+                }
+            }
+        }
+        return Out;
+    }
+
+    FString Joined(const UInputMappingContext* Context, const UInputAction* Action)
+    {
+        const TArray<FString> Keys = MappedKeys(Context, Action);
+        return Keys.Num() ? FString::Join(Keys, TEXT(" / ")) : FString(TEXT("(unbound)"));
+    }
+
+    /** A 2D movement action mapped by MapWasd (right, left, forward, back) shown as forward / left / back / right. */
+    FString FourWay(const UInputMappingContext* Context, const UInputAction* Action)
+    {
+        const TArray<FString> K = MappedKeys(Context, Action);
+        return K.Num() == 4 ? FString::Printf(TEXT("%s / %s / %s / %s"), *K[2], *K[1], *K[3], *K[0]) : Joined(Context, Action);
+    }
+}
+
+TArray<FHavocControlRow> UHavocPlayInput::BuildControlRows() const
+{
+    TArray<FHavocControlRow> Rows;
+    const auto Add = [&Rows](const TCHAR* Section, const TCHAR* Action, const FString& Keys)
+    {
+        Rows.Add({ Section, Action, Keys });
+    };
+
+    const TCHAR* Foot = TEXT("On foot (Marine)");
+    Add(Foot, TEXT("Move forward / left / back / right"), FourWay(FootContext, MoveAction));
+    Add(Foot, TEXT("Look"), Joined(FootContext, LookAction));
+    Add(Foot, TEXT("Jump"), Joined(FootContext, JumpAction));
+    Add(Foot, TEXT("Sprint (hold)"), Joined(FootContext, SprintAction));
+    Add(Foot, TEXT("Crouch (toggle)"), Joined(FootContext, CrouchAction));
+    Add(Foot, TEXT("Aim"), Joined(FootContext, AimAction));
+    Add(Foot, TEXT("Fire (hold for automatic)"), Joined(FootContext, FireAction));
+    Add(Foot, TEXT("Reload"), Joined(FootContext, ReloadAction));
+    Add(Foot, TEXT("Interact: call a resupply drop"), Joined(MetaContext, InteractAction));
+    Add(Foot, TEXT("Get into the nearest vehicle / get out"), Joined(MetaContext, VehicleAction));
+    Add(Foot, TEXT("Choose north / west landing beach"), FString::Printf(TEXT("%s / %s"), *Joined(MetaContext, ChooseNorthAction), *Joined(MetaContext, ChooseWestAction)));
+
+    const TCHAR* Veh = TEXT("Vehicles (boat, ground vehicle, helicopter, recon drone)");
+    Add(Veh, TEXT("Throttle forward / reverse"), Joined(VehicleContext, ThrottleAction));
+    Add(Veh, TEXT("Steer right / left (or yaw)"), Joined(VehicleContext, SteerAction));
+    Add(Veh, TEXT("Climb / descend (flying vehicles)"), Joined(VehicleContext, RiseAction));
+    Add(Veh, TEXT("Camera"), Joined(VehicleContext, LookAction));
+    Add(Veh, TEXT("Get out"), Joined(MetaContext, VehicleAction));
+
+    const TCHAR* Raven = TEXT("Raven drone");
+    Add(Raven, TEXT("Launch or take control of the Raven"), Joined(MetaContext, DeployRavenAction));
+    Add(Raven, TEXT("Fly forward / left / back / right"), FourWay(DroneContext, MoveAction));
+    Add(Raven, TEXT("Climb / descend"), Joined(DroneContext, RiseAction));
+    Add(Raven, TEXT("Turn and tilt the camera"), Joined(DroneContext, LookAction));
+    Add(Raven, TEXT("Mark a revealed lane hazard"), Joined(MetaContext, InteractAction));
+    Add(Raven, TEXT("Return to the Marine"), Joined(MetaContext, ReturnAction));
+
+    const TCHAR* Falcon = TEXT("Falcon helicopter");
+    Add(Falcon, TEXT("Call Falcon support"), Joined(MetaContext, CallFalconAction));
+    Add(Falcon, TEXT("Climb / descend (collective)"), Joined(FalconContext, CollectiveAction));
+    Add(Falcon, TEXT("Tilt forward / left / back / right (cyclic)"), FourWay(FalconContext, CyclicAction));
+    Add(Falcon, TEXT("Yaw right / left"), Joined(FalconContext, YawAction));
+    Add(Falcon, TEXT("Return to the Marine (the Falcon keeps covering)"), Joined(MetaContext, ReturnAction));
+
+    const TCHAR* Menu = TEXT("Menus and game");
+    Add(Menu, TEXT("Pause menu"), Joined(MetaContext, PauseAction));
+    Add(Menu, TEXT("Dismiss a first-time hint"), Joined(MetaContext, DismissHintAction));
+    Add(Menu, TEXT("Menus: move, choose, back"), TEXT("Mouse click, or Up / Down and Enter / Esc, or gamepad D-pad / stick, A / B"));
+    return Rows;
+}
+
+FString UHavocPlayInput::HintFor(EHavocHintKind Kind) const
+{
+    const FString Return = Joined(MetaContext, ReturnAction);
+    switch (Kind)
+    {
+    case EHavocHintKind::Drone:
+        return FString::Printf(TEXT("RAVEN DRONE: %s fly, Space / Left Ctrl climb and descend, mouse turns. %s marks a revealed hazard. %s returns to the Marine."),
+            *FourWay(DroneContext, MoveAction), *Joined(MetaContext, InteractAction), *Return);
+    case EHavocHintKind::Vehicle:
+        return FString::Printf(TEXT("VEHICLE: %s throttle, %s steer, %s climb and descend (flying vehicles only), mouse moves the camera. %s gets out. Full list: Pause > How to play."),
+            *Joined(VehicleContext, ThrottleAction), *Joined(VehicleContext, SteerAction), *Joined(VehicleContext, RiseAction), *Joined(MetaContext, VehicleAction));
+    default:
+        return FString::Printf(TEXT("FALCON HELICOPTER: %s climb and descend, %s tilt, %s yaw. %s returns to the Marine. Full list: Pause > How to play."),
+            *Joined(FalconContext, CollectiveAction), *FourWay(FalconContext, CyclicAction), *Joined(FalconContext, YawAction), *Return);
     }
 }

@@ -11,7 +11,8 @@
 #include "Player/HavocPlayerCharacter.h"
 #include "HavocPlayerController.generated.h"
 
-class AHavocEpisodeFlowBase;
+class AHavocEpisode04Flow;
+class IHavocEpisodeFlow;
 class UHavocMenuWidget;
 class UHavocPlayHUD;
 
@@ -45,11 +46,19 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|UI")
     void TogglePause();
 
-    /** The active episode flow (Episode 04 until the Campaign menu picks another). Null if none exists in the level. */
-    AHavocEpisodeFlowBase* GetFlow();
+    /** The active episode flow through the shared interface (null if the level has none). */
+    IHavocEpisodeFlow* GetFlow();
+    /** Episode 04 only: for its specific inputs (beach choice, Raven, Falcon). */
+    AHavocEpisode04Flow* GetEpisode04Flow();
 
-    /** Makes the flow of this class the active one, spawning it if the level has none. Returns it. */
-    AHavocEpisodeFlowBase* SelectFlow(TSubclassOf<AHavocEpisodeFlowBase> FlowClass);
+    /** The first-time hint on screen now (empty if none). Shown by the HUD until dismissed or it times out. */
+    const FString& GetActiveHint() const { return ActiveHint; }
+
+    /** Dismisses the first-time hint (H or gamepad X). */
+    void DismissHint();
+
+    /** Shows the hint for this kind of machine unless it was shown before (remembered in UHavocPlaySettings). */
+    void ShowFirstTimeHint(EHavocHintKind Kind);
 
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }
@@ -58,6 +67,8 @@ protected:
     virtual void BeginPlay() override;
     virtual void SetupInputComponent() override;
     virtual void OnPossess(APawn* InPawn) override;
+    virtual void AcknowledgePossession(APawn* P) override;
+    virtual void Tick(float DeltaSeconds) override;
 
 private:
     void OnChooseNorth();
@@ -67,6 +78,7 @@ private:
     void OnCallFalcon();
     void OnReturn();
     void OnVehicle();
+    void OnDismissHint() { DismissHint(); }
     void EnsureMetaContext();
 
     /** Smoke test only (-HavocSmokeStart): start Episode 04 without the menu, then take a screenshot for
@@ -79,8 +91,11 @@ private:
     UFUNCTION(Server, Reliable)
     void ServerToggleVehicle();
 
+    FString ActiveHint;
+    float HintSecondsLeft = 0.f;
+
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;
-    UPROPERTY() TObjectPtr<AHavocEpisodeFlowBase> Flow;
+    UPROPERTY() TScriptInterface<IHavocEpisodeFlow> Flow;
     TWeakObjectPtr<AHavocPlayerCharacter> Marine;
 };

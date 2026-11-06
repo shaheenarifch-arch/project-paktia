@@ -5,7 +5,7 @@ Episode 4 is a declared real-world hypothetical (see `README.md`, Safety boundar
 
 | Episode | Operation | Where | Code | Data |
 | --- | --- | --- | --- | --- |
-| 1 | Mountain Shield | Paktia Highlands: Checkpoint Echo, Ridge Station, Falcon-2 crash grid R-17 | `src/gameplay/missions/mission01/` | (hand-written state machine) |
+| 1 | Mountain Shield | Paktia Highlands: Checkpoint Echo, Ridge Station, Falcon-2 crash grid R-17 | `src/gameplay/missions/mission01/` | `data/missions/episode-01-mountain-shield.json` (Unreal) + hand-written TS state machine |
 | 2 | Silent Corridor | Valley corridor → Dry Riverbed → South Gate | `src/gameplay/missions/episode02/` | `data/missions/episode-02-silent-corridor.json` |
 | 3 | Broken Citadel | Gardun, all five Stronghold Assault phases | `src/gameplay/missions/episode03/` | `data/missions/episode-03-broken-citadel.json` + `operation-broken-citadel.json` |
 | 4 | Open Strait | Kharg Island and the Strait of Hormuz (real-world hypothetical) | `src/gameplay/missions/episode04/` | `data/missions/episode-04-open-strait.json` + `data/maps/kharg-hormuz.json` |
@@ -13,6 +13,8 @@ Episode 4 is a declared real-world hypothetical (see `README.md`, Safety boundar
 `src/gameplay/campaign/Campaign.ts` keeps the order, unlocks an episode when
 the previous one ended in SUCCESS or PARTIAL, never lets a worse replay
 overwrite a better result, and saves/loads as plain JSON.
+
+The Unreal port is `game/Source/MidnightHavoc/Campaign/HavocCampaign.*` (`UHavocCampaign`): same rules, saved with `USaveGame` to the `HavocCampaign` slot (<https://dev.epicgames.com/documentation/en-us/unreal-engine/saving-and-loading-your-game-in-unreal-engine>). The campaign menu shows each episode as Locked, Unlocked or Completed. Until Episodes 01-03 exist in Unreal, the menu offers "Unlock all episodes (testing)" so Episode 04 can be played. Tests: `MidnightHavoc.Campaign.*`.
 
 ## Mission framework
 
@@ -122,3 +124,15 @@ As with Mission 01, the engine reports results and the episode decides what happ
 - **Reading state:** `snapshot()` returns everything the UI shows.
 
 Tests: `src/tests/episodes.test.ts`. Data checks: `npm run validate`.
+
+## Unreal build status (issue #70)
+
+Order in Unreal: 01 -> 02 -> 03 -> 04, two maps (Paktia Highlands for 01; Gardun shared by 02 and 03).
+
+| Episode | Map script | Rules in C++ | Playable flow |
+| --- | --- | --- | --- |
+| 1 | `game/Content/Python/build_paktia_level.py` (workflow *Build Paktia level*, manual) | `Missions/Episode01/HavocMountainShieldMission` (+ `Tests/HavocEpisode01Tests.cpp`) | not yet: next PR (Raven/HUD hookup, hints, cutscenes, menu) |
+| 2, 3 | not started | not started | not started |
+| 4 | `build_kharg_level.py` | `Missions/Episode04/` | yes |
+
+Episode 01 carryover (`UHavocMountainShieldMission::GetCarryover`): crew recovered (SUCCESS) or abandoned (PARTIAL).

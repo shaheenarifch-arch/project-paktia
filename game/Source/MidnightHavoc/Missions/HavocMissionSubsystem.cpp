@@ -5,7 +5,7 @@
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "Missions/HavocMissionRunner.h"
-#include "Missions/Episode02/HavocSilentCorridorMission.h"
+#include "Missions/Episode01/HavocMountainShieldMission.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 
 bool UHavocMissionSubsystem::GetMissionDef(FName Id, FHavocMissionDef& OutMission) const
@@ -31,9 +31,20 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
 
     ActiveRunner = nullptr;
     ActiveOpenStrait = nullptr;
-    ActiveSilentCorridor = nullptr;
+    ActiveMountainShield = nullptr;
 
     FString Error;
+    if (Def.Id == TEXT("mission_01_mountain_shield"))
+    {
+        UHavocMountainShieldMission* Mission = NewObject<UHavocMountainShieldMission>(this);
+        if (!Mission->Initialize(Def, Events, Error))
+        {
+            return false;
+        }
+        ActiveMountainShield = Mission;
+        ActiveRunner = Mission->GetRunner();
+        return true;
+    }
     if (Def.Id == TEXT("episode_04_open_strait"))
     {
         UHavocOpenStraitMission* Mission = NewObject<UHavocOpenStraitMission>(this);
