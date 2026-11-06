@@ -1,3 +1,4 @@
 # Generated heightmap; run Content/Python/make_kharg_heightmap.py
 Source/*.png
 Source/*.tif
+Source/*.obj

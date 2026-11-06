@@ -9,5 +9,6 @@ enum class EHavocMenuMode : uint8
     Main,
     Pause,
     Settings,
-    Results
+    Results,
+    Campaign   // episode select: Main > Campaign > Start
 };

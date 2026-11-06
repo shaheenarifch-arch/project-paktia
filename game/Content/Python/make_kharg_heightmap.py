@@ -26,6 +26,41 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.normpath(os.path.join(HERE, "..", "Maps", "Kharg", "Source", "kharg_heightmap_r16.png"))
 
 
+MESH_RES = 401                   # terrain mesh grid (401 x 401 verts, 50 m spacing over 20 km)
+
+
+def write_terrain_obj(elev, path):
+    """Write the island as a centred grid mesh (OBJ, centimetres, Z up) for build_kharg_level.py.
+
+    Unreal 5.5 Python cannot create a Landscape, so the builder imports this mesh instead. The grid is
+    centred on (0, 0) so it matches LAYOUT in build_kharg_level.py. Row 0 of the DEM is north (+Y).
+    OBJ import help: https://dev.epicgames.com/documentation/en-us/unreal-engine/importing-assets-using-interchange-in-unreal-engine
+    """
+    import numpy as np
+    n = MESH_RES
+    idx = np.linspace(0, elev.shape[0] - 1, n).round().astype(int)
+    h = elev[np.ix_(idx, idx)] * 100.0                  # metres -> cm
+    half = SIZE_KM * 100000.0 / 2
+    xs = np.linspace(-half, half, n)
+    ys = np.linspace(half, -half, n)                    # north first
+    with open(path, "w") as f:
+        f.write("# Kharg Island terrain, %d x %d grid, cm, Z up. Made by make_kharg_heightmap.py\n" % (n, n))
+        f.write("o KhargTerrain\n")
+        for r in range(n):
+            for c in range(n):
+                f.write("v %.0f %.0f %.0f\n" % (xs[c], ys[r], h[r, c]))
+        for r in range(n):
+            for c in range(n):
+                f.write("vt %.5f %.5f\n" % (c / (n - 1) * 64, r / (n - 1) * 64))  # sand texture tiles 64x
+        for r in range(n - 1):
+            for c in range(n - 1):
+                a = r * n + c + 1
+                b, d, e = a + 1, a + n, a + n + 1
+                f.write("f %d/%d %d/%d %d/%d\n" % (a, a, d, d, b, b))
+                f.write("f %d/%d %d/%d %d/%d\n" % (b, b, d, d, e, e))
+    print("Wrote %s (%d x %d terrain mesh)" % (path, n, n))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--download", action="store_true", help="read the open Copernicus tile over HTTPS")
@@ -54,6 +89,7 @@ def main():
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     Image.fromarray(raw).save(a.out)
     print("Wrote %s (max land height %.0f m)" % (a.out, elev.max()))
+    write_terrain_obj(elev, os.path.join(os.path.dirname(a.out), "kharg_terrain.obj"))
     print("Record source and licence in Content/Maps/Kharg/SOURCES.txt (already pre-filled for Copernicus).")
 
 

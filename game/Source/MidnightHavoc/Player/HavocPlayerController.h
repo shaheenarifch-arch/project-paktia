@@ -65,6 +65,12 @@ private:
     void OnVehicle();
     void EnsureMetaContext();
 
+    /** Smoke test only (-HavocSmokeStart): start Episode 04 without the menu, then take a screenshot for
+     *  game/scripts/smoke-run.ps1 to check the world is visible. See game/docs/smoke-test.md. */
+    void StartSmokeRun();
+    FTimerHandle SmokeStartTimer;
+    FTimerHandle SmokeShotTimer;
+
     /** F on foot enters the nearest vehicle in range, F in a vehicle exits (state changes are server only). */
     UFUNCTION(Server, Reliable)
     void ServerToggleVehicle();

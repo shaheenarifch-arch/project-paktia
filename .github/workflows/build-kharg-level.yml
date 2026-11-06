@@ -10,7 +10,7 @@ name: Build Kharg level
 on:
   push:
     branches: ['bhaddru/**']
-    paths: ['.github/workflows/build-kharg-level.yml']
+    paths: ['.github/workflows/build-kharg-level.yml', 'game/Content/Python/build_kharg_level.py', 'game/Content/Python/make_kharg_heightmap.py']
   workflow_dispatch:
 
 concurrency:
