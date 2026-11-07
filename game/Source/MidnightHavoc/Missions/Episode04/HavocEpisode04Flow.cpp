@@ -1,5 +1,7 @@
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "AI/HavocAIController.h"
 #include "AI/HavocEnemyCharacter.h"
 #include "AI/HavocSquadSubsystem.h"
@@ -278,9 +280,12 @@ void AHavocEpisode04Flow::StartEpisode()
     // Episode 03 SUCCESS adds the Episode 04 reinforcement bonus.
     const UGameInstance* GI = GetGameInstance();
     const UHavocCampaign* Campaign = GI ? GI->GetSubsystem<UHavocCampaign>() : nullptr;
-    if (Campaign && !Campaign->IsUnlocked(4))
+    // The automated smoke test (-HavocSmokeStart) plays Episode 04 on a fresh save, so it skips the campaign lock.
+    const bool bSmokeRun = FParse::Param(FCommandLine::Get(), TEXT("HavocSmokeStart"));
+    if (Campaign && !Campaign->IsUnlocked(4) && !bSmokeRun)
     {
         ShowToast(TEXT("Episode 04 is locked. Finish Episode 03 first."), 6.f);
+        UE_LOG(LogHavocFlow, Display, TEXT("Episode 04 is locked in this campaign (finish Episode 03 first)"));
         return;
     }
     if (Missions && Campaign)
