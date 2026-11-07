@@ -64,6 +64,9 @@ public:
     /** The Episode 03 flow when the session plays Episode 03 (greybox Gardun), else null. */
     AHavocEpisode03Flow* GetFlow03();
 
+    /** Makes the flow actor of this class the active one (spawning it if the level has none). Returns it. */
+    AActor* SelectFlow(TSubclassOf<AActor> FlowClass);
+
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }
 
@@ -101,5 +104,6 @@ private:
     UPROPERTY() TObjectPtr<UHavocMenuWidget> Menu;
     UPROPERTY() TObjectPtr<UHavocPlayHUD> Hud;
     UPROPERTY() TScriptInterface<IHavocEpisodeFlow> Flow;
+    UPROPERTY() TObjectPtr<AHavocEpisode03Flow> Flow03;
     TWeakObjectPtr<AHavocPlayerCharacter> Marine;
 };

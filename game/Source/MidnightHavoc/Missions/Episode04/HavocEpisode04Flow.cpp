@@ -216,6 +216,12 @@ bool AHavocEpisode04Flow::IsPiloting() const
     return Pawn && (Pawn == Raven.Get() || Pawn == Falcon.Get());
 }
 
+void AHavocEpisode04Flow::ShowToast(const FString& Text, float Seconds)
+{
+    Toast = Text;
+    ToastTime = Seconds;
+}
+
 void AHavocEpisode04Flow::Publish(const TCHAR* EventName, const FString& Payload) const
 {
     if (const UGameInstance* GI = GetGameInstance())
@@ -469,7 +475,9 @@ void AHavocEpisode04Flow::EndEpisode()
         }
     }
 
-    if (AHavocPlayerController* PC = GetPC())
+    // Outro fly-over, then the results screen (skippable).
+    TWeakObjectPtr<AHavocEpisode04Flow> Self(this);
+    PlayCutscene(false, [Self]()
     {
         if (AHavocEpisode04Flow* Flow = Self.Get())
         {

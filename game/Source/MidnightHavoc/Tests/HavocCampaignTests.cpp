@@ -9,6 +9,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Misc/AutomationTest.h"
+#include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Campaign/HavocCampaign.h"
@@ -27,11 +28,14 @@ namespace HavocCampaignTests
     /** A campaign on its own save slot, so the player's real save is never touched. Delete the slot when done. */
     struct FTestCampaign
     {
+        // UHavocCampaign is a game-instance subsystem (ClassWithin UGameInstance), so it needs one as its outer.
+        TStrongObjectPtr<UGameInstance> GameInstance;
         TStrongObjectPtr<UHavocCampaign> Campaign;
         FString Slot;
 
         explicit FTestCampaign(const TCHAR* Name, bool bClear = true)
-            : Campaign(NewObject<UHavocCampaign>(GetTransientPackage()))
+            : GameInstance(NewObject<UGameInstance>(GetTransientPackage()))
+            , Campaign(NewObject<UHavocCampaign>(GameInstance.Get()))
             , Slot(FString::Printf(TEXT("HavocCampaignTest_%s"), Name))
         {
             Campaign->SlotName = Slot;

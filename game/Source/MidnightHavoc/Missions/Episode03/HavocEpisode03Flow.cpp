@@ -110,13 +110,13 @@ FVector2D AHavocEpisode03Flow::GetGreyboxSectorCentre(FName SectorId)
     return FVector2D::ZeroVector;
 }
 
-int32 AHavocEpisode03Flow::GetGarrisonFor(const FString& ObjectiveId, int32 Phase) const
+int32 AHavocEpisode03Flow::GetGarrisonFor(const FString& ObjectiveId, int32 AssaultPhase) const
 {
     if (GetSectorForObjective(ObjectiveId).IsNone() || ObjectiveId == TEXT("medical_station"))
     {
         return 0; // the medical station is a protected location: hold it, no garrison
     }
-    return GarrisonPerObjective + (Phase == 5 ? CitadelExtraGarrison : 0);
+    return GarrisonPerObjective + (AssaultPhase == 5 ? CitadelExtraGarrison : 0);
 }
 
 // ---------------------------------------------------------------- lifecycle

@@ -15,7 +15,7 @@ namespace
         }
     }
 
-    EHavocRelayState StateFromString(const FString& Text)
+    EHavocRelayState RelayStateFromString(const FString& Text)
     {
         if (Text == TEXT("ONLINE")) { return EHavocRelayState::Online; }
         if (Text == TEXT("JAMMED")) { return EHavocRelayState::Jammed; }
@@ -172,7 +172,7 @@ void UHavocRelayNetwork::RestoreSnapshot(const TSharedPtr<FJsonObject>& Data)
             (*Pos)->TryGetNumberField(TEXT("z"), R.Position.Z);
         }
         Item->TryGetNumberField(TEXT("range"), R.Range);
-        if (Item->TryGetStringField(TEXT("state"), Text)) { R.State = StateFromString(Text); }
+        if (Item->TryGetStringField(TEXT("state"), Text)) { R.State = RelayStateFromString(Text); }
         Relays.Add(R);
     }
 }
