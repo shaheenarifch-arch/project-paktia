@@ -58,24 +58,23 @@ void UHavocDataSubsystem::LoadAll()
     // Search order: the DataDirectory override; the repo's data/ folder (<ProjectDir>/../data, used in the
     // editor); then Content/HavocData, the copy that packaged builds ship (made by the PreBuildSteps in
     // MidnightHavoc.uproject and staged by DefaultGame.ini). See game/README.md "Packaged builds".
+    // In packaged builds ProjectDir() is relative ("../../../MidnightHavoc/"). Make it absolute first:
+    // collapsing "../" pieces of a relative path climbed one folder too high (data not found).
+    const FString ProjectAbs = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir());
+    const FString ContentAbs = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir());
     TArray<FString> Candidates;
     if (!DataDirectory.IsEmpty())
     {
-        Candidates.Add(DataDirectory);
+        Candidates.Add(FPaths::IsRelative(DataDirectory) ? FPaths::Combine(ProjectAbs, DataDirectory) : DataDirectory);
     }
-    Candidates.Add(FPaths::Combine(FPaths::ProjectDir(), TEXT("../data")));
-    Candidates.Add(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("HavocData")));
+    Candidates.Add(FPaths::Combine(ProjectAbs, TEXT("../data")));
+    Candidates.Add(FPaths::Combine(ContentAbs, TEXT("HavocData")));
 
     TArray<FString> Tried;
     ResolvedDataDirectory.Reset();
     for (FString Dir : Candidates)
     {
-        if (FPaths::IsRelative(Dir))
-        {
-            Dir = FPaths::Combine(FPaths::ProjectDir(), Dir);
-        }
         FPaths::CollapseRelativeDirectories(Dir);
-        Dir = FPaths::ConvertRelativePathToFull(Dir);
         Tried.Add(Dir);
         if (FPaths::DirectoryExists(Dir))
         {
