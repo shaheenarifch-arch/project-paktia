@@ -70,8 +70,9 @@ Get-ChildItem -Path $searchRoot -Recurse -Filter '*.log' -ErrorAction SilentlyCo
 # Log errors: top 10 distinct, with counts (timestamps/frame counters stripped).
 $errLines = @()
 Get-ChildItem -Path $OutDir -Filter '*.log' -ErrorAction SilentlyContinue | ForEach-Object {
+  $logName = $_.Name   # prefix each error with its log file so stray logs (not smoke.log) are easy to spot
   $errLines += Select-String -Path $_.FullName -Pattern ': (Error|Fatal):|Ensure condition failed|Assertion failed' -ErrorAction SilentlyContinue |
-    ForEach-Object { ($_.Line -replace '^\[[^\]]*\]\[[^\]]*\]', '' -replace '0x[0-9A-Fa-f]+', '0x…').Trim() }
+    ForEach-Object { "[$logName] " + ($_.Line -replace '^\[[^\]]*\]\[[^\]]*\]', '' -replace '0x[0-9A-Fa-f]+', '0x…').Trim() }
 }
 $topErrors = $errLines | Group-Object | Sort-Object Count -Descending | Select-Object -First 10
 if ($errLines | Where-Object { $_ -match 'Fatal:' }) { $reasons += 'Fatal log entries present' }
