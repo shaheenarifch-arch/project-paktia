@@ -63,6 +63,21 @@ jobs:
             Get-Content $log -Tail 60
           } else { Write-Host "No editor log at $log" }
 
+      # Build and smoke test run on the same PC (paktia-pc), so the smoke job takes the build from disk.
+      # Uploading the ~GB zip kept dropping the PC's connection (ECONNRESET / "runner lost communication").
+      - name: Keep the packaged build on this PC for the smoke test
+        if: success()
+        shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
+        run: |
+          $root = 'C:\havoc-builds'
+          $dest = Join-Path $root "$env:GITHUB_RUN_ID"
+          New-Item -ItemType Directory -Force -Path $dest | Out-Null
+          Copy-Item -Path "$env:GITHUB_WORKSPACE\out\Windows\*" -Destination $dest -Recurse -Force
+          # Keep only the 3 newest builds so the disk does not fill up.
+          Get-ChildItem $root -Directory | Sort-Object LastWriteTime -Descending | Select-Object -Skip 3 |
+            ForEach-Object { Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue }
+          Write-Host "Packaged build kept at $dest"
+
       - name: Zip the packaged build
         if: success()
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
@@ -70,8 +85,9 @@ jobs:
           Compress-Archive -Path "$env:GITHUB_WORKSPACE\out\Windows\*" `
             -DestinationPath "$env:GITHUB_WORKSPACE\MidnightHavoc-Win64.zip" -Force
 
-      - name: Upload packaged build
+      - name: Upload packaged build (download link; a network drop here doesn't fail the build)
         if: success()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: MidnightHavoc-Win64
@@ -80,6 +96,7 @@ jobs:
 
       - name: Upload logs and test report
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: unreal-logs
@@ -105,21 +122,18 @@ jobs:
         with:
           lfs: false
 
-      - name: Download packaged build
-        uses: actions/download-artifact@v4
-        with:
-          name: MidnightHavoc-Win64
-          path: smoke-in
-
-      - name: Unzip build
+      - name: Use the packaged build kept on this PC by the build job
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
-        run: Expand-Archive -Path smoke-in\MidnightHavoc-Win64.zip -DestinationPath smoke-build -Force
+        run: |
+          $src = "C:\havoc-builds\$env:GITHUB_RUN_ID"
+          if (-not (Test-Path $src)) { throw "No packaged build at $src (the build job keeps it there)." }
+          Write-Host "Smoke test uses $src"
 
       - name: Smoke run (each playable episode in turn) and parse results
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: >
           ./game/scripts/smoke-episodes.ps1
-          -BuildDir "$env:GITHUB_WORKSPACE\smoke-build"
+          -BuildDir "C:\havoc-builds\$env:GITHUB_RUN_ID"
           -OutDir "$env:GITHUB_WORKSPACE\smoke-out"
           -Seconds ([int]$env:SMOKE_SECONDS)
 
@@ -132,6 +146,7 @@ jobs:
 
       - name: Upload smoke artifacts
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: smoke-test
