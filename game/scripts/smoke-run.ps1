@@ -154,7 +154,7 @@ if (-not $shot) {
   } catch { $reasons += "Could not read the in-game screenshot: $_" }
 }
 
-Get-ChildItem -Path $OutDir -Filter '*.log' -ErrorAction SilentlyContinue | Select-String -Pattern 'HavocSmoke|HavocCutscene|Cutscene could not|LogHavocFlow|LogLoad: (Game class|LoadMap)|Took .* seconds to LoadMap' -ErrorAction SilentlyContinue |
+Get-ChildItem -Path $OutDir -Filter '*.log' -ErrorAction SilentlyContinue | Select-String -Pattern 'HavocSmoke|HavocCutscene|Cutscene could not|LogHavocFlow|LogHavocMission|LogHavocData|LogLoad: (Game class|LoadMap)|Took .* seconds to LoadMap' -ErrorAction SilentlyContinue |
   Select-Object -First 40 | ForEach-Object { Write-Host "smoke log: $($_.Line)" }
 Write-Host "Screenshot spread: $shotSpread"
 # Thumbnails of every screenshot from this run, oldest first (the first is the scored one; the rest are diag shots).

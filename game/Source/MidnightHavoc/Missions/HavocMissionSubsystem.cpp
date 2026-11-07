@@ -76,6 +76,7 @@ bool UHavocMissionSubsystem::StartMission(FName MissionId)
         UHavocOpenStraitMission* Mission = NewObject<UHavocOpenStraitMission>(this);
         if (!Mission->Initialize(Def, Episode3Outcome, Events, Error))
         {
+            UE_LOG(LogHavocMission, Error, TEXT("StartMission '%s': %s"), *MissionId.ToString(), *Error);
             return false;
         }
         ActiveOpenStrait = Mission;
