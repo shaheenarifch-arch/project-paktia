@@ -127,13 +127,17 @@ jobs:
         run: |
           $src = "C:\havoc-builds\$env:GITHUB_RUN_ID"
           if (-not (Test-Path $src)) { throw "No packaged build at $src (the build job keeps it there)." }
-          Write-Host "Smoke test uses $src"
+          # Same folder layout the smoke test always used (the game resolves its data folder from there).
+          $dst = "$env:GITHUB_WORKSPACE\smoke-build"
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Copy-Item -Path "$src\*" -Destination $dst -Recurse -Force
+          Write-Host "Smoke test uses a local copy of $src"
 
       - name: Smoke run (each playable episode in turn) and parse results
         shell: powershell -NoProfile -ExecutionPolicy Bypass -Command ". '{0}'"
         run: >
           ./game/scripts/smoke-episodes.ps1
-          -BuildDir "C:\havoc-builds\$env:GITHUB_RUN_ID"
+          -BuildDir "$env:GITHUB_WORKSPACE\smoke-build"
           -OutDir "$env:GITHUB_WORKSPACE\smoke-out"
           -Seconds ([int]$env:SMOKE_SECONDS)
 
