@@ -32,20 +32,21 @@ PLACEHOLDER_DIR = LEVEL_DIR + "/Placeholder"
 # sector id -> (centre x, y, half-extent x, y) in cm. Z is placed on the terrain; every sector is 300 m tall each way.
 SECTOR_HALF_Z = 30000
 LAYOUT = {
+    # Ids must match data/maps/paktia-highlands.json (the missions reference them).
+    "highlands_staging": (-650000, 300000, 70000, 60000),   # Marine drop-off and Raven launch, west of Echo
     "checkpoint_echo":   (-400000, 300000, 60000, 50000),
     "ridge_station":     (200000, -250000, 50000, 50000),
-    "falcon2_crash_r17": (400000, 100000, 40000, 40000),
-    "valley_corridor":   (0, 50000, 250000, 40000),
+    "crash_grid_r17":    (400000, 100000, 40000, 40000),
 }
 PLAYER_STARTS = {  # name -> (x, y, yaw), all inside checkpoint_echo
     "echo_1": (-420000, 300000, 0), "echo_2": (-400000, 300000, 0),
     "echo_3": (-380000, 300000, 0), "echo_4": (-400000, 320000, 0),
 }
-FALCON_CRASH = (400000, 100000, 20)  # x, y, yaw: Falcon-2 wreck marker inside falcon2_crash_r17
+FALCON_CRASH = (400000, 100000, 20)  # x, y, yaw: Falcon-2 wreck marker inside crash_grid_r17
 RIDGE_STATION = (200000, -250000)
 DIRECTOR_POS = (-400000, 270000)
-# NavMesh bounds (centre x, y, half-extent x, y): the valley corridor and the sectors around it.
-NAV_BOUNDS = (0, 50000, 520000, 380000)
+# NavMesh bounds (centre x, y, half-extent x, y): all four sectors and the ground between them.
+NAV_BOUNDS = (-100000, 50000, 640000, 380000)
 NAV_HALF_Z = 60000
 TERRAIN_HALF = 1000000.0  # terrain is 20 km across
 TEMPLATE_CLASSES = ("Landscape", "LandscapeStreamingProxy", "DirectionalLight", "SkyAtmosphere", "SkyLight",
