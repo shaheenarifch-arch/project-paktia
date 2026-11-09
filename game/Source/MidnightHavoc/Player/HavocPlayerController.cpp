@@ -17,6 +17,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Missions/HavocEpisodeFlowBase.h"
+#include "Missions/Episode01/HavocEpisode01Flow.h"
 #include "Missions/Episode02/HavocEpisode02Flow.h"
 #include "Missions/Episode03/HavocEpisode03Flow.h"
 #include "Missions/Episode04/HavocEpisode04Flow.h"
@@ -142,7 +143,11 @@ void AHavocPlayerController::StartSmokeRun()
     }
     else
     {
-        if (EpisodeNumber == 2)
+        if (EpisodeNumber == 1)
+        {
+            SelectFlow(AHavocEpisode01Flow::StaticClass());
+        }
+        else if (EpisodeNumber == 2)
         {
             SelectFlow(AHavocEpisode02Flow::StaticClass());
         }
