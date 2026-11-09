@@ -218,6 +218,37 @@ bool AHavocEpisode04Flow::IsPiloting() const
     return Pawn && (Pawn == Raven.Get() || Pawn == Falcon.Get());
 }
 
+namespace
+{
+    // Trace straight down at (X, Y) and return dry, walkable land: skips the water surface (traces through it)
+    // and anything below 50 cm (sea level is 0) or steeper than ~53 degrees.
+    bool FindDryLand(UWorld* World, float X, float Y, float TopZ, float BottomZ, FVector& OutGround)
+    {
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(HavocFindDryLand), true);
+        for (int32 Pass = 0; Pass < 4; ++Pass)
+        {
+            FHitResult Hit;
+            if (!World->LineTraceSingleByChannel(Hit, FVector(X, Y, TopZ), FVector(X, Y, BottomZ), ECC_WorldStatic, Params))
+            {
+                return false;
+            }
+            AActor* HitActor = Hit.GetActor();
+            if (HitActor && (HitActor->GetClass()->GetName().Contains(TEXT("Water")) || HitActor->GetClass()->GetName().Contains(TEXT("Volume"))))
+            {
+                Params.AddIgnoredActor(HitActor);
+                continue;
+            }
+            if (Hit.ImpactNormal.Z < 0.6f || Hit.ImpactPoint.Z < 50.f)
+            {
+                return false;
+            }
+            OutGround = Hit.ImpactPoint;
+            return true;
+        }
+        return false;
+    }
+}
+
 void AHavocEpisode04Flow::ShowToast(const FString& Text, float Seconds)
 {
     Toast = Text;
@@ -776,32 +807,44 @@ void AHavocEpisode04Flow::SpawnGarrison(FName SectorId, int32 Count, FName Tag, 
 
         bool bPlaced = false;
         FVector Spot = FVector::ZeroVector;
-        for (int32 Attempt = 0; Attempt < 12 && !bPlaced; ++Attempt)
+        // Random spots across the whole sector (24 tries).
+        for (int32 Attempt = 0; Attempt < 24 && !bPlaced; ++Attempt)
         {
-            const float X = FMath::FRandRange(Box.Min.X + Box.GetExtent().X * 0.2f, Box.Max.X - Box.GetExtent().X * 0.2f);
-            const float Y = FMath::FRandRange(Box.Min.Y + Box.GetExtent().Y * 0.2f, Box.Max.Y - Box.GetExtent().Y * 0.2f);
-            FHitResult Hit;
-            const FVector Top(X, Y, Box.Max.Z + 30000.f);
-            const FVector Bottom(X, Y, Box.Min.Z - 30000.f);
-            if (!World->LineTraceSingleByChannel(Hit, Top, Bottom, ECC_WorldStatic))
+            const float X = FMath::FRandRange(Box.Min.X, Box.Max.X);
+            const float Y = FMath::FRandRange(Box.Min.Y, Box.Max.Y);
+            FVector Ground;
+            if (!FindDryLand(World, X, Y, Box.Max.Z + 30000.f, Box.Min.Z - 30000.f, Ground))
             {
                 continue;
             }
-            // Keep units on land: skip the water surface and steep ground.
-            if (Hit.GetActor() && Hit.GetActor()->GetClass()->GetName().Contains(TEXT("Water")))
+            if (MinDistFromMarine > 0.f && FVector::Dist2D(Ground, MarineLoc) < MinDistFromMarine)
             {
                 continue;
             }
-            if (Hit.ImpactNormal.Z < 0.6f || Hit.ImpactPoint.Z < 50.f)
-            {
-                continue;
-            }
-            if (MinDistFromMarine > 0.f && FVector::Dist2D(Hit.ImpactPoint, MarineLoc) < MinDistFromMarine)
-            {
-                continue;
-            }
-            Spot = Hit.ImpactPoint + FVector(0.f, 0.f, 110.f);
+            Spot = Ground + FVector(0.f, 0.f, 110.f);
             bPlaced = true;
+        }
+        // A beach sector can sit mostly over water: walk inland from the sector centre towards the island
+        // centre (0, 0) in 50 m steps (up to 8 km) and use the first dry land, jittered a little.
+        if (!bPlaced)
+        {
+            const FVector Centre = Box.GetCenter();
+            const FVector2D Inland = FVector2D(-Centre.X, -Centre.Y).GetSafeNormal();
+            for (float Dist = 0.f; Dist <= 800000.f && !bPlaced && !Inland.IsNearlyZero(); Dist += 5000.f)
+            {
+                const float X = Centre.X + Inland.X * Dist + FMath::FRandRange(-1500.f, 1500.f);
+                const float Y = Centre.Y + Inland.Y * Dist + FMath::FRandRange(-1500.f, 1500.f);
+                FVector Ground;
+                if (FindDryLand(World, X, Y, Box.Max.Z + 30000.f, Box.Min.Z - 30000.f, Ground))
+                {
+                    Spot = Ground + FVector(0.f, 0.f, 110.f);
+                    bPlaced = true;
+                    if (i == 0)
+                    {
+                        UE_LOG(LogHavocFlow, Display, TEXT("Sector '%s' has no dry land inside; spawning %.0f m inland"), *SectorId.ToString(), Dist / 100.f);
+                    }
+                }
+            }
         }
         if (!bPlaced)
         {
