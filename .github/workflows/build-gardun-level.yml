@@ -86,6 +86,9 @@ jobs:
           git diff --cached --stat
           git commit -m "Gardun level: generate L_Gardun with build_gardun_level.py (Build Gardun level workflow)"
           if ($LASTEXITCODE) { Write-Error 'Nothing to commit'; exit 1 }
+          # Another level build may have pushed to this branch first; rebase so the push is a fast-forward.
+          git pull --rebase origin $env:GITHUB_REF_NAME
+          if ($LASTEXITCODE) { exit 1 }
           git push
           if ($LASTEXITCODE) { exit 1 }
 
