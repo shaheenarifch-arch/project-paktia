@@ -1,6 +1,7 @@
 #include "Player/HavocPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Campaign/HavocCampaign.h"
 #include "Camera/CameraActor.h"
 #include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
@@ -9,6 +10,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
+#include "GameFramework/GameModeBase.h"
 #include "Aircraft/HavocFalconHelicopter.h"
 #include "Drones/HavocDrone.h"
 #include "Input/HavocPlayInput.h"
@@ -115,6 +117,73 @@ void AHavocPlayerController::BeginPlay()
     {
         GetWorldTimerManager().SetTimer(SmokeStartTimer, this, &AHavocPlayerController::StartSmokeRun, 3.f, false);
     }
+    else if (IsLocalController())
+    {
+        // Opened by PlayEpisode: start the episode the travel URL names, once the level has settled.
+        const AGameModeBase* Mode = GetWorld() ? GetWorld()->GetAuthGameMode() : nullptr;
+        if (Mode && UGameplayStatics::HasOption(Mode->OptionsString, TEXT("AutoStart")))
+        {
+            const int32 Episode = UGameplayStatics::GetIntOption(Mode->OptionsString, TEXT("Episode"), 0);
+            FTimerHandle AutoStart;
+            GetWorldTimerManager().SetTimer(AutoStart, FTimerDelegate::CreateWeakLambda(this, [this, Episode]()
+            {
+                StartEpisodeFlow(Episode);
+            }), 1.f, false);
+        }
+    }
+}
+
+bool AHavocPlayerController::OpenEpisodeLevel(int32 Episode, bool bAutoStart)
+{
+    const FString Path = UHavocCampaign::EpisodeMapPath(Episode);
+    if (Path.IsEmpty())
+    {
+        return false;
+    }
+    if (UHavocCampaign::EpisodeMapName(Episode).Equals(UGameplayStatics::GetCurrentLevelName(this, true), ESearchCase::IgnoreCase))
+    {
+        return false; // already on it
+    }
+    UE_LOG(LogTemp, Display, TEXT("HavocPlay: opening %s for Episode %02d"), *Path, Episode);
+    UGameplayStatics::OpenLevel(this, FName(*Path), true,
+        FString::Printf(TEXT("Episode=%d%s"), Episode, bAutoStart ? TEXT("?AutoStart=1") : TEXT("")));
+    return true;
+}
+
+void AHavocPlayerController::PlayEpisode(int32 Episode)
+{
+    if (Episode < UHavocCampaign::FirstEpisode || Episode > UHavocCampaign::LastEpisode)
+    {
+        return;
+    }
+    // Same level (e.g. Episode 02 after 01): no reload needed, just start the other flow.
+    if (!OpenEpisodeLevel(Episode, /*bAutoStart*/ true))
+    {
+        StartEpisodeFlow(Episode);
+    }
+}
+
+bool AHavocPlayerController::StartEpisodeFlow(int32 Episode)
+{
+    if (Episode == 3)
+    {
+        if (AHavocEpisode03Flow* F3 = GetFlow03())
+        {
+            F3->StartEpisode();
+            return true;
+        }
+        return false;
+    }
+    if (UClass* FlowClass = UHavocCampaign::EpisodeFlowClass(Episode))
+    {
+        SelectFlow(FlowClass);
+    }
+    if (IHavocEpisodeFlow* F = GetFlow())
+    {
+        F->StartEpisode();
+        return true;
+    }
+    return false;
 }
 
 void AHavocPlayerController::StartSmokeRun()
@@ -128,38 +197,19 @@ void AHavocPlayerController::StartSmokeRun()
     {
         EpisodeNumber = FCString::Atoi(*EpisodeId);
     }
-    if (EpisodeNumber == 3)
+    // The episode's own map first: if another one is loaded, open it (the command line still has
+    // -HavocSmokeStart, so the new level's controller comes back here and carries on).
+    if (OpenEpisodeLevel(EpisodeNumber, /*bAutoStart*/ false))
     {
-        if (AHavocEpisode03Flow* F3 = GetFlow03())
-        {
-            UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode 03"));
-            F3->StartEpisode();
-        }
-        else
-        {
-            UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode 03 flow in this level; cannot start the episode"));
-            return;
-        }
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: Episode %02d is on another map; opening it first"), EpisodeNumber);
+        return;
     }
-    else
+    if (!StartEpisodeFlow(EpisodeNumber))
     {
-        if (EpisodeNumber == 1)
-        {
-            SelectFlow(AHavocEpisode01Flow::StaticClass());
-        }
-        else if (EpisodeNumber == 2)
-        {
-            SelectFlow(AHavocEpisode02Flow::StaticClass());
-        }
-        IHavocEpisodeFlow* F = GetFlow();
-        if (!F)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no episode flow in this level; cannot start the episode"));
-            return;
-        }
-        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
-        F->StartEpisode();
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no Episode %02d flow in this level; cannot start the episode"), EpisodeNumber);
+        return;
     }
+    UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
     // 30 s in: frame the island explicitly, then shoot.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
     GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()

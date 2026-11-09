@@ -73,6 +73,18 @@ public:
     FString SlotName = TEXT("HavocCampaign");
 
     static FString EpisodeName(int32 Episode);
+
+    /**
+     * The one place that says which level an episode is played on: 01 and 02 on Paktia Highlands, 03 on Gardun,
+     * 04 on Kharg. Asset path without the ".L_Name" suffix; empty for an unknown episode.
+     */
+    static FString EpisodeMapPath(int32 Episode);
+    /** The level's short name (e.g. "L_Gardun") for an episode; empty for an unknown episode. */
+    static FString EpisodeMapName(int32 Episode);
+    /** The episode a level is for (the first listed, so Paktia gives 1); 0 if the name is not an episode map. Accepts a short name or a path, with or without a UEDPIE_ prefix. */
+    static int32 EpisodeForMap(const FString& MapName);
+    /** The AHavocEpisode0NFlow class an episode runs; null for an unknown episode. */
+    static UClass* EpisodeFlowClass(int32 Episode);
     /** Rank of an outcome: FAILED 0, PARTIAL 1, SUCCESS 2, anything else -1. */
     static int32 OutcomeRank(const FString& Outcome);
 

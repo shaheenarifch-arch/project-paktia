@@ -39,6 +39,10 @@ public:
         meta = (ToolTip = "Start the configured mission now. Returns false if it cannot start."))
     bool StartMission();
 
+    /** If MissionId is not in data/missions, looks the mission up by the episode number in an "episode_NN_..." id
+     *  (so "episode_01_mountain_shield" finds mission_01_mountain_shield). Called on BeginPlay. */
+    void ResolveMissionId();
+
     /** The mission state (phase) last seen on the event bus; empty before the mission starts. */
     UFUNCTION(BlueprintPure, Category = "Havoc|Level")
     FString GetPhase() const { return Phase; }

@@ -398,7 +398,10 @@ def build_gameplay(eas):
         spawn(eas, unreal.PlayerStart, "PlayerStart_" + name, (x, y, ground_z(x, y, 300)), (0, 0, yaw))
     director = spawn(eas, havoc("HavocLevelDirector"), "HavocLevelDirector", (DIRECTOR_XY[0], DIRECTOR_XY[1], ground_z(*DIRECTOR_XY, above=300)))
     director.set_editor_property("map_id", "gardun_city")
-    director.set_editor_property("mission_id", "episode_02_silent_corridor")  # Episode 03 maps set episode_03_broken_citadel here
+    # Gardun is Episode 03's level (UHavocCampaign::EpisodeMapPath). The Episode 03 flow starts the mission,
+    # so the director only validates sectors and follows phases.
+    director.set_editor_property("mission_id", "episode_03_broken_citadel")
+    director.set_editor_property("start_mission_on_begin_play", False)
     for cls_name, (x, y, yaw) in VEHICLES.items():
         spawn(eas, havoc(cls_name), cls_name, (x, y, ground_z(x, y, 300)), (0, 0, yaw))
     cls = getattr(unreal, "NavMeshBoundsVolume", None)
