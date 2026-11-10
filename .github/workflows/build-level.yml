@@ -133,6 +133,8 @@ jobs:
           git diff --cached --stat
           git commit -m "$($env:LEVEL) level: generate $($env:LEVEL_NAME) with $($env:LEVEL_BUILDER) (Build level workflow)"
           if ($LASTEXITCODE) { Write-Error 'Nothing to commit'; exit 1 }
+          git pull --rebase
+          if ($LASTEXITCODE) { exit 1 }
           git push
           if ($LASTEXITCODE) { exit 1 }
 
