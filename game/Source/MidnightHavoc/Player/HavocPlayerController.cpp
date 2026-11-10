@@ -29,13 +29,14 @@
 #include "UI/HavocMenuWidget.h"
 #include "UI/HavocPlayHUD.h"
 #include "Vehicles/HavocVehicleBase.h"
+#include "World/HavocSectorVolume.h"
 
 namespace
 {
-// Smoke test only: put the view over Kharg looking at the oil terminal. The Raven at 30 s is not a reliable
+// Smoke test only: put the view over the episode's map (Kharg oil terminal, Paktia Highlands or Gardun sectors). The Raven at 30 s is not a reliable
 // vantage (it hovers between the beaches and the screenshot showed only sky haze), so the picture must not depend on it.
 // The island is centred on 0,0 in the level (build_kharg_level.py); the terminal sector is at (-170000, 120000) cm.
-void FrameKhargForSmoke(AHavocPlayerController* PC)
+void FrameMapForSmoke(AHavocPlayerController* PC, int32 EpisodeNumber)
 {
     UWorld* World = PC->GetWorld();
     if (!World)
@@ -48,7 +49,8 @@ void FrameKhargForSmoke(AHavocPlayerController* PC)
     for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
     {
         AStaticMeshActor* A = *It;
-        if (!A->GetName().Contains(TEXT("KhargTerrain")))
+        // KhargTerrain, PaktiaTerrain, GardunTerrain (the level builders' names).
+        if (!A->GetName().Contains(TEXT("Terrain")))
         {
             continue;
         }
@@ -66,12 +68,30 @@ void FrameKhargForSmoke(AHavocPlayerController* PC)
     }
     if (!bFound)
     {
-        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no AStaticMeshActor named *KhargTerrain* in this world (missing or not streamed in)"));
+        UE_LOG(LogTemp, Warning, TEXT("HavocSmoke: no AStaticMeshActor named *Terrain* in this world (missing or not streamed in)"));
     }
 
     // 2. Frame on the real terrain centre (0,0 only if nothing was found).
     const FVector Centre = bFound ? FVector(TerrainBox.GetCenter().X, TerrainBox.GetCenter().Y, 0.f) : FVector::ZeroVector;
-    const FVector Terminal(-170000.f, 120000.f, 0.f);
+    // Look-at point: Kharg = the oil terminal sector; Paktia / Gardun = the middle of the map's sector volumes
+    // (they are where the episode happens), else along +X.
+    FVector Terminal(-170000.f, 120000.f, 0.f);
+    if (EpisodeNumber != 4)
+    {
+        FVector Sum = FVector::ZeroVector;
+        int32 Count = 0;
+        for (TActorIterator<AHavocSectorVolume> It(World); It; ++It)
+        {
+            Sum += It->GetActorLocation();
+            ++Count;
+        }
+        Terminal = Count > 0 ? FVector(Sum.X / Count, Sum.Y / Count, 0.f) : Centre + FVector(100000.f, 0.f, 0.f);
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: Episode %02d framing toward %s (%d sector volumes)"), EpisodeNumber, *Terminal.ToString(), Count);
+        if ((Terminal - Centre).SizeSquared2D() < 1.f)
+        {
+            Terminal = Centre + FVector(100000.f, 0.f, 0.f);
+        }
+    }
     float GroundZ = 0.f;
     FCollisionQueryParams QParams(SCENE_QUERY_STAT(HavocSmokeTrace), /*bTraceComplex*/ true);
     FHitResult Hit;
@@ -98,7 +118,7 @@ void FrameKhargForSmoke(AHavocPlayerController* PC)
     if (ACameraActor* Cam = World->SpawnActor<ACameraActor>(Eye, Look, Params))
     {
         PC->SetViewTargetWithBlend(Cam, 0.f);
-        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: view framed on Kharg (ground z %.0f, eye %s)"), GroundZ, *Eye.ToString());
+        UE_LOG(LogTemp, Display, TEXT("HavocSmoke: view framed on Episode %02d map (ground z %.0f, eye %s)"), EpisodeNumber, GroundZ, *Eye.ToString());
     }
 }
 }
@@ -210,11 +230,11 @@ void AHavocPlayerController::StartSmokeRun()
         return;
     }
     UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
-    // 30 s in: frame the island explicitly, then shoot.
+    // 30 s in: frame the episode's map explicitly, then shoot.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
     GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
     {
-        FrameKhargForSmoke(this);
+        FrameMapForSmoke(this, EpisodeNumber);
         // Shoot a few seconds later so auto-exposure has adapted to the new view (it resets on a camera cut).
         GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
         {
