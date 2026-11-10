@@ -232,7 +232,7 @@ void AHavocPlayerController::StartSmokeRun()
     UE_LOG(LogTemp, Display, TEXT("HavocSmoke: starting Episode %02d"), EpisodeNumber);
     // 30 s in: frame the episode's map explicitly, then shoot.
     // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/taking-screenshots-in-unreal-engine
-    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+    GetWorldTimerManager().SetTimer(SmokeShotTimer, FTimerDelegate::CreateWeakLambda(this, [this, EpisodeNumber]()
     {
         FrameMapForSmoke(this, EpisodeNumber);
         // Shoot a few seconds later so auto-exposure has adapted to the new view (it resets on a camera cut).
