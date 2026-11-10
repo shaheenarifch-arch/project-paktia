@@ -33,6 +33,8 @@ void AHavocLevelDirector::BeginPlay()
         UE_LOG(LogHavocWorld, Warning, TEXT("%d AHavocLevelDirector actors in the level; only one is expected"), Directors);
     }
 
+    ResolveMissionId();
+
     const bool bSectorsOk = ValidateSectors();
     if (!bSectorsOk)
     {
@@ -88,6 +90,27 @@ void AHavocLevelDirector::OnMissionState(FName EventName, const FString& Payload
         {
             Squads->ApplyPhase(Phase);
         }
+    }
+}
+
+void AHavocLevelDirector::ResolveMissionId()
+{
+    const UWorld* World = GetWorld();
+    const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+    const UHavocDataSubsystem* Data = GameInstance ? GameInstance->GetSubsystem<UHavocDataSubsystem>() : nullptr;
+    FHavocMissionDef Def;
+    if (!Data || Data->GetMission(MissionId, Def))
+    {
+        return;
+    }
+    // Levels built earlier name the mission "episode_NN_..." (Episode 01's file id is "mission_01_mountain_shield").
+    // Find it by episode number instead, so those levels keep working without a rebuild.
+    FString Digits = MissionId.ToString();
+    if (Digits.RemoveFromStart(TEXT("episode_")) && Digits.Len() >= 2 && Digits.Left(2).IsNumeric()
+        && Data->FindMissionByEpisode(FCString::Atoi(*Digits.Left(2)), Def))
+    {
+        UE_LOG(LogHavocWorld, Log, TEXT("Mission '%s' not in data/missions; using '%s' (episode %d)"), *MissionId.ToString(), *Def.Id, Def.Episode);
+        MissionId = FName(*Def.Id);
     }
 }
 

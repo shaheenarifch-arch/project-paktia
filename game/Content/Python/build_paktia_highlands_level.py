@@ -231,10 +231,10 @@ def build_gameplay(eas):
     dx, dy = DIRECTOR_POS
     director = spawn(eas, havoc("HavocLevelDirector"), "HavocLevelDirector", (dx, dy, ground_z(dx, dy, 300)))
     director.set_editor_property("map_id", "paktia_highlands")
-    # data/missions has no Episode 01 file yet: keep the director from auto-starting a mission that does not exist.
-    director.set_editor_property("mission_id", "episode_01_mountain_shield")
+    # The episode flow (AHavocEpisode01Flow / 02, spawned by HavocPlayableGameMode) starts the mission, so the
+    # director only validates sectors and follows phases; it must not start a second copy.
+    director.set_editor_property("mission_id", "mission_01_mountain_shield")
     director.set_editor_property("start_mission_on_begin_play", False)
-    warn("HavocLevelDirector will not auto-start a mission: data/missions has no Episode 01 definition yet.")
 
     cls = getattr(unreal, "NavMeshBoundsVolume", None)
     if cls is None:

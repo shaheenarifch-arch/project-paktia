@@ -67,6 +67,13 @@ public:
     /** Makes the flow actor of this class the active one (spawning it if the level has none). Returns it. */
     AActor* SelectFlow(TSubclassOf<AActor> FlowClass);
 
+    /**
+     * "Play Episode N" from the menu: opens that episode's level (UHavocCampaign::EpisodeMapPath) with
+     * ?Episode=N?AutoStart=1; once it loads the game mode spawns the episode's flow and this controller starts it.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Campaign")
+    void PlayEpisode(int32 Episode);
+
     /** The Marine, even while the controller possesses the Raven or Falcon. Null before it exists. */
     AHavocPlayerCharacter* GetMarine() const { return Marine.Get(); }
 
@@ -91,6 +98,11 @@ private:
     /** Smoke test only (-HavocSmokeStart): start Episode 04 without the menu, then take a screenshot for
      *  game/scripts/smoke-run.ps1 to check the world is visible. See game/docs/smoke-test.md. */
     void StartSmokeRun();
+
+    /** Makes the episode's flow active (spawning it if the level has none) and starts it. False if there is none. */
+    bool StartEpisodeFlow(int32 Episode);
+    /** Opens the episode's level unless it is already loaded. True when a level change was started. */
+    bool OpenEpisodeLevel(int32 Episode, bool bAutoStart);
     FTimerHandle SmokeStartTimer;
     FTimerHandle SmokeShotTimer;
 

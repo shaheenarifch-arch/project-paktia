@@ -13,6 +13,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Campaign/HavocCampaign.h"
+#include "Missions/Episode01/HavocEpisode01Flow.h"
+#include "Missions/Episode02/HavocEpisode02Flow.h"
+#include "Missions/Episode03/HavocEpisode03Flow.h"
+#include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "Missions/Episode04/HavocOpenStraitMission.h"
 
 #define HAVOC_CAMPAIGN_TEST_FLAGS (EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::ProductFilter)
@@ -192,6 +196,31 @@ bool FHavocCampaignCarryoverTest::RunTest(const FString& Parameters)
     // A worse Episode 03 replay cannot take the bonus away.
     C->Record(3, TEXT("FAILED"), HavocCampaignTests::None(), false);
     TestEqual(TEXT("bonus kept after a worse replay"), C->GetEpisode3Outcome(), FString(TEXT("SUCCESS")));
+    return true;
+}
+
+// Which level and flow each episode uses (the one table in UHavocCampaign).
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHavocCampaignEpisodeMapTest, "MidnightHavoc.Campaign.EpisodeMaps", HAVOC_CAMPAIGN_TEST_FLAGS)
+bool FHavocCampaignEpisodeMapTest::RunTest(const FString& Parameters)
+{
+    TestEqual(TEXT("01 map"), UHavocCampaign::EpisodeMapPath(1), FString(TEXT("/Game/Maps/PaktiaHighlands/L_PaktiaHighlands")));
+    TestEqual(TEXT("02 map"), UHavocCampaign::EpisodeMapPath(2), FString(TEXT("/Game/Maps/PaktiaHighlands/L_PaktiaHighlands")));
+    TestEqual(TEXT("03 map"), UHavocCampaign::EpisodeMapPath(3), FString(TEXT("/Game/Maps/Gardun/L_Gardun")));
+    TestEqual(TEXT("04 map"), UHavocCampaign::EpisodeMapPath(4), FString(TEXT("/Game/Maps/Kharg/L_KhargHormuz")));
+    TestTrue(TEXT("unknown episode has no map"), UHavocCampaign::EpisodeMapPath(5).IsEmpty());
+    TestEqual(TEXT("short name"), UHavocCampaign::EpisodeMapName(3), FString(TEXT("L_Gardun")));
+
+    TestEqual(TEXT("Paktia -> 01"), UHavocCampaign::EpisodeForMap(TEXT("L_PaktiaHighlands")), 1);
+    TestEqual(TEXT("Gardun -> 03"), UHavocCampaign::EpisodeForMap(TEXT("L_Gardun")), 3);
+    TestEqual(TEXT("Kharg path -> 04"), UHavocCampaign::EpisodeForMap(TEXT("/Game/Maps/Kharg/L_KhargHormuz")), 4);
+    TestEqual(TEXT("PIE prefix"), UHavocCampaign::EpisodeForMap(TEXT("UEDPIE_0_L_Gardun")), 3);
+    TestEqual(TEXT("other map -> 0"), UHavocCampaign::EpisodeForMap(TEXT("Untitled")), 0);
+
+    TestTrue(TEXT("01 flow"), UHavocCampaign::EpisodeFlowClass(1) == AHavocEpisode01Flow::StaticClass());
+    TestTrue(TEXT("02 flow"), UHavocCampaign::EpisodeFlowClass(2) == AHavocEpisode02Flow::StaticClass());
+    TestTrue(TEXT("03 flow"), UHavocCampaign::EpisodeFlowClass(3) == AHavocEpisode03Flow::StaticClass());
+    TestTrue(TEXT("04 flow"), UHavocCampaign::EpisodeFlowClass(4) == AHavocEpisode04Flow::StaticClass());
+    TestNull(TEXT("no flow for 0"), UHavocCampaign::EpisodeFlowClass(0));
     return true;
 }
 

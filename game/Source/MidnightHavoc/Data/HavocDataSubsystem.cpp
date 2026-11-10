@@ -308,6 +308,19 @@ bool UHavocDataSubsystem::GetMission(FName Id, FHavocMissionDef& OutMission) con
     return false;
 }
 
+bool UHavocDataSubsystem::FindMissionByEpisode(int32 Episode, FHavocMissionDef& OutMission) const
+{
+    for (const TPair<FName, FHavocMissionDef>& Pair : Missions)
+    {
+        if (Pair.Value.Episode == Episode)
+        {
+            OutMission = Pair.Value;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool UHavocDataSubsystem::GetMap(FName Id, FHavocMapDef& OutMap) const
 {
     if (const FHavocMapDef* Found = Maps.Find(Id)) { OutMap = *Found; return true; }

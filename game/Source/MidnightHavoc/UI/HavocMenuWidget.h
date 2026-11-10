@@ -36,6 +36,12 @@ protected:
     virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
     UFUNCTION() void OnPlay();
+    /** Campaign "Start Episode N": opens that episode's level and starts its flow (AHavocPlayerController::PlayEpisode). */
+    UFUNCTION() void OnPlayEpisode1() { PlayEpisode(1); }
+    UFUNCTION() void OnPlayEpisode2() { PlayEpisode(2); }
+    UFUNCTION() void OnPlayEpisode3() { PlayEpisode(3); }
+    UFUNCTION() void OnPlayEpisode4() { PlayEpisode(4); }
+    void PlayEpisode(int32 Episode);
     UFUNCTION() void OnCampaign();
     UFUNCTION() void OnUnlockAll();
     UFUNCTION() void OnMainMenu();

@@ -164,38 +164,36 @@ void UHavocMenuWidget::Rebuild()
     case EHavocMenuMode::Campaign:
     {
         // Lock state comes from the saved campaign (UHavocCampaign): an episode unlocks when the one before it
-        // ended in SUCCESS or PARTIAL. Episodes 01-03 are playable in the browser prototype (docs/campaign.md);
-        // their Unreal maps are not built yet. Episode 04 is playable here.
+        // ended in SUCCESS or PARTIAL. "Start Episode N" opens that episode's level (UHavocCampaign::EpisodeMapPath).
         const FLinearColor Locked(0.55f, 0.58f, 0.64f);
         const UHavocCampaign* Campaign = GetCampaign();
         AddLabel(TEXT("CAMPAIGN"), 40, Gold);
         AddLabel(TEXT("Episodes unlock in order: finish one with SUCCESS or PARTIAL to open the next."), 18, Soft);
+        bool bAnyLocked = false;
         for (int32 Episode = UHavocCampaign::FirstEpisode; Episode <= UHavocCampaign::LastEpisode; ++Episode)
         {
             const bool bOpen = !Campaign || Campaign->IsUnlocked(Episode);
+            bAnyLocked |= !bOpen;
             const FString Status = Campaign ? Campaign->StatusText(Episode) : FString(TEXT("Unlocked"));
-            const TCHAR* Where = Episode == 4 ? TEXT("") : TEXT(" (Unreal version in progress)");
-            AddLabel(FString::Printf(TEXT("Episode %02d: %s  -  %s%s"), Episode, *UHavocCampaign::EpisodeName(Episode), *Status, Where),
-                Episode == 4 ? 24 : 20, bOpen ? FLinearColor::White : Locked);
-        }
-        AddLabel(TEXT("Episode 04: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait. A hypothetical scenario."), 18, Soft);
-        if (!Campaign || Campaign->IsUnlocked(4))
-        {
-            const bool bBonus = Campaign && Campaign->GetEpisode3Outcome() == TEXT("SUCCESS");
-            AddButton(TEXT("Start Episode 04"), TEXT("OnPlay"));
-            if (bBonus)
+            AddLabel(FString::Printf(TEXT("Episode %02d: %s  -  %s"), Episode, *UHavocCampaign::EpisodeName(Episode), *Status),
+                24, bOpen ? FLinearColor::White : Locked);
+            if (bOpen)
             {
-                AddLabel(TEXT("Episode 03 success: +10 reinforcements."), 15, Gold);
+                static const FName Handlers[] = { TEXT("OnPlayEpisode1"), TEXT("OnPlayEpisode2"), TEXT("OnPlayEpisode3"), TEXT("OnPlayEpisode4") };
+                AddButton(FString::Printf(TEXT("Start Episode %02d"), Episode), Handlers[Episode - UHavocCampaign::FirstEpisode]);
             }
         }
-        else
+        AddLabel(TEXT("Episode 04: land on Kharg Island, secure the oil terminal intact, clear the shipping lanes and escort the tankers through the strait. A hypothetical scenario."), 18, Soft);
+        if (Campaign && Campaign->IsUnlocked(4) && Campaign->GetEpisode3Outcome() == TEXT("SUCCESS"))
         {
-            AddLabel(TEXT("Episode 04 is locked: finish Episode 03 first."), 18, Gold);
+            AddLabel(TEXT("Episode 03 success: +10 reinforcements."), 15, Gold);
+        }
+        if (bAnyLocked)
+        {
             AddButton(TEXT("Unlock all episodes (testing)"), TEXT("OnUnlockAll"));
-            AddLabel(TEXT("Episodes 01-03 are not playable in Unreal yet, so this opens Episode 04 for testing. Your saved results are kept."), 15, Locked);
+            AddLabel(TEXT("Opens every episode for testing. Your saved results are kept."), 15, Locked);
         }
         AddButton(TEXT("Back"), TEXT("OnMainMenu"));
-        AddLabel(TEXT("Episodes 01-02 can be played now in the browser prototype. Help: docs/campaign.md"), 15, Locked);
         break;
     }
 
@@ -421,6 +419,14 @@ FReply UHavocMenuWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKey
         }
     }
     return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
+}
+
+void UHavocMenuWidget::PlayEpisode(int32 Episode)
+{
+    if (AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetOwningPlayer()))
+    {
+        PC->PlayEpisode(Episode);
+    }
 }
 
 void UHavocMenuWidget::OnPlay()

@@ -1,6 +1,11 @@
 #include "Campaign/HavocCampaign.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Misc/PackageName.h"
+#include "Missions/Episode01/HavocEpisode01Flow.h"
+#include "Missions/Episode02/HavocEpisode02Flow.h"
+#include "Missions/Episode03/HavocEpisode03Flow.h"
+#include "Missions/Episode04/HavocEpisode04Flow.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHavocCampaign, Log, All);
 
@@ -19,6 +24,56 @@ FString UHavocCampaign::EpisodeName(int32 Episode)
     case 3: return TEXT("Operation Broken Citadel");
     case 4: return TEXT("Operation Open Strait");
     default: return FString();
+    }
+}
+
+FString UHavocCampaign::EpisodeMapPath(int32 Episode)
+{
+    switch (Episode)
+    {
+    case 1:
+    case 2: return TEXT("/Game/Maps/PaktiaHighlands/L_PaktiaHighlands");
+    case 3: return TEXT("/Game/Maps/Gardun/L_Gardun");
+    case 4: return TEXT("/Game/Maps/Kharg/L_KhargHormuz");
+    default: return FString();
+    }
+}
+
+FString UHavocCampaign::EpisodeMapName(int32 Episode)
+{
+    return FPackageName::GetShortName(EpisodeMapPath(Episode));
+}
+
+int32 UHavocCampaign::EpisodeForMap(const FString& MapName)
+{
+    FString Short = FPackageName::GetShortName(MapName);
+    if (Short.StartsWith(TEXT("UEDPIE_"))) // play-in-editor prefix "UEDPIE_<n>_"
+    {
+        const int32 Sep = Short.Find(TEXT("_"), ESearchCase::CaseSensitive, ESearchDir::FromStart, 7);
+        if (Sep != INDEX_NONE)
+        {
+            Short = Short.Mid(Sep + 1);
+        }
+    }
+    for (int32 Episode = FirstEpisode; Episode <= LastEpisode; ++Episode)
+    {
+        if (Short.Equals(EpisodeMapName(Episode), ESearchCase::IgnoreCase))
+        {
+            return Episode;
+        }
+    }
+    return 0;
+}
+
+UClass* UHavocCampaign::EpisodeFlowClass(int32 Episode)
+{
+    switch (Episode)
+    {
+    case 1: return AHavocEpisode01Flow::StaticClass();
+    case 2: return AHavocEpisode02Flow::StaticClass();
+    case 3: return AHavocEpisode03Flow::StaticClass();
+    case 4: return AHavocEpisode04Flow::StaticClass();
+    default: return nullptr;
     }
 }
 

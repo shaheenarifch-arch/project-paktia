@@ -5,8 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
-#include "Missions/Episode03/HavocEpisode03Flow.h"
-#include "Missions/Episode04/HavocEpisode04Flow.h"
+#include "Campaign/HavocCampaign.h"
 #include "Player/HavocPlayerCharacter.h"
 #include "Player/HavocPlayerController.h"
 
@@ -20,30 +19,32 @@ void AHavocPlayableGameMode::StartPlay()
 {
     Super::StartPlay();
     UWorld* World = GetWorld();
-    for (TActorIterator<AHavocEpisode04Flow> It(World); It; ++It)
-    {
-        return; // one placed in the level already
-    }
-    for (TActorIterator<AHavocEpisode03Flow> It(World); It; ++It)
-    {
-        return;
-    }
-    // Episode 03 (greybox Gardun) when asked: travel option ?Episode=3, command line -HavocEpisode=3,
-    // or a map whose name contains "Gardun". Otherwise Episode 04 as before.
+    // Which episode: travel option ?Episode=N (menu "Play Episode N"), command line -HavocSmokeEpisode=NN or
+    // -HavocEpisode=N, else the episode the map belongs to (UHavocCampaign::EpisodeMapPath), else Episode 04.
     int32 Episode = 0;
     FParse::Value(FCommandLine::Get(), TEXT("HavocEpisode="), Episode);
+    FString SmokeEpisode;
+    if (FParse::Value(FCommandLine::Get(), TEXT("HavocSmokeEpisode="), SmokeEpisode) && SmokeEpisode.IsNumeric())
+    {
+        Episode = FCString::Atoi(*SmokeEpisode);
+    }
     if (UGameplayStatics::HasOption(OptionsString, TEXT("Episode")))
     {
         Episode = UGameplayStatics::GetIntOption(OptionsString, TEXT("Episode"), Episode);
     }
-    if (Episode == 0 && World->GetMapName().Contains(TEXT("Gardun")))
+    if (Episode < UHavocCampaign::FirstEpisode || Episode > UHavocCampaign::LastEpisode)
     {
-        Episode = 3;
+        Episode = UHavocCampaign::EpisodeForMap(World->GetMapName());
     }
-    if (Episode == 3)
+    if (Episode == 0)
     {
-        World->SpawnActor<AHavocEpisode03Flow>(AHavocEpisode03Flow::StaticClass(), FTransform::Identity);
-        return;
+        Episode = 4;
     }
-    World->SpawnActor<AHavocEpisode04Flow>(AHavocEpisode04Flow::StaticClass(), FTransform::Identity);
+    UClass* FlowClass = UHavocCampaign::EpisodeFlowClass(Episode);
+    for (TActorIterator<AActor> It(World, FlowClass); It; ++It)
+    {
+        return; // one placed in the level already
+    }
+    UE_LOG(LogTemp, Display, TEXT("HavocGameMode: map %s, spawning the Episode %02d flow (%s)"), *World->GetMapName(), Episode, *FlowClass->GetName());
+    World->SpawnActor<AActor>(FlowClass, FTransform::Identity);
 }

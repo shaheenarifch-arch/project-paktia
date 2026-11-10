@@ -28,6 +28,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|Data")
     bool GetMission(FName Id, FHavocMissionDef& OutMission) const;
 
+    /** The campaign mission for an episode number (1-4), whatever its id ("mission_01_..." or "episode_0N_..."). */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Data")
+    bool FindMissionByEpisode(int32 Episode, FHavocMissionDef& OutMission) const;
+
     UFUNCTION(BlueprintCallable, Category = "Havoc|Data")
     bool GetMap(FName Id, FHavocMapDef& OutMap) const;
 

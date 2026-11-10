@@ -15,7 +15,8 @@ Help links:
 
 `game/scripts/smoke-episodes.ps1` reads `game/scripts/playable-episodes.json` (the list of playable episodes; today only
 `04`) and calls `smoke-run.ps1 -Episode <id>` for each one in turn (never two Unreal processes at once). The game starts that
-episode with `-HavocSmokeEpisode=<id>`. The summary opens with a table (episode, PASS/FAIL, intro, outro, world visible,
+episode with `-HavocSmokeEpisode=<id>`; if another level is loaded it first opens that episode's own map
+(`UHavocCampaign::EpisodeMapPath`: 01 and 02 Paktia Highlands, 03 Gardun, 04 Kharg), so `-Map` is optional. The summary opens with a table (episode, PASS/FAIL, intro, outro, world visible,
 FPS, crashes); each episode's logs, `ingame.png` and `summary.md` are under `ep-<id>/` in the `smoke-test` artifact.
 **To add an episode:** add it to `playable-episodes.json` and give it an intro and outro cutscene
 (`Source/MidnightHavoc/Cutscene`, see `game/README.md` "Intro and outro cutscenes"); until both play, its row fails.
