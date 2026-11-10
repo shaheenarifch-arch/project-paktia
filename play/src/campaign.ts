@@ -1,4 +1,4 @@
-import { Campaign, type CampaignSave, type E02Carryover, type MissionOutcome } from '../../src/index.js'
+import { Campaign, type CampaignSave, type E02Carryover, type M01Carryover, type MissionOutcome } from '../../src/index.js'
 
 // Campaign progress lives in this browser only (the game server will own it later).
 const KEY = 'paktia.campaign.v1'
@@ -21,7 +21,7 @@ export function resetCampaign(): Campaign {
   return new Campaign()
 }
 
-/** Episode 01 is not playable in the browser yet, so the player states how it ended. */
+/** Fallback for players who skip Episode 01: they state how it ended. A played result takes precedence. */
 export function loadCrewRecovered(): boolean {
   try { return localStorage.getItem(SETTINGS) !== 'crew-lost' } catch { return true }
 }
@@ -38,5 +38,15 @@ export function recordEpisode02(c: Campaign, outcome: MissionOutcome, carryover:
 
 export function recordEpisode03(c: Campaign, outcome: MissionOutcome): void {
   c.record(3, outcome, { episode: 3, outcome })
+  saveCampaign(c)
+}
+
+export function recordEpisode01(c: Campaign, outcome: MissionOutcome, carryover: M01Carryover): void {
+  c.record(1, outcome, carryover)
+  saveCampaign(c)
+}
+
+export function recordEpisode04(c: Campaign, outcome: MissionOutcome): void {
+  c.record(4, outcome, { episode: 4, outcome })
   saveCampaign(c)
 }
