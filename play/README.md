@@ -2,8 +2,8 @@
 
 A playable browser version of the campaign so it can be played before the
 Unreal gray-box exists. It is a top-down three.js prototype, not the final
-game. Episodes 02 and 03 are playable and linked: Episode 02's result is what
-Episode 03 starts with.
+game. Episodes 01 to 04 are all playable from the menu and linked through the
+campaign save: each result (win, partial or lose) feeds the next episode.
 
 The rules are not re-implemented here. The prototype drives the real domain
 layer and data, the same code `npm test` covers:
@@ -14,6 +14,8 @@ layer and data, the same code `npm test` covers:
 | `SilentCorridorMission`, `ConvoyEscort`, `RelayNetwork` (`src/gameplay/missions/episode02/`) | Every Episode 02 step, convoy integrity and losses, the drone link and Relay Kilo, the outage, the bridge choice, the ambush contacts, the result and its carryover |
 | `BrokenCitadelMission` (`src/gameplay/missions/episode03/`) | Phases, phase-1 "either one" rule, unlocks, reinforcements, fail state |
 | `MissionRunner` | Checkpoints and restore in both episodes |
+| `MountainShieldMission` + `MissionRunner` (`data/missions/episode-01-mountain-shield.json`) | Episode 01 states, Ridge Station / Aegis, the Falcon-2 crash sequence and crew recovery, and the carryover Episode 02 reads |
+| `OpenStraitMission` (`src/gameplay/missions/episode04/`) | Episode 04 beach choice, island assault, oil terminal integrity, shipping lanes, tanker escort, reinforcements and result |
 | `SurpriseEventDirector` | Episode 03's seeded phase-3 event and its modifiers |
 | `AegisSupportController` + `ContactManager` + `TargetValidator` | Aegis: select → validate → authorise → commit → complete, refused inside the Medical Station protected zone |
 | `data/missions/*`, `data/maps/gardun-city.json`, `data/weapons/kr47.json` | Briefings, states, objectives, protected zones, surprise events, KR-47 magazine and fire modes |
@@ -33,6 +35,9 @@ src/corridor.ts    Episode 02 map: Checkpoint Echo → Relay Kilo → bridge →
 src/episode02.ts   Episode 02 on SilentCorridorMission
 src/gardun.ts      Episode 03 map: Gardun
 src/episode03.ts   Episode 03 on BrokenCitadelMission
+src/scenario.ts    shared layer for objective episodes: hold sites, Raven, choice cards, wave spawns, HUD frame
+src/episode01.ts   Episode 01 map and game on MountainShieldMission (Paktia Highlands)
+src/episode04.ts   Episode 04 map and game on OpenStraitMission (Kharg Island and the strait)
 src/campaign.ts    campaign save/load in the browser
 src/main.ts        campaign menu
 ```
@@ -83,9 +88,11 @@ Common: **WASD** move, **Shift** sprint, **mouse** aim, **click** fire, **R** re
 
 **Episode 03, Operation Broken Citadel.** Capture the amber rings across five phases. Each time you go down costs one reinforcement. **F** calls Falcon air support at the cursor (Airfield taken and crew delivered). **G** calls Aegis on a hostile you have kept in sight (Mountain Fort taken). **E** uses a cellar hatch if the tunnel event opens them.
 
-Episode 01 is not playable yet; the menu asks how it ended (crew recovered or not), which decides what Nomad-1 carries.
+**Episode 01, Operation Mountain Shield.** Tutorial: **Q** launches Raven, fly to the beacon, **Q** back. Hold Checkpoint Echo for 70 s (keep hostiles out of the compound), take Ridge Station, watch Falcon-2 go down, then choose (**1**/**2**) to recover the crew (secure grid R-17, reach all three crew, carry them to the evacuation point) or abandon them. Survive the counterattack at Ridge Station. Losing Echo or Ridge Station fails the episode; abandoning the crew gives a partial result. If you skip it, the menu asks how it ended; a played result replaces that.
+
+**Episode 04, Operation Open Strait** (hypothetical scenario on real geography; fictional kit, game-balance ratings only). Fly Raven over both beaches, choose one (**1**/**2**), clear the beachhead, then take the oil terminal and the airstrip (order depends on the beach). Rounds that land in the jetties, tank farm or pump station damage the terminal, so aim clear of them. **F** calls Falcon cover once the airstrip is taken; it refuses protected zones (the terminal and Kharg town). Then fly Raven along both lanes to find hazards (clearance teams remove them) and hold the south shore while six tankers transit. Running out of reinforcements, or losing every tanker, fails the episode; a damaged terminal or too few tankers gives a partial result.
 
 ## Not in this prototype yet
 
-Episode 01, Episode 04, allied squads, driving vehicles, multiplayer and the
+Allied squads, driving vehicles, multiplayer and the
 dedicated server.
