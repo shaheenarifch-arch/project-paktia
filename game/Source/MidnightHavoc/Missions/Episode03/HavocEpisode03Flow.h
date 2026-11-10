@@ -26,6 +26,7 @@
 #include "Missions/Episode04/HavocEpisode04Flow.h"
 #include "HavocEpisode03Flow.generated.h"
 
+class AHavocCutscene;
 class AHavocEnemyCharacter;
 class AHavocPlayerCharacter;
 class AHavocPlayerController;
@@ -69,6 +70,12 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void HandleInteract();
     UFUNCTION(BlueprintCallable, Category = "Havoc|Flow") void CallFalcon();
 
+    // ---- Cutscenes (as AHavocEpisodeFlowBase; Episode 03 is not on that base, so it uses HavocFlowCutscene directly) ----
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayIntro() { PlayCutscene(true, nullptr); }
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayOutro() { PlayCutscene(false, nullptr); }
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void SkipCutscene();
+    UFUNCTION(BlueprintPure, Category = "Havoc|Cutscene") bool IsCutsceneActive() const;
+
     // ---- Queries for the HUD and menus ----
     UFUNCTION(BlueprintPure, Category = "Havoc|Flow") EHavocFlowPhase GetPhase() const { return Phase; }
     UFUNCTION(BlueprintPure, Category = "Havoc|Flow") FString GetHint() const { return Hint; }
@@ -86,6 +93,10 @@ public:
     static FName GetSectorForObjective(const FString& ObjectiveId);
     /** Greybox layout: sector centre in game-space metres (x east, z north), NAME_None-safe (zero for unknown). */
     static FVector2D GetGreyboxSectorCentre(FName SectorId);
+    /** Sector ids the intro / outro fly over: intro Gardun approach (south_gate) -> old_gardun -> citadel. */
+    static TArray<FName> CutsceneSectorIds(bool bIntro);
+    /** Cutscene camera targets (cm) for the greybox Gardun at Origin (GreyboxOriginCm); used when the level has no sector volumes. */
+    static TArray<FVector> BuildGreyboxCutsceneTargets(const FVector& OriginCm, bool bIntro);
     /** Garrison size for an objective in a phase (0 for the protected medical station). */
     int32 GetGarrisonFor(const FString& ObjectiveId, int32 AssaultPhase) const;
 
@@ -109,6 +120,10 @@ private:
 
     // ---- greybox ----
     void BuildGreyboxIfNeeded();
+
+    // ---- cutscenes ----
+    void PlayCutscene(bool bIntro, TFunction<void()> Then);
+    TArray<FVector> CutsceneTargets(bool bIntro);
 
     // ---- state machine ----
     void OnEnterState(const FString& State, bool bRestored);
@@ -139,6 +154,7 @@ private:
     FString Outcome;
     FString LastSurprise;
 
+    UPROPERTY() TObjectPtr<AHavocCutscene> Cutscene;
     UPROPERTY() TObjectPtr<AHavocPlayerController> CachedPC;
     UPROPERTY() TObjectPtr<AHavocPlayerCharacter> CachedMarine;
     UPROPERTY() TMap<FName, TObjectPtr<AHavocSectorVolume>> Sectors;

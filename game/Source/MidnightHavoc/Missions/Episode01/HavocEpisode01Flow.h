@@ -14,7 +14,8 @@
 //   M01_COUNTERATTACK    E                                                                         -> RepelCounterattack
 //   M01_DEBRIEF          E                                                                         -> Finish
 //
-// No map or cutscene work here: the map and the intro/outro come in later steps of #102.
+// Intro: a fly-over of highlands_staging -> checkpoint_echo -> ridge_station before the tutorial starts. Outro: ridge_station
+// -> crash_grid_r17, then the results screen. Both are skippable (AHavocEpisodeFlowBase::PlayCutscene).
 // Help: https://dev.epicgames.com/documentation/en-us/unreal-engine/actors-in-unreal-engine
 
 #include "CoreMinimal.h"
@@ -56,6 +57,14 @@ public:
     static FString BuildHint(const UHavocMountainShieldMission& Mission);
     /** Steps of the objective tracker with a [x] / [>] / [ ] marker for a state id. */
     static TArray<FString> BuildTracker(const FString& State, bool bComplete);
+    /** Sector ids the intro / outro fly over (data/maps/paktia-highlands.json). */
+    static TArray<FName> CutsceneSectorIds(bool bIntro);
+    /** Where a Paktia sector sits when the level has no volume for it: its centre in build_paktia_highlands_level.py (cm). */
+    static FVector FallbackSectorCentre(FName SectorId);
+
+protected:
+    virtual TArray<FVector> CutsceneTargets(bool bIntro) override;
+    virtual FString CutsceneLabel() const override { return TEXT("01"); }
 
 private:
     UHavocMountainShieldMission* GetMission() const;

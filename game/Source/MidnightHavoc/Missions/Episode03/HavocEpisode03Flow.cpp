@@ -6,6 +6,8 @@
 #include "Audio/HavocAudioSubsystem.h"
 #include "Combat/HavocWeaponComponent.h"
 #include "Components/BoxComponent.h"
+#include "Cutscene/HavocCutscene.h"
+#include "Cutscene/HavocFlowCutscene.h"
 #include "Components/StaticMeshComponent.h"
 #include "Core/HavocEventSubsystem.h"
 #include "Data/HavocDataSubsystem.h"
@@ -440,11 +442,62 @@ void AHavocEpisode03Flow::StartEpisode()
     {
         Audio->StartAmbient();
     }
-    if (UHavocBrokenCitadelMission* Mission = GetMission())
+    // Intro fly-over of the Gardun approach and the citadel, then briefing -> staging -> phase 1.
+    // Tick pauses the state machine while the cutscene plays, so nothing happens behind it.
+    TWeakObjectPtr<AHavocEpisode03Flow> Self(this);
+    PlayCutscene(true, [Self]()
     {
-        Mission->BeginAssault(); // briefing -> staging -> phase 1
-    }
+        if (AHavocEpisode03Flow* Flow = Self.Get())
+        {
+            if (UHavocBrokenCitadelMission* Mission = Flow->GetMission())
+            {
+                Mission->BeginAssault();
+            }
+        }
+    });
 }
+
+// ---------------------------------------------------------------- cutscenes
+
+TArray<FName> AHavocEpisode03Flow::CutsceneSectorIds(bool bIntro)
+{
+    return bIntro ? TArray<FName>{ TEXT("south_gate"), TEXT("old_gardun"), TEXT("citadel") }
+                  : TArray<FName>{ TEXT("citadel"), TEXT("old_gardun") };
+}
+
+TArray<FVector> AHavocEpisode03Flow::BuildGreyboxCutsceneTargets(const FVector& OriginCm, bool bIntro)
+{
+    TArray<FVector> Targets;
+    for (const FName& Id : CutsceneSectorIds(bIntro))
+    {
+        const FVector2D C = GetGreyboxSectorCentre(Id);
+        Targets.Add(FVector(OriginCm.X + C.X * 100.0, OriginCm.Y + C.Y * 100.0, OriginCm.Z));
+    }
+    return Targets;
+}
+
+TArray<FVector> AHavocEpisode03Flow::CutsceneTargets(bool bIntro)
+{
+    // The level's sector volumes (the built Gardun, or the greybox's own); a sector with no volume falls back to the greybox layout.
+    const TArray<FVector> Fallback = BuildGreyboxCutsceneTargets(GreyboxOriginCm, bIntro);
+    const TArray<FName> Ids = CutsceneSectorIds(bIntro);
+    TArray<FVector> Targets;
+    for (int32 i = 0; i < Ids.Num(); ++i)
+    {
+        const AHavocSectorVolume* Volume = FindSector(Ids[i]);
+        Targets.Add(Volume ? Volume->GetComponentsBoundingBox(true).GetCenter() : Fallback[i]);
+    }
+    return Targets;
+}
+
+void AHavocEpisode03Flow::PlayCutscene(bool bIntro, TFunction<void()> Then)
+{
+    HavocFlowCutscene::Play(*this, Cutscene, GetPC(), TEXT("03"), bIntro, CutsceneTargets(bIntro),
+                            HavocFlowCutscene::BuildLines(TEXT("03"), bIntro, Outcome), MoveTemp(Then));
+}
+
+void AHavocEpisode03Flow::SkipCutscene() { if (Cutscene) { Cutscene->Skip(); } }
+bool AHavocEpisode03Flow::IsCutsceneActive() const { return Cutscene && Cutscene->IsPlaying(); }
 
 void AHavocEpisode03Flow::RestartFromCheckpoint()
 {
@@ -495,10 +548,18 @@ void AHavocEpisode03Flow::EndEpisode()
     {
         Missions->SetEpisode3Outcome(Outcome);
     }
-    if (AHavocPlayerController* PC = GetPC())
+    // Outro fly-over, then the results screen (skippable).
+    TWeakObjectPtr<AHavocEpisode03Flow> Self(this);
+    PlayCutscene(false, [Self]()
     {
-        PC->ShowMenu(EHavocMenuMode::Results);
-    }
+        if (AHavocEpisode03Flow* Flow = Self.Get())
+        {
+            if (AHavocPlayerController* PC = Flow->GetPC())
+            {
+                PC->ShowMenu(EHavocMenuMode::Results);
+            }
+        }
+    });
 }
 
 // ---------------------------------------------------------------- tick
@@ -520,7 +581,7 @@ void AHavocEpisode03Flow::Tick(float DeltaSeconds)
         }
         return;
     }
-    if (Phase != EHavocFlowPhase::Playing)
+    if (Phase != EHavocFlowPhase::Playing || IsCutsceneActive())
     {
         return;
     }
@@ -805,7 +866,7 @@ void AHavocEpisode03Flow::TickWaves(float Dt)
 
 void AHavocEpisode03Flow::HandleInteract()
 {
-    if (Phase != EHavocFlowPhase::Playing || bRespawnPending)
+    if (Phase != EHavocFlowPhase::Playing || bRespawnPending || IsCutsceneActive())
     {
         return;
     }

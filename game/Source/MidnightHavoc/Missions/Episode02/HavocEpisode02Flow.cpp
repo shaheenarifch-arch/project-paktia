@@ -324,11 +324,31 @@ void AHavocEpisode02Flow::StartEpisode()
     {
         Audio->StartAmbient();
     }
-    // Briefing -> convoy form-up -> Relay Kilo (the runner stops there until the relay is placed).
-    if (UHavocSilentCorridorMission* Mission = GetMission())
+    // Intro fly-over of the convoy route, then briefing -> convoy form-up -> Relay Kilo (the runner stops
+    // there until the relay is placed). Tick pauses the state machine while the cutscene plays.
+    TWeakObjectPtr<AHavocEpisode02Flow> Self(this);
+    PlayCutscene(true, [Self]()
     {
-        Mission->Progress();
+        if (AHavocEpisode02Flow* Flow = Self.Get())
+        {
+            if (UHavocSilentCorridorMission* Mission = Flow->GetMission())
+            {
+                Mission->Progress();
+            }
+        }
+    });
+}
+
+TArray<FVector> AHavocEpisode02Flow::BuildCutsceneTargets(const FVector& Origin, bool bIntro)
+{
+    // The convoy route in game metres (same frame as ToWorldGround: x east, z along the valley).
+    const TArray<FVector> Route = bIntro ? TArray<FVector>{ Echo, Bridge, SouthGate } : TArray<FVector>{ SouthGate, Narrows };
+    TArray<FVector> Targets;
+    for (const FVector& P : Route)
+    {
+        Targets.Add(Origin + FVector(P.X, P.Z, 0.0) * 100.0);
     }
+    return Targets;
 }
 
 void AHavocEpisode02Flow::RestartFromCheckpoint()
@@ -384,10 +404,18 @@ void AHavocEpisode02Flow::EndEpisode()
         C.bWardenOperational ? TEXT("operational") : TEXT("lost"), C.RelaysOnline);
     Publish(TEXT("episode:results"), Mission->GetSummaryJson());
 
-    if (AHavocPlayerController* PC = GetPC())
+    // Outro fly-over, then the results screen (skippable).
+    TWeakObjectPtr<AHavocEpisode02Flow> Self(this);
+    PlayCutscene(false, [Self]()
     {
-        PC->ShowMenu(EHavocMenuMode::Results);
-    }
+        if (AHavocEpisode02Flow* Flow = Self.Get())
+        {
+            if (AHavocPlayerController* PC = Flow->GetPC())
+            {
+                PC->ShowMenu(EHavocMenuMode::Results);
+            }
+        }
+    });
 }
 
 // ---------------------------------------------------------------- tick
@@ -399,7 +427,7 @@ void AHavocEpisode02Flow::Tick(float DeltaSeconds)
     LinkToastCooldown = FMath::Max(0.f, LinkToastCooldown - DeltaSeconds);
     ResupplyCooldown = FMath::Max(0.f, ResupplyCooldown - DeltaSeconds);
 
-    if (Phase != EHavocFlowPhase::Playing)
+    if (Phase != EHavocFlowPhase::Playing || IsCutsceneActive())
     {
         return;
     }
@@ -1190,7 +1218,7 @@ void AHavocEpisode02Flow::ChooseBranch(bool bFirst)
 void AHavocEpisode02Flow::HandleInteract()
 {
     UHavocSilentCorridorMission* Mission = GetMission();
-    if (Phase != EHavocFlowPhase::Playing || bRespawnPending || !Mission)
+    if (Phase != EHavocFlowPhase::Playing || bRespawnPending || !Mission || IsCutsceneActive())
     {
         return;
     }
