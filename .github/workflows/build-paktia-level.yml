@@ -69,6 +69,8 @@ jobs:
           git diff --cached --stat
           git commit -m "Paktia level: generate L_PaktiaHighlands with build_paktia_level.py (Build Paktia level workflow)"
           if ($LASTEXITCODE) { Write-Error 'Nothing to commit'; exit 1 }
+          git pull --rebase
+          if ($LASTEXITCODE) { exit 1 }
           git push
           if ($LASTEXITCODE) { exit 1 }
 
