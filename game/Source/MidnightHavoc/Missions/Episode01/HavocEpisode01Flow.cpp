@@ -3,12 +3,14 @@
 #include "Core/HavocEventSubsystem.h"
 #include "Dom/JsonObject.h"
 #include "Engine/GameInstance.h"
+#include "EngineUtils.h"
 #include "Engine/World.h"
 #include "Missions/HavocMissionJson.h"
 #include "Missions/HavocMissionRunner.h"
 #include "Missions/HavocMissionSubsystem.h"
 #include "Missions/Episode01/HavocMountainShieldMission.h"
 #include "Player/HavocPlayerController.h"
+#include "World/HavocSectorVolume.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHavocFlow01, Log, All);
 
@@ -132,6 +134,39 @@ bool AHavocEpisode01Flow::InteractStep(UHavocMountainShieldMission& Mission)
     return bDone;
 }
 
+TArray<FName> AHavocEpisode01Flow::CutsceneSectorIds(bool bIntro)
+{
+    return bIntro ? TArray<FName>{ TEXT("highlands_staging"), TEXT("checkpoint_echo"), TEXT("ridge_station") }
+                  : TArray<FName>{ TEXT("ridge_station"), TEXT("crash_grid_r17") };
+}
+
+FVector AHavocEpisode01Flow::FallbackSectorCentre(FName SectorId)
+{
+    // Same numbers as LAYOUT in game/Content/Python/build_paktia_highlands_level.py (centre x, y in cm).
+    if (SectorId == TEXT("highlands_staging")) { return FVector(-650000.0, 300000.0, 0.0); }
+    if (SectorId == TEXT("checkpoint_echo")) { return FVector(-400000.0, 300000.0, 0.0); }
+    if (SectorId == TEXT("ridge_station")) { return FVector(200000.0, -250000.0, 0.0); }
+    if (SectorId == TEXT("crash_grid_r17")) { return FVector(400000.0, 100000.0, 0.0); }
+    return FVector::ZeroVector;
+}
+
+TArray<FVector> AHavocEpisode01Flow::CutsceneTargets(bool bIntro)
+{
+    // The placed HavocSectorVolumes, as Episode 04 does; a sector missing from the level falls back to the builder's layout.
+    TMap<FName, FVector> Centres;
+    for (TActorIterator<AHavocSectorVolume> It(GetWorld()); It; ++It)
+    {
+        Centres.Add(It->SectorId, It->GetComponentsBoundingBox(true).GetCenter());
+    }
+    TArray<FVector> Targets;
+    for (const FName& Id : CutsceneSectorIds(bIntro))
+    {
+        const FVector* Found = Centres.Find(Id);
+        Targets.Add(Found ? *Found : FallbackSectorCentre(Id));
+    }
+    return Targets;
+}
+
 // ---------------------------------------------------------------- queries
 
 FString AHavocEpisode01Flow::GetObjectiveText() const
@@ -196,9 +231,20 @@ void AHavocEpisode01Flow::StartEpisode()
         PC->HideMenu();
         PC->ShowHud();
     }
-    // Briefing -> tutorial (the runner stops there until the steps are done).
-    Missions->GetMountainShield()->Progress();
-    SetHint(BuildHint(*Missions->GetMountainShield()));
+    // Intro fly-over, then briefing -> tutorial (the runner stops there until the steps are done).
+    // Tick pauses the state machine while the cutscene plays, so nothing happens behind it.
+    TWeakObjectPtr<AHavocEpisode01Flow> Self(this);
+    PlayCutscene(true, [Self]()
+    {
+        if (AHavocEpisode01Flow* Flow = Self.Get())
+        {
+            if (UHavocMountainShieldMission* Mission = Flow->GetMission())
+            {
+                Mission->Progress();
+                Flow->SetHint(BuildHint(*Mission));
+            }
+        }
+    });
 }
 
 void AHavocEpisode01Flow::RestartFromCheckpoint()
@@ -254,10 +300,18 @@ void AHavocEpisode01Flow::EndEpisode()
     Json->SetBoolField(TEXT("crewRecovered"), C.bCrewRecovered);
     Publish(TEXT("episode:results"), HavocMissionJson::ToString(Json));
 
-    if (AHavocPlayerController* PC = Cast<AHavocPlayerController>(GetWorld()->GetFirstPlayerController()))
+    // Outro fly-over, then the results screen (skippable).
+    TWeakObjectPtr<AHavocEpisode01Flow> Self(this);
+    PlayCutscene(false, [Self]()
     {
-        PC->ShowMenu(EHavocMenuMode::Results);
-    }
+        if (const AHavocEpisode01Flow* Flow = Self.Get())
+        {
+            if (AHavocPlayerController* PC = Cast<AHavocPlayerController>(Flow->GetWorld()->GetFirstPlayerController()))
+            {
+                PC->ShowMenu(EHavocMenuMode::Results);
+            }
+        }
+    });
 }
 
 void AHavocEpisode01Flow::Tick(float DeltaSeconds)
@@ -265,7 +319,7 @@ void AHavocEpisode01Flow::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     ToastTime = FMath::Max(0.f, ToastTime - DeltaSeconds);
 
-    if (Phase != EHavocFlowPhase::Playing)
+    if (Phase != EHavocFlowPhase::Playing || IsCutsceneActive())
     {
         return;
     }
@@ -316,7 +370,7 @@ void AHavocEpisode01Flow::ChooseBranch(bool bFirst)
 void AHavocEpisode01Flow::HandleInteract()
 {
     UHavocMountainShieldMission* Mission = GetMission();
-    if (Phase != EHavocFlowPhase::Playing || !Mission)
+    if (Phase != EHavocFlowPhase::Playing || !Mission || IsCutsceneActive())
     {
         return;
     }

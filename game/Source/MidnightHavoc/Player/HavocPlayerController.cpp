@@ -227,10 +227,18 @@ void AHavocPlayerController::StartSmokeRun()
     FTimerHandle OutroTimer;
     GetWorldTimerManager().SetTimer(OutroTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
     {
-        // The outro cutscene is Episode 04 only for now (not part of IHavocEpisodeFlow).
+        // The cutscenes are not part of IHavocEpisodeFlow: Episode 04 has its own, 01/02 use the flow base, 03 its own.
         if (AHavocEpisode04Flow* E04 = GetEpisode04Flow())
         {
             E04->PlayOutro();
+        }
+        else if (AHavocEpisodeFlowBase* Base = Cast<AHavocEpisodeFlowBase>(Flow.GetObject()))
+        {
+            Base->PlayOutro();
+        }
+        else if (AHavocEpisode03Flow* E03 = GetFlow03())
+        {
+            E03->PlayOutro();
         }
     }), 35.f, false);
 }

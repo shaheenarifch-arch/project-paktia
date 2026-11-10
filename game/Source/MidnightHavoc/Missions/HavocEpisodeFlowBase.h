@@ -11,6 +11,9 @@
 #include "Missions/HavocEpisodeFlow.h"
 #include "HavocEpisodeFlowBase.generated.h"
 
+class AHavocCutscene;
+class AHavocPlayerController;
+
 // EHavocFlowPhase is declared in Missions/HavocEpisodeFlow.h.
 UCLASS(Abstract)
 class MIDNIGHTHAVOC_API AHavocEpisodeFlowBase : public AActor, public IHavocEpisodeFlow
@@ -57,7 +60,25 @@ public:
     virtual FString GetResultTitle() const { return Outcome == TEXT("FAILED") ? TEXT("OPERATION FAILED") : TEXT("MISSION COMPLETE"); }
     virtual FString GetReplayLabel() const { return TEXT("Play again"); }
 
+    // ---- Cutscenes (skippable fly-over with subtitles; Cutscene/HavocCutscene.h) ----
+    /** Plays the intro or outro by itself from StartEpisode / the end of the episode; also used by the smoke test. */
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayIntro() { PlayCutscene(true, nullptr); }
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void PlayOutro() { PlayCutscene(false, nullptr); }
+    UFUNCTION(BlueprintCallable, Category = "Havoc|Cutscene") void SkipCutscene();
+    UFUNCTION(BlueprintPure, Category = "Havoc|Cutscene") bool IsCutsceneActive() const;
+    UFUNCTION(BlueprintPure, Category = "Havoc|Cutscene") FString GetCutsceneSubtitle() const;
+
 protected:
+    /**
+     * Plays the intro (bIntro) or outro as a fly-over of CutsceneTargets(bIntro). Then runs when it finishes or
+     * is skipped (or straight away if it cannot start). Logs "HavocCutscene: <CutsceneLabel()> intro|outro ...".
+     */
+    void PlayCutscene(bool bIntro, TFunction<void()> Then);
+    /** World positions (cm) the camera visits: one 5 s shot each. An episode's sector volumes, with a fallback. */
+    virtual TArray<FVector> CutsceneTargets(bool bIntro) { return TArray<FVector>(); }
+    /** Episode number as logged ("01".."03"). */
+    virtual FString CutsceneLabel() const { return FString(); }
+
     void SetHint(const FString& Text) { Hint = Text; }
     void ShowToast(const FString& Text, float Seconds = 5.f)
     {
@@ -71,4 +92,6 @@ protected:
     float ToastTime = 0.f;
     FString ResultSummary;
     FString Outcome;
+
+    UPROPERTY() TObjectPtr<AHavocCutscene> Cutscene;
 };

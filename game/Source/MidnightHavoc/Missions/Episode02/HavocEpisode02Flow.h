@@ -96,7 +96,12 @@ public:
     /** Steps of the objective tracker with a [x] / [>] / [ ] marker for a state id (static so tests need no world). */
     static TArray<FString> BuildTracker(const FString& State, bool bComplete);
 
+    /** Cutscene camera targets (cm) for a greybox at Origin: intro Echo -> bridge -> South Gate, outro South Gate -> narrows. */
+    static TArray<FVector> BuildCutsceneTargets(const FVector& Origin, bool bIntro);
+
 protected:
+    virtual TArray<FVector> CutsceneTargets(bool bIntro) override { return BuildCutsceneTargets(GreyboxOrigin, bIntro); }
+    virtual FString CutsceneLabel() const override { return TEXT("02"); }
     virtual void BeginPlay() override;
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
