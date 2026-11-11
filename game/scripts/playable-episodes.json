@@ -1,6 +1,9 @@
 {
   "_note": "Playable episodes the CI smoke test starts in turn (scripts/smoke-episodes.ps1). Add an episode here when it becomes playable in the Unreal build; it needs an intro and an outro cutscene (Source/MidnightHavoc/Cutscene) or its smoke result fails. See game/docs/smoke-test.md.",
   "episodes": [
+    { "id": "01", "name": "Operation Mountain Shield", "map": "/Game/Maps/PaktiaHighlands/L_PaktiaHighlands" },
+    { "id": "02", "name": "Operation Silent Corridor", "map": "/Game/Maps/PaktiaHighlands/L_PaktiaHighlands" },
+    { "id": "03", "name": "Operation Broken Citadel", "map": "/Game/Maps/Gardun/L_Gardun" },
     { "id": "04", "name": "Operation Open Strait", "map": "" }
   ]
 }

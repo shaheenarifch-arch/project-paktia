@@ -13,8 +13,8 @@ Help links:
 
 ## Per-episode results
 
-`game/scripts/smoke-episodes.ps1` reads `game/scripts/playable-episodes.json` (the list of playable episodes; today only
-`04`) and calls `smoke-run.ps1 -Episode <id>` for each one in turn (never two Unreal processes at once). The game starts that
+`game/scripts/smoke-episodes.ps1` reads `game/scripts/playable-episodes.json` (the list of playable episodes; today all four:
+`01` to `04`) and calls `smoke-run.ps1 -Episode <id>` for each one in turn (never two Unreal processes at once). The game starts that
 episode with `-HavocSmokeEpisode=<id>`; if another level is loaded it first opens that episode's own map
 (`UHavocCampaign::EpisodeMapPath`: 01 and 02 Paktia Highlands, 03 Gardun, 04 Kharg), so `-Map` is optional. The summary opens with a table (episode, PASS/FAIL, intro, outro, world visible,
 FPS, crashes); each episode's logs, `ingame.png` and `summary.md` are under `ep-<id>/` in the `smoke-test` artifact.
@@ -30,7 +30,7 @@ gracefully (so the CSV is flushed; force-kill after 30 s), then:
 - copies new `Crashes/*` folders and `Saved/Logs/*.log` written during the run,
 - lists the **top 10 distinct errors** (`Error:`, `Fatal:`, ensure/assert lines, with counts),
 - computes **avg/min FPS** from the CSV `FrameTime` column,
-- passes `-HavocSmokeStart`, so the game starts Episode 04 by itself and frames the view over Kharg (looking at the oil terminal) and takes a `HighResShot` at 30 s;
+- passes `-HavocSmokeStart`, so the game starts the chosen episode by itself and frames the view over that episode's map (Kharg: the oil terminal; Paktia and Gardun: the middle of the sector volumes, -12° pitch) and takes a `HighResShot` at 30 s;
   the script measures how varied that picture is (`ingame.png` in the artifact) to check the world renders,
 - reads the log for `HavocCutscene: <episode> intro|outro started|finished|skipped`; the intro plays when the episode starts,
   the outro is triggered 35 s in, and both must start and end,
